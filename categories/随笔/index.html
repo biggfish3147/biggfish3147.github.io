@@ -81,6 +81,8 @@
 
 
 
+  <link rel="alternate" href="/atom.xml" title="Biggfish" type="application/atom+xml">
+
 
 
 
@@ -375,7 +377,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Dongjie">
+              <img class="site-author-image" itemprop="image" src="/images/cyber_avatar.jpg" alt="Dongjie">
             
               <p class="site-author-name" itemprop="name">Dongjie</p>
               <p class="site-description motion-element" itemprop="description">给时光以生命，给岁月以文明</p>
@@ -418,6 +420,13 @@
 
           </nav>
 
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
           
 
           
@@ -666,6 +675,14 @@
         guest_info:guest,
         pageSize:'10' || 10,
     });
+
+    //增加以下六行代码去除 power by valine
+    var infoEle = document.querySelector('#comments .info');
+    if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0){
+      infoEle.childNodes.forEach(function(item) {
+        item.parentNode.removeChild(item);
+      });
+    }
   </script>
 
 

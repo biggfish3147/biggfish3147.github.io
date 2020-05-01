@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Biggfish</title>
+  
+  <subtitle>Good good study！！</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://yoursite.com/"/>
+  <updated>2020-04-29T11:22:54.998Z</updated>
+  <id>http://yoursite.com/</id>
+  
+  <author>
+    <name>Dongjie</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Hexo与GitHub Pages搭建独立博客</title>
+    <link href="http://yoursite.com/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/"/>
+    <id>http://yoursite.com/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/</id>
+    <published>2020-04-28T16:00:00.000Z</published>
+    <updated>2020-04-29T11:22:54.998Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>博客其实在很久之前按照教程已经搭建完成，现在才回头来写教程步骤。有时候会想是否多此一举，毕竟网上现成的优秀的教程比比皆是。所以权且不说这是搭建基于Hexo的博客教程，只是一个简单的记录。</p><p>写一点东西，像擦肩而过的风。</p><p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/7.jpg" alt="起飞"></p><h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2><p><code>GitHub Pages</code> 是一项<strong>静态站点托管服务</strong>，它直接从<code>GitHub</code> 上的仓库获取<code>HTML</code>、<code>CSS</code>和<code>JavaScript</code>文件，（可选）通过构建过程运行文件，然后发布网站。</p><p>有三种类型的 <code>GitHub Pages</code> 站点：项目、用户和组织。 项目站点连接到 <code>GitHub</code> 上托管的特定项目，用户和组织站点连接到特定的 <code>GitHub</code> 帐户。只能为每个 <code>GitHub</code>账户创建一个用户或组织站点。项目站点（无论是组织还是用户帐户拥有）没有限制。除非使用自定义域，否则用户和组织站点位于<code>http(s)://&lt;username&gt;.github.io</code> 或 <code>http(s)://&lt;organization&gt;.github.io</code>。</p><p>基于<code>GitHub Pages</code>搭建个人独立博客，即属于用户或组织站点。</p><p><code>GitHub Pages</code> 站点的发布来源是存储站点源文件的分支或文件夹。 所有站点都有默认的发布来源，项目站点还有其他可用的发布来源。用户和组织站点的默认发布来源是<code>master</code>分支。如果用户和组织站点的仓库是<code>master</code> 分支，您的站点将从该分支自动发布。无法为用户或组织站点选择不同的发布来源。</p><p><code>GitHub Pages</code> 站点受到以下使用限制的约束：</p><ul><li><code>GitHub Pages</code> 源仓库建议的限制为1GB。</li><li>发布的 <code>GitHub Pages</code> 站点不得超过 1 GB。</li><li><code>GitHub Pages</code> 站点的软带宽限制为每月 100GB。</li><li><code>GitHub Pages</code> 站点的软限制为每小时 10 次构建。</li></ul><h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p><code>Hexo</code>是基于<code>Node.js</code>的快速、简洁且高效的博客框架。<code>Hexo</code> 使用 <code>Markdown</code>（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p><h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul><li>安装<code>Node.js</code></li><li>安装<code>Git</code></li><li>安装<code>Hexo</code><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//进入自己的博客文件夹(如/biggfish/blog)</span></span><br><span class="line">npm install hexo-cli -g </span><br><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure></li></ul><h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><ul><li><p>初始化配置</p><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 在Hexo安装目录下新建hexo文件夹，如 /biggfish/blog/hexo</span></span><br><span class="line">hexo inint</span><br></pre></td></tr></table></figure></li><li><p>本地生成与部署</p><figure class="highlight verilog"><table><tr><td class="code"><pre><span class="line"><span class="comment">//在hexo文件目录下执行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件</span></span><br><span class="line">hexo <span class="keyword">generate</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地部署</span></span><br><span class="line">hexo server </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地测试</span></span><br><span class="line">http:<span class="comment">//localhost:4000/</span></span><br></pre></td></tr></table></figure></li><li><p>配置<code>Hexo</code>与远程<code>GitHub</code>仓库关联</p><figure class="highlight dts"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建`GitHub Pages`的站点发布来源，即username.github.io仓库</span></span><br><span class="line"><span class="comment">//配置远程连接的SSH密钥与公钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//将本地Hexo文件（静态网页）更新到GitHub 的username.github.io仓库</span></span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 复制Github仓库的ssh地址</span><br><span class="line"><span class="number">2.</span> 选择hexo文件夹下_config.yml文件，修改deploy相关信息</span><br><span class="line"><span class="symbol">  deploy:</span></span><br><span class="line"><span class="symbol">    type:</span> git</span><br><span class="line"><span class="symbol">    repository:</span> 刚复制的仓库ssh地址</span><br><span class="line"><span class="symbol">    branch:</span> master</span><br></pre></td></tr></table></figure></li><li><p>本地博客推送到远程仓库，<code>GitHub Pages</code>自动发布</p><figure class="highlight stata"><table><tr><td class="code"><pre><span class="line"><span class="comment">//g-&gt;generate  d-&gt;deploy</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件，然后部署</span></span><br><span class="line">hexo <span class="keyword">g</span></span><br><span class="line">hexo <span class="built_in">d</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者联合执行</span></span><br><span class="line">hexo <span class="keyword">g</span> -<span class="built_in">d</span></span><br></pre></td></tr></table></figure></li><li><p>访问博客 <a href="https://biggfish3147.github.io" target="_blank" rel="noopener">我的博客</a></p></li></ul><h1 id="发表文章"><a href="#发表文章" class="headerlink" title="发表文章"></a>发表文章</h1><p>注意用<code>markdown</code>语法编写文章。</p><ul><li><p><code>Front-matter</code>配置</p><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">博客伊始</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2019</span><span class="bullet">-09</span><span class="bullet">-20</span> <span class="number">23</span><span class="string">:29:47</span></span><br><span class="line"><span class="attr">comments:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">tags:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">君不见，黄河之水天上来，奔流到海不复回</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 文章正文</span></span><br><span class="line"></span><br><span class="line"><span class="string">注:</span> <span class="string">Front-matter配置支持的变量，其值因主题不同而存在差异</span></span><br><span class="line"><span class="string">/**</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">layout:</span> <span class="string">页面布局（配合主题文档使用）</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章名称</span></span><br><span class="line"><span class="attr">date:</span> <span class="string">文章日期</span></span><br><span class="line"><span class="attr">comments:</span> <span class="string">文章是否开启评论</span></span><br><span class="line"><span class="attr">photos:</span> <span class="string">文章封面图（仅部分主题支持）</span></span><br><span class="line"><span class="attr">tags:</span> </span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签一</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签二</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">文章分类</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">文章描述，即要在首页显示的摘要（仅部分主题支持）</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">*/</span></span><br></pre></td></tr></table></figure></li><li><p>推送文章</p><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//.md文章保存在/biggfish/blog/hexo/source/_posts中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者新建文章 默认放置在hexo/source/_posts中</span></span><br><span class="line">hexo <span class="keyword">new</span> <span class="string">"test"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//Next主题新建页面</span></span><br><span class="line">hexo <span class="keyword">new</span> page <span class="string">"分类"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//照样在hexo文件夹下执行</span></span><br><span class="line"></span><br><span class="line">hexo d -g</span><br></pre></td></tr></table></figure></li></ul><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul><li><a href="https://help.github.com/cn/github/working-with-github-pages/about-github-pages" target="_blank" rel="noopener">GitHub Pages官方说明文档</a></li><li><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">Hexo官方文档</a></li><li><a href="https://blog.csdn.net/qq_36759224/article/details/82121420#font_colorFF000_font_12" target="_blank" rel="noopener">使用 GitHub Pages和Hexo搭建自己的独立博客</a></li></ul>]]></content>
+    
+    <summary type="html">
+    
+      基于Hexo与GitHub Pages搭建独立博客
+    
+    </summary>
+    
+    
+      <category term="教程" scheme="http://yoursite.com/categories/%E6%95%99%E7%A8%8B/"/>
+    
+    
+      <category term="Hexo" scheme="http://yoursite.com/tags/Hexo/"/>
+    
+      <category term="GitHub Pages" scheme="http://yoursite.com/tags/GitHub-Pages/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>博客伊始</title>
+    <link href="http://yoursite.com/2019/09/20/%E5%8D%9A%E5%AE%A2%E4%BC%8A%E5%A7%8B/"/>
+    <id>http://yoursite.com/2019/09/20/%E5%8D%9A%E5%AE%A2%E4%BC%8A%E5%A7%8B/</id>
+    <published>2019-09-20T15:29:47.000Z</published>
+    <updated>2020-04-29T09:05:18.417Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="博客伊始"><a href="#博客伊始" class="headerlink" title="博客伊始"></a>博客伊始</h2><p align="right"><font color="grey">作者：冬结</font></p><blockquote><p>写在前面：<br>偶然看到Hexo模板的博客，观感不错，加上前辈也搭过，就试试以这种相对简单的形式搭建起来玩。一方面简单学习以现有框架搭建专属博客的“技术”，另一方面也能有个容器装一点自己的笔记，尽管可能比较少，可能并不安全，聊胜于无。</p></blockquote><h3 id="兴趣"><a href="#兴趣" class="headerlink" title="兴趣"></a>兴趣</h3><p>我的兴趣，很难讲。佛系（可能）心态的人在平静生活中貌似对所有的事不放心上，所以，电影可以不看、单车可以不骑、乒乓球可以不打、书可以不阅读、随笔可以不写、游戏可以不玩。自我认知是一个漫长的过程，从浪漫理想主义到实用现实主义，说到底也划不清界限。妥协的做法是就此作罢，不去深究，也就能将困惑搁置一旁。况且说辞也是一大把，比如复杂的个体就能说服我自己。一贯的自我否定，也可以说深究一法至少能够审视自我更加全面深刻，更加接近真实。否定之否定，打住！</p><p>接着说兴趣。从某种维度上讲，兴趣带来愉悦、专注与充实感。</p><p>这样说来，好的电影是我的兴趣，带给我专注与思考。看过的电影也不少，影评却没尝试过一篇。电影没有带给我充实感，但我并不认为它在浪费时间。娱乐的底质，依旧能够容纳艺术与生活。尽管总能从这种媒介中看到不真实，生活的经验依然鲜活。现在的我能以相对包容的眼光对待现实的种种“怪象”，大抵与之有所关联。</p><p>骑单车溜达也算得上。单车是真的单车，单人单骑，随便找个目标，也就慢慢悠悠的去。骑行就不能描述我的方式了，老老实实地去骑单车溜达。某次，什么背景的现在全无记忆，只是感到沉闷的低落，简直到不能忍受的地步，然后就溜达着去后海那边。也许逛胡同，也许没有。至于能否缓解我的状态，我也记不得。只是到那种状态，我能想到这种方式去排解，多少也算是一种认同吧。</p><p>至于随笔（恰当称谓？），也能算是我的兴趣。偶尔写写东西，偶尔是真的偶偶尔。我从写文字当中获取的安静、专注、充实感显而易见，而文字大多都是当时的情绪与想法，可能脱胎于日记，但也将一些真实到黑暗的思考隐藏起来，多少能见光。不知道将自我产出的文字视若珍宝算不算病态，但我的确珍视，在我眼里这些文字能真切表示一种状态，这一刻我就是美化的真实的。至于这种方式何以占据重要的位置，大概因为内心戏丰富如我，不善表达情绪，多少是关掉大门开几扇窗。</p><p>其他能说的，读书、乒乓和游戏，目前的程度都还比较浅。曾经都热过一阵的行为，慢慢沉寂下来也沾上了尘土。所谓的我的兴趣，没得一项算是个人特长。骑车只是休闲，电影只是娱乐，随笔也只是偶尔的文艺，但是至少这些，能够成为生活的调剂，是能够令我感到舒适的生活方式。</p><h3 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h3><p>整理些技术向的学习内容，也多少要往这博客里边搁，况且，这本就是搭建这玩意的初衷。尽管不太喜欢用“工作”一词，但还是必须得慢慢习惯的。</p><p>求学时期拥有很好的学习环境，这段时间也就余下几年，两者都不得不承认。实验室的一些开发工作，还有自己看过的、学过的、实践过的一些内容，选择性的往这个博客里边搁。尽量减少一些空洞的文字（多一些图），减少随处可见的教程，多一点自己的总结，就是描述不规范，甚至有错误也无关紧要。他人的是他人的，转化为自己的才是自己的。尽管这些话可有可无，也就这样摆在这里了。</p><p>至于具体的工作内容，也没法细说。只是一段时间过去，觉得稍微闲下来时，慢悠悠写一点总结，多少能够察觉出自己在缓慢的生长，就很开心了。至于成长的快与慢，也不多去琢磨。吃饭慢，跑步慢，性子慢……真要快节奏起来，真就为难我“胖虎”了！</p><h3 id="成长"><a href="#成长" class="headerlink" title="成长"></a>成长</h3><p>现在过多的想法与计划一如既往地空白，只是希望每天有点进步，慢慢生长吧。</p><p>趁现在还有点记忆，罗列下自初中以来每个阶段自我希求的关键词。</p><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">改变 ：白墙上丑陋的浓墨毛笔字，墨迹未干尚不回望，小屋也拆了，斑驳的往事不能再找回。</span><br><span class="line">掌控 ：年少时总希望能够决定自己的命运，可是连早睡早起也没有做到。</span><br><span class="line">自由 ：那四年时光，持续性潇洒，间歇性焦虑。觉睡得很饱，书读得也少。向自己一样平平淡淡。</span><br><span class="line">成长 ：有的人每天跑步，有的人会慢慢散步。蜗牛和火箭，都在自以为的前进。</span><br></pre></td></tr></table></figure><h3 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h3><p>今天是2019年9月20日，算是一个开始吧！</p><p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/xingkong.jpeg" alt="星空"></p>]]></content>
+    
+    <summary type="html">
+    
+      君不见，黄河之水天上来，奔流到海不复回
+    
+    </summary>
+    
+    
+      <category term="随笔" scheme="http://yoursite.com/categories/%E9%9A%8F%E7%AC%94/"/>
+    
+    
+      <category term="随笔" scheme="http://yoursite.com/tags/%E9%9A%8F%E7%AC%94/"/>
+    
+  </entry>
+  
+</feed>
