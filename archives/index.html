@@ -735,11 +735,15 @@
         pageSize:'10' || 10,
     });
 
-    //增加以下六行代码去除 power by valine
-    var infoEle = document.querySelector('#comments .info');
-    if (infoEle && infoEle.childNodes && infoEle.childNodes.length > 0){
+    //增加以下六行代码去除 power by valine(有bug，其中两个子元素a链接和版本v1.4.14移除不了)
+    //直接更改样式display="none"
+    var infoEle = document.querySelector('#comments .vpower');
+    infoEle.style.display="none";
+
+    if (infoEle && infoEle.childNodes && (infoEle.childNodes.length > 0)){
       infoEle.childNodes.forEach(function(item) {
-        item.parentNode.removeChild(item);
+        // console.log(item);
+        //item.parentNode.removeChild(item);
       });
     }
   </script>

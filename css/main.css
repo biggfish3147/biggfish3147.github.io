@@ -1963,7 +1963,7 @@ img:hover {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #607377;
+  background: #8ce505;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -3064,4 +3064,7 @@ header {
 }
 .main {
   padding-bottom: 200px;
+}
+#comments .vsys {
+  display: none;
 }
