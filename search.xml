@@ -32,6 +32,125 @@
       </tags>
   </entry>
   <entry>
+    <title>漫谈JSP</title>
+    <url>/2020/05/09/%E6%BC%AB%E8%B0%88JSP/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>以前倒是知道<code>JSP</code>概念，但只能算是大概中的大概。今天因缘际会，又大致去查了些资料，然后就知道了个大概。比起<code>JSP</code>本身的语法规则，我对其由盛及衰的发展历史，倒表现出更大的兴趣。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ship.jpg" alt="古堡小船"></p>
+<h1 id="JSP"><a href="#JSP" class="headerlink" title="JSP"></a>JSP</h1><p>全称<code>JavaServer Pages</code>，即Java服务器页面。它是一种 <strong>动态</strong> 网页技术标准，是一种服务器端的脚本语言（以<code>Java</code>作为脚本语言），但却和<code>PHP</code> <code>ASP</code>有着本质的区别，JSP本质上就是一种<code>Java Servlet</code>。</p>
+<p>JSP技术使用JSP标签在HTML网页中插入Java代码，也就是将Java代码和特定变动内容嵌入到静态的页面中，实现以静态页面为模板，动态生成其中的部分内容。标签通常以&lt;%开头，以%&gt;结束。</p>
+<p>JSP标签有多种功能，比如访问数据库、访问JavaBeans组件等，还可以在不同的网页中传递控制信息和共享信息。</p>
+<h2 id="语法标准"><a href="#语法标准" class="headerlink" title="语法标准"></a>语法标准</h2><p>一个JSP页面可以被分为以下几部分：</p>
+<ul>
+<li>静态数据，如HTML</li>
+<li>JSP指令，如include指令</li>
+<li>JSP脚本元素（标签）和变量，如脚本变量request </li>
+<li>JSP动作，如jsp:forward</li>
+<li>用户自定义标签</li>
+</ul>
+<h2 id="执行过程"><a href="#执行过程" class="headerlink" title="执行过程"></a>执行过程</h2><p>通常我们在JSP文件中写Html代码，于是<strong>在使用上</strong>可以把它当作Html文件。比如我们访问某个网站的首页<code>http://yourdomainname:8080/index.jsp</code>，请求的就是这个JSP文件，这里理解上就可以认为JSP文件是一种<strong>动态资源</strong>（<code>Html/CSS</code>文件、图片等属于静态资源）。</p>
+<p>当用户请求JSP文件时，服务器内部会经历一次JSP（动态资源）到HTML（静态资源）的转换，服务器会自动帮我们把JSP中的HTML片段和数据拼接成静态资源响应给浏览器。</p>
+<p>网络服务器需要一个 JSP 引擎，也就是一个容器来处理 JSP 页面。容器负责截获对 JSP页面的请求。也就是说，<strong>JSP文件是运行在服务端</strong>而不是客户端的。</p>
+<ul>
+<li>JSP转换为Servlet</li>
+</ul>
+<p>JSP文件在运行时会被JSP引擎（引擎<code>jspServlet</code>本身也是Servlet，负责解释和执行JSP页面）转换成更原始的Servlet代码（.java后缀即java源文件）。在转换时，如果发现JSP文件中有任何语法错误，则中断转换过程，并向服务端和客户端输出错误信息。</p>
+<blockquote>
+<p>注:servlet是用Java语言编写的服务器端程序。主要功能是和浏览器进行交互，生成页面展示。</p>
+</blockquote>
+<ul>
+<li>转换为.class文件</li>
+</ul>
+<p>JSP被JSP引擎转换为Servlet后，将被编译成Servlet的class文件（字节码文件）。也就是通常的.java文件到.class文件的编译过程。</p>
+<ul>
+<li>Servlet容器处理</li>
+</ul>
+<p>.jsp文件转换之后的.class文件能够被JVM（Java虚拟机）执行，通过加载类、初始化、实例化等步骤，将执行结果（Html代码-静态文件）传递给（处理这个jsp请求的Servlet程序中的）response对象，进而通过Web服务器响应给浏览器。</p>
+<ul>
+<li>浏览器解析Html</li>
+</ul>
+<p>浏览器只能够处理并渲染静态资源。虽然请求的是.jsp文件，但是获得的响应是完完全全的Html文件，于是解析Html代码并将请求的页面显示。</p>
+<h2 id="JSP、PHP与ASP"><a href="#JSP、PHP与ASP" class="headerlink" title="JSP、PHP与ASP"></a>JSP、PHP与ASP</h2><ul>
+<li>PHP  </li>
+</ul>
+<p>PHP是一种嵌入HTML页面中的脚本语言，使Web开发者能够快速地写出动态产生页面。</p>
+<p>PHP语法简单，非常易学易用，很利于快速开发各种功能不同的定制网站（<code>APACHE＋PHP＋MYSQL</code>搭配），但因为结构上的缺陷，使的PHP在复杂的大型项目上的开发和维护都比较困难。</p>
+<ul>
+<li>ASP</li>
+</ul>
+<p>ASP（Active Server Pages）是微软的Windows IIS系统自带的脚本语言，利用它可以执行动态的Web服务应用程序。</p>
+<p>和PHP一样，ASP简单而易于维护，很适合小型网站应用，通过DCOM和MTS技术，ASP甚至还可以完成小规模的企业应用，但ASP的致命缺点就是不支持跨平台的系统，在大型项目开发和维护上非常困难。</p>
+<ul>
+<li>JSP</li>
+</ul>
+<p>JSP（JavaServer Pages）是Sun公司推出的一种动态网页技术。JSP本身虽然也是脚本语言(以Java作为脚本语言)，但是却和PHP、ASP有着本质的区别。PHP和ASP都是由语言引擎解释执行程序代码，而JSP代码却被编译成Servlet并由Java虚拟机执行，这种编译操作仅在对JSP页面的第一次请求时发生。因此普遍认为JSP的执行效率比PHP和ASP都高。</p>
+<p>JSP是一种服务器端的脚本语言，最大的好处就是开发效率较高，但是因为其业务规则代码与页面代码混为一团，不利于维护，因此并不适应大型应用的要求，取而代之的是基于MVC的Web架构。</p>
+<p>MVC的核心思想是将应用分为模型、视图和控制器三部分。模型是指应用程序的数据，以及对这些数据的操作；视图是指用户界面；控制器负责用户界面和程序数据之间的同步。通过MVC的Web架构，可以弱化各个部分的耦合关系，并将业务逻辑处理与页面以及数据分离开来，这样当其中一个模块的代码发生改变时，并不影响其他模块的正常运行，所以基于MVC的Web架构更适应于大型应用开发的潮流。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/planet.jpg" alt="星球"></p>
+<h1 id="由盛及衰"><a href="#由盛及衰" class="headerlink" title="由盛及衰"></a>由盛及衰</h1><h2 id="故事背景"><a href="#故事背景" class="headerlink" title="故事背景"></a>故事背景</h2><p>1995年，SUN公司发布了Java。创始人之一望着手中的咖啡，灵机一动，取名Java。宣传口号是”一次编写，到处运行”（Write Once, Run Anywhere）。</p>
+<blockquote>
+<p>注：一次编写，到处运行，也就是跨平台了。</p>
+</blockquote>
+<p>几乎同年，后来被黑为“世界上最好的语言”PHP也发布了。WordPress和MediaWiki就是有出息的两个儿子。</p>
+<p>也是1995年，一个名叫布兰登·艾奇的技术员，为应付任务花了10天设计出JavaScript（这名字就是蹭Java热度，JavaScript与Java只有半毛钱关系）。这个借鉴C、Java、Scheme和Self等语言设计出来的冬冬，初始版本很不好用，但好在后期救回来了，并逐渐走上人生巅峰。</p>
+<blockquote>
+<p>注：一个完整的JavaScript实现应由三个部分组成:ECMAScript、DOM、BOM</p>
+</blockquote>
+<h2 id="出道往事"><a href="#出道往事" class="headerlink" title="出道往事"></a>出道往事</h2><h3 id="黑世纪–Servlet写Html代码"><a href="#黑世纪–Servlet写Html代码" class="headerlink" title="黑世纪–Servlet写Html代码"></a>黑世纪–Servlet写Html代码</h3><p>下述是MyEclipse新建Servlet时显示的模板。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.PrintWriter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HistoryServlet</span> <span class="keyword">extends</span> <span class="title">HttpServlet</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Constructor of the object.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">HistoryServlet</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Destruction of the servlet. &lt;br&gt;</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>.destroy(); <span class="comment">// Just puts "destroy" string in log</span></span><br><span class="line">		<span class="comment">// Put your code here</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * The doGet method of the servlet. &lt;br&gt;</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * This method is called when a form has its tag value method equals to get.</span></span><br><span class="line"><span class="comment">	 * </span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> request the request send by the client to the server</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> response the response send by the server to the client</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> ServletException if an error occurred</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> IOException if an error occurred</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doGet</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span></span><br><span class="line"><span class="function">			<span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line"></span><br><span class="line">		response.setContentType(<span class="string">"text/html"</span>);</span><br><span class="line">		PrintWriter out = response.getWriter();</span><br><span class="line">		out.println(<span class="string">"&lt;!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"&gt;"</span>);</span><br><span class="line">		out.println(<span class="string">"&lt;HTML&gt;"</span>);</span><br><span class="line">		out.println(<span class="string">"  &lt;HEAD&gt;&lt;TITLE&gt;A Servlet&lt;/TITLE&gt;&lt;/HEAD&gt;"</span>);</span><br><span class="line">		out.println(<span class="string">"  &lt;BODY&gt;"</span>);</span><br><span class="line">		out.print(<span class="string">"    This is "</span>);</span><br><span class="line">		out.print(<span class="keyword">this</span>.getClass());</span><br><span class="line">		out.println(<span class="string">", using the GET method"</span>);</span><br><span class="line">		out.println(<span class="string">"  &lt;/BODY&gt;"</span>);</span><br><span class="line">		out.println(<span class="string">"&lt;/HTML&gt;"</span>);</span><br><span class="line">		out.flush();</span><br><span class="line">		out.close();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * The doPost method of the servlet. &lt;br&gt;</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * This method is called when a form has its tag value method equals to post.</span></span><br><span class="line"><span class="comment">	 * </span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> request the request send by the client to the server</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> response the response send by the server to the client</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> ServletException if an error occurred</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> IOException if an error occurred</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doPost</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span></span><br><span class="line"><span class="function">			<span class="keyword">throws</span> ServletException, IOException </span>&#123;</span><br><span class="line"></span><br><span class="line">		response.setContentType(<span class="string">"text/html"</span>);</span><br><span class="line">		PrintWriter out = response.getWriter();</span><br><span class="line">		out.println(<span class="string">"&lt;!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"&gt;"</span>);</span><br><span class="line">		out.println(<span class="string">"&lt;HTML&gt;"</span>);</span><br><span class="line">		out.println(<span class="string">"  &lt;HEAD&gt;&lt;TITLE&gt;A Servlet&lt;/TITLE&gt;&lt;/HEAD&gt;"</span>);</span><br><span class="line">		out.println(<span class="string">"  &lt;BODY&gt;"</span>);</span><br><span class="line">		out.print(<span class="string">"    This is "</span>);</span><br><span class="line">		out.print(<span class="keyword">this</span>.getClass());</span><br><span class="line">		out.println(<span class="string">", using the POST method"</span>);</span><br><span class="line">		out.println(<span class="string">"  &lt;/BODY&gt;"</span>);</span><br><span class="line">		out.println(<span class="string">"&lt;/HTML&gt;"</span>);</span><br><span class="line">		out.flush();</span><br><span class="line">		out.close();</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Initialization of the servlet. &lt;br&gt;</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@throws</span> ServletException if an error occurs</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> <span class="keyword">throws</span> ServletException </span>&#123;</span><br><span class="line">		<span class="comment">// Put your code here</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上古时代，就是这样一行一行写入Html代码到response对象中的。美工做好Html的静态页面，扔给Java程序员。Java程序员逐条拷贝Html代码，并于后端数据拼接，最后返回带数据的完整的Html。</p>
+<figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">out</span>.println("&lt;span&gt;用户名："+<span class="keyword">user</span>.name+&lt;"/span&gt;");</span><br></pre></td></tr></table></figure>
+
+<h3 id="出道–Servlet披着JSP的壳"><a href="#出道–Servlet披着JSP的壳" class="headerlink" title="出道–Servlet披着JSP的壳"></a>出道–Servlet披着JSP的壳</h3><p>友商PHP这时候就很优秀，它们选择在html页面中嵌入相应语言来引入动态数据。</p>
+<p>细想起来，目标无非就是在最终输出的html的代码中嵌入后台数据。可以在Html文件中嵌入动态数据，也可以在动态页面中嵌入Html静态数据，殊途同归。</p>
+<p>于是，JSP诞生了。虽然名字叫做JSP，但JSP实质上就是Servlet实例。暗世纪手动拷贝HTML代码的日子结束了，这些操作交给了JSP引擎（即jspServlet）去执行。</p>
+<p>JSP = Html + Java片段。</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">%@</span> <span class="attr">page</span> <span class="attr">language</span>=<span class="string">"java"</span> <span class="attr">contentType</span>=<span class="string">"text/html;charset=UTF-8"</span></span></span><br><span class="line"><span class="tag">	<span class="attr">pageEncoding</span>=<span class="string">"UTF-8"</span>%&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">%@</span> <span class="attr">page</span> <span class="attr">import</span>=<span class="string">"com.py.vo.Member"</span>%&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">%</span></span></span><br><span class="line"><span class="tag"><span class="attr">String</span> <span class="attr">path</span> = <span class="string">request.getContextPath();</span></span></span><br><span class="line"><span class="tag"><span class="attr">String</span> <span class="attr">basePath</span> = <span class="string">request.getScheme()+</span>"<span class="attr">:</span>//"+<span class="attr">request.getServerName</span>()+"<span class="attr">:</span>"+<span class="attr">request.getServerPort</span>()+<span class="attr">path</span>+"/";</span></span><br><span class="line"><span class="tag">%&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">xmlns</span>=<span class="string">"http://www.w3.org/1999/xhtml"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">base</span> <span class="attr">href</span>=<span class="string">"&lt;%=basePath%&gt;"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>电子商务网站<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">href</span>=<span class="string">"css/style.css"</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">type</span>=<span class="string">"text/css"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript">	<span class="function"><span class="keyword">function</span> <span class="title">quit</span><span class="params">()</span> </span>&#123;</span></span><br><span class="line"><span class="actionscript">		<span class="keyword">if</span> (confirm(<span class="string">"没有要买的东西了吗？"</span>)) &#123;</span></span><br><span class="line"><span class="javascript">			<span class="built_in">window</span>.location.href = <span class="string">"MemberServlet.do?method=logoutMember"</span>;</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"header"</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"logo"</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"index.jsp"</span>&gt;</span><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">"images/logo.gif"</span> <span class="attr">width</span>=<span class="string">"135"</span></span></span><br><span class="line"><span class="tag">				<span class="attr">height</span>=<span class="string">"55"</span> /&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">form</span> <span class="attr">name</span>=<span class="string">"form"</span> <span class="attr">method</span>=<span class="string">"post"</span></span></span><br><span class="line"><span class="tag">			<span class="attr">action</span>=<span class="string">"GoodsServlet.do?method=selectByKeywords"</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"search"</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">class</span>=<span class="string">"input1"</span> <span class="attr">name</span>=<span class="string">"keywords"</span>/&gt;</span> <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"image"</span></span></span><br><span class="line"><span class="tag">					<span class="attr">src</span>=<span class="string">"images/icon_search.gif"</span> <span class="attr">class</span>=<span class="string">"input2"</span> /&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">%</span></span></span><br><span class="line"><span class="tag">			<span class="attr">if</span> (<span class="attr">session.getAttribute</span>("<span class="attr">member</span>") == <span class="string">null)</span> &#123;</span></span><br><span class="line"><span class="tag">		%&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"login"</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"fg-memberLogin.jsp"</span> <span class="attr">class</span>=<span class="string">"a1"</span>&gt;</span>登录<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">%</span></span></span><br><span class="line"><span class="tag">			&#125; <span class="attr">else</span> &#123;</span></span><br><span class="line"><span class="tag">				<span class="attr">Member</span> <span class="attr">member</span> = <span class="string">(Member)</span> <span class="attr">session.getAttribute</span>("<span class="attr">member</span>");</span></span><br><span class="line"><span class="tag">		%&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">"login"</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">font</span> <span class="attr">class</span>=<span class="string">"red"</span>&gt;</span><span class="tag">&lt;<span class="name">%=member.getAccount()%</span>&gt;</span><span class="tag">&lt;/<span class="name">font</span>&gt;</span>，欢迎回来&amp;nbsp;&amp;nbsp;<span class="tag">&lt;<span class="name">a</span></span></span><br><span class="line"><span class="tag">				<span class="attr">href</span>=<span class="string">"javascript:quit()"</span>&gt;</span>退出<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">%</span></span></span><br><span class="line"><span class="tag">			&#125;</span></span><br><span class="line"><span class="tag">		%&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>JSP特点</p>
+<ul>
+<li>跨平台（以Java作为脚本）</li>
+<li>业务代码分离（数据对象模型）</li>
+<li>组件重用（JavaBean）</li>
+<li>预编译（首次请求JSP是编译执行后，class文件被保存）</li>
+</ul>
+<h3 id="危机–优点也会是缺点"><a href="#危机–优点也会是缺点" class="headerlink" title="危机–优点也会是缺点"></a>危机–优点也会是缺点</h3><p>JSP文件能够同时写Html和Java，但是。</p>
+<ol>
+<li><p>动态和静态资源放在一起，一旦服务器出现状况，前后台一起玩完，用户体验极差。</p>
+</li>
+<li><p>一旦jsp出现了问题，就需要前端后端发开人员一块来分析解决，效率低。</p>
+</li>
+<li><p>jsp无法使用nginx等。</p>
+</li>
+<li><p>jsp页面复杂，难以修改。</p>
+</li>
+<li><p>第一次加载jsp需要编译成servlet，时间久，而且业务量大的时候，jsp负担太大。</p>
+</li>
+</ol>
+<p>于是，前后端分离就出现了。</p>
+<h3 id="落寞–前后端分离燃烧起来"><a href="#落寞–前后端分离燃烧起来" class="headerlink" title="落寞–前后端分离燃烧起来"></a>落寞–前后端分离燃烧起来</h3><p>前后端分离其实就是后端工程师只关注于后端业务逻辑的开发，不再处理前端问题。前端工程师只关注于自己的页面开发。需要数据交互的时候，两者会有一份接口文档。</p>
+<p>然后新兴SpringMVC、RestFul、Ajax …</p>
+<blockquote>
+<p>注：MVC是WEB开发模式，并不是SpringMVC专属</p>
+</blockquote>
+<p>然后前端也不再是Web页面，移动端又蓬勃起来…</p>
+<p>JSP也就这样渐渐的完成它的时代使命，告别曾经辉煌过的舞台，偶尔在一些老旧的项目中散发着微光…</p>
+<h1 id="我的小结"><a href="#我的小结" class="headerlink" title="我的小结"></a>我的小结</h1><p>JSP的盛衰似乎令人唏嘘，但这就是技术的发展与进步。它已经完成了它的使命，但这并不意味着JSP应该被描述过时或者应该被抛弃，在适当的场景JSP还是有用武之地的，就像PHP依然那么活跃。</p>
+<p>具体的JSP技术与语法，是现在的我不需要去花时间看的。近来觉得编程里边的知识很丰富，面面俱到不大现实也不应该。可以知道很多，但是专注的点也就只能那么几个。正所谓涉猎广泛，重点捕捉。</p>
+<p>然后就是觉得学习编程不再纯粹只是看技术细节，还需要提升一点看语言的设计以及系统的整体架构。当然我现在还不会，就怎么说呢，技术是看代码和写代码，思想是像写诗一样优雅的造轮子。</p>
+<p>胡言胡语，小结完毕。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://zhuanlan.zhihu.com/p/42343690" target="_blank" rel="noopener">知乎：浅谈JSP</a><br><a href="https://baijiahao.baidu.com/s?id=1645273953613115391&wfr=spider&for=pc" target="_blank" rel="noopener">曾经风光无限的jsp，为什么现在很少有人用了呢？</a><br><a href="https://www.cnblogs.com/lixuwu/articles/4499883.html" target="_blank" rel="noopener">php与jsp的区别</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/yellowman.jpg" alt="小黄人"></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>JSP</tag>
+        <tag>概念</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hexo与GitHub Pages搭建独立博客</title>
     <url>/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>博客其实在很久之前按照教程已经搭建完成，现在才回头来写教程步骤。有时候会想是否多此一举，毕竟网上现成的优秀的教程比比皆是。所以权且不说这是搭建基于Hexo的博客教程，只是一个简单的记录。</p>
