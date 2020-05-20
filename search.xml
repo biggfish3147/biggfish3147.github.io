@@ -32,6 +32,153 @@
       </tags>
   </entry>
   <entry>
+    <title>Hexo与GitHub Pages搭建独立博客</title>
+    <url>/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>博客其实在很久之前按照教程已经搭建完成，现在才回头来写教程步骤。有时候会想是否多此一举，毕竟网上现成的优秀的教程比比皆是。所以权且不说这是搭建基于Hexo的博客教程，只是一个简单的记录。</p>
+<p>写一点东西，像擦肩而过的风。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/7.jpg" alt="起飞"></p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2><p><code>GitHub Pages</code> 是一项<strong>静态站点托管服务</strong>，它直接从<code>GitHub</code> 上的仓库获取<code>HTML</code>、<code>CSS</code>和<code>JavaScript</code>文件，（可选）通过构建过程运行文件，然后发布网站。</p>
+<p>有三种类型的 <code>GitHub Pages</code> 站点：项目、用户和组织。 项目站点连接到 <code>GitHub</code> 上托管的特定项目，用户和组织站点连接到特定的 <code>GitHub</code> 帐户。只能为每个 <code>GitHub</code>账户创建一个用户或组织站点。项目站点（无论是组织还是用户帐户拥有）没有限制。除非使用自定义域，否则用户和组织站点位于<code>http(s)://&lt;username&gt;.github.io</code> 或 <code>http(s)://&lt;organization&gt;.github.io</code>。</p>
+<p>基于<code>GitHub Pages</code>搭建个人独立博客，即属于用户或组织站点。</p>
+<p><code>GitHub Pages</code> 站点的发布来源是存储站点源文件的分支或文件夹。 所有站点都有默认的发布来源，项目站点还有其他可用的发布来源。用户和组织站点的默认发布来源是<code>master</code>分支。如果用户和组织站点的仓库是<code>master</code> 分支，您的站点将从该分支自动发布。无法为用户或组织站点选择不同的发布来源。</p>
+<p><code>GitHub Pages</code> 站点受到以下使用限制的约束：</p>
+<ul>
+<li><code>GitHub Pages</code> 源仓库建议的限制为1GB。</li>
+<li>发布的 <code>GitHub Pages</code> 站点不得超过 1 GB。</li>
+<li><code>GitHub Pages</code> 站点的软带宽限制为每月 100GB。</li>
+<li><code>GitHub Pages</code> 站点的软限制为每小时 10 次构建。</li>
+</ul>
+<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p><code>Hexo</code>是基于<code>Node.js</code>的快速、简洁且高效的博客框架。<code>Hexo</code> 使用 <code>Markdown</code>（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
+<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul>
+<li>安装<code>Node.js</code></li>
+<li>安装<code>Git</code></li>
+<li>安装<code>Hexo</code><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//进入自己的博客文件夹(如/biggfish/blog)</span></span><br><span class="line">npm install hexo-cli -g </span><br><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><ul>
+<li><p>初始化配置</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 在Hexo安装目录下新建hexo文件夹，如 /biggfish/blog/hexo</span></span><br><span class="line">hexo inint</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>本地生成与部署</p>
+<figure class="highlight verilog"><table><tr><td class="code"><pre><span class="line"><span class="comment">//在hexo文件目录下执行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件</span></span><br><span class="line">hexo <span class="keyword">generate</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地部署</span></span><br><span class="line">hexo server </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地测试</span></span><br><span class="line">http:<span class="comment">//localhost:4000/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置<code>Hexo</code>与远程<code>GitHub</code>仓库关联</p>
+<figure class="highlight dts"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建`GitHub Pages`的站点发布来源，即username.github.io仓库</span></span><br><span class="line"><span class="comment">//配置远程连接的SSH密钥与公钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//将本地Hexo文件（静态网页）更新到GitHub 的username.github.io仓库</span></span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 复制Github仓库的ssh地址</span><br><span class="line"><span class="number">2.</span> 选择hexo文件夹下_config.yml文件，修改deploy相关信息</span><br><span class="line"><span class="symbol">  deploy:</span></span><br><span class="line"><span class="symbol">    type:</span> git</span><br><span class="line"><span class="symbol">    repository:</span> 刚复制的仓库ssh地址</span><br><span class="line"><span class="symbol">    branch:</span> master</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>本地博客推送到远程仓库，<code>GitHub Pages</code>自动发布</p>
+<figure class="highlight stata"><table><tr><td class="code"><pre><span class="line"><span class="comment">//g-&gt;generate  d-&gt;deploy</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件，然后部署</span></span><br><span class="line">hexo <span class="keyword">g</span></span><br><span class="line">hexo <span class="built_in">d</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者联合执行</span></span><br><span class="line">hexo <span class="keyword">g</span> -<span class="built_in">d</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>访问博客 <a href="https://biggfish3147.github.io" target="_blank" rel="noopener">我的博客</a></p>
+</li>
+</ul>
+<h1 id="发表文章"><a href="#发表文章" class="headerlink" title="发表文章"></a>发表文章</h1><p>注意用<code>markdown</code>语法编写文章。</p>
+<ul>
+<li><p><code>Front-matter</code>配置</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">博客伊始</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2019</span><span class="bullet">-09</span><span class="bullet">-20</span> <span class="number">23</span><span class="string">:29:47</span></span><br><span class="line"><span class="attr">comments:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">tags:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">君不见，黄河之水天上来，奔流到海不复回</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 文章正文</span></span><br><span class="line"></span><br><span class="line"><span class="string">注:</span> <span class="string">Front-matter配置支持的变量，其值因主题不同而存在差异</span></span><br><span class="line"><span class="string">/**</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">layout:</span> <span class="string">页面布局（配合主题文档使用）</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章名称</span></span><br><span class="line"><span class="attr">date:</span> <span class="string">文章日期</span></span><br><span class="line"><span class="attr">comments:</span> <span class="string">文章是否开启评论</span></span><br><span class="line"><span class="attr">photos:</span> <span class="string">文章封面图（仅部分主题支持）</span></span><br><span class="line"><span class="attr">tags:</span> </span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签一</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签二</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">文章分类</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">文章描述，即要在首页显示的摘要（仅部分主题支持）</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">*/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>推送文章</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//.md文章保存在/biggfish/blog/hexo/source/_posts中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者新建文章 默认放置在hexo/source/_posts中</span></span><br><span class="line">hexo <span class="keyword">new</span> <span class="string">"test"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//Next主题新建页面</span></span><br><span class="line">hexo <span class="keyword">new</span> page <span class="string">"分类"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//照样在hexo文件夹下执行</span></span><br><span class="line"></span><br><span class="line">hexo d -g</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://help.github.com/cn/github/working-with-github-pages/about-github-pages" target="_blank" rel="noopener">GitHub Pages官方说明文档</a></li>
+<li><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">Hexo官方文档</a></li>
+<li><a href="https://blog.csdn.net/qq_36759224/article/details/82121420#font_colorFF000_font_12" target="_blank" rel="noopener">使用 GitHub Pages和Hexo搭建自己的独立博客</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>教程</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>GitHub Pages</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Json基础</title>
+    <url>/2020/05/20/Json%E5%9F%BA%E7%A1%80/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>JSON其实就是一种数据的表示格式，由于其自身的优点（XML衬托）而广泛用于前后端的<strong>文本数据交互</strong>。这里又大概能够窥见XML与JSON的暗流涌动，一如前述JSP的落寞，但不至于那么惨烈。目前XML格式的文件还广泛作为配置文件的格式存在，尽管<code>.yml</code>、<code>.properties</code>、<code>.json</code>文件也在某些地方作为配置文件的格式。</p>
+<p>细想起来，无非也就是一种数据格式。编程圈里可能有很多“取代”这一说法，我并不十分认同，每种技术点自然有其存在的环境与背景，适时的发挥作用罢了。但技术的向前发展进步，是毋庸置疑的，所以我也不会无聊地选择用XML来做文本数据传输。突然想到，HTML的标签语法，是不是也存在着标签增加网络传输流量这一说法？又或者从JSON的命名看，是否前端巨头JavaScript就捧红了JSON呢？当然这是无端的幻想，技术时时刻刻都在迭代，我们唯有跟着大浪而已。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1015.jpg" alt="地平线的余晖"></p>
+<h1 id="Json简介"><a href="#Json简介" class="headerlink" title="Json简介"></a>Json简介</h1><p>JSON 是<strong>存储和交换文本信息</strong>的语法。类似 XML。JSON 比 XML 更小、更快，更易解析。</p>
+<ul>
+<li>JSON 指的是 JavaScript 对象表示法<code>JavaScript Object Notation</code></li>
+<li>JSON 是<strong>轻量级的文本数据交换格式</strong></li>
+<li>JSON 独立于语言</li>
+<li>JSON 具有自我描述性，更易理解</li>
+</ul>
+<p>JSON 使用 <strong>JavaScript 语法</strong>来描述数据对象，但是 JSON 仍然独立于语言和平台。<strong>JSON 解析器和 JSON 库</strong>支持许多不同的编程语言（PHP、Java、Python中均可以使用JSON）。</p>
+<p>JSON 文本格式在语法上与创建 JavaScript 对象的代码相同。由于这种相似性，无需解析器，JavaScript 程序能够使用<strong>内建的 eval() 函数</strong>，用 JSON 数据来生成原生的 JavaScript 对象。</p>
+<p>注：JSON常用于<strong>前后端的数据交互</strong>（前端Ajax上传JSON数据，服务器返回JSON字符串），需要明确是<strong>文本数据</strong>，类似图片文件等不能通过JSON来传输。</p>
+<h1 id="Json数据"><a href="#Json数据" class="headerlink" title="Json数据"></a>Json数据</h1><p>通过Js语法声明并初始化JSON对象，可以是单个JSON对象，也可以是JSON数组。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> JSONObject= &#123;</span><br><span class="line">    <span class="string">"name"</span>:<span class="string">"Bill Gates"</span>,</span><br><span class="line">    <span class="string">"street"</span>:<span class="string">"Fifth Avenue New York 666"</span>,</span><br><span class="line">    <span class="string">"age"</span>:<span class="number">56</span>,</span><br><span class="line">    <span class="string">"phone"</span>:<span class="string">"555 1234567"</span>&#125;;</span><br><span class="line">    </span><br><span class="line"><span class="comment">//json数组，每个元素是一个对象    </span></span><br><span class="line"><span class="keyword">var</span> employees = [</span><br><span class="line">    &#123; <span class="string">"firstName"</span>:<span class="string">"Bill"</span> , <span class="string">"lastName"</span>:<span class="string">"Gates"</span> &#125;,</span><br><span class="line">    &#123; <span class="string">"firstName"</span>:<span class="string">"George"</span> , <span class="string">"lastName"</span>:<span class="string">"Bush"</span> &#125;,</span><br><span class="line">    &#123; <span class="string">"firstName"</span>:<span class="string">"Thomas"</span> , <span class="string">"lastName"</span>: <span class="string">"Carter"</span> &#125;</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+
+<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><ul>
+<li>数据在名称/值对中（<strong>双引号</strong>）</li>
+<li>数据由<strong>逗号</strong>分隔</li>
+<li>花括号保存对象</li>
+<li>方括号保存数组</li>
+</ul>
+<h2 id="Json数据值"><a href="#Json数据值" class="headerlink" title="Json数据值"></a>Json数据值</h2><ul>
+<li>数字（整数或浮点数）</li>
+<li>字符串（在双引号中）</li>
+<li>逻辑值（true 或 false）</li>
+<li>数组（在方括号中）</li>
+<li>对象（在花括号中）</li>
+<li>null</li>
+</ul>
+<blockquote>
+<p>注: Js的数据类型一般为6种，其中基本数据类型：字符串（String）、数字(Number)、布尔(Boolean)、空（Null）、未定义（Undefined），引用数据类型：对象(Object)，ES6中新增Symbol（独一无二的值）。可以通过 typeof 查看变量类型，数组(Array)返回object类型，函数(Function)返回function类型。</p>
+</blockquote>
+<h1 id="Json基本用法"><a href="#Json基本用法" class="headerlink" title="Json基本用法"></a>Json基本用法</h1><h2 id="把-JSON-文本转换为-JavaScript-对象"><a href="#把-JSON-文本转换为-JavaScript-对象" class="headerlink" title="把 JSON 文本转换为 JavaScript 对象"></a>把 JSON 文本转换为 JavaScript 对象</h2><p>JSON 最常见的用法之一，是<strong>从 web 服务器上读取 JSON 数据（作为文件或作为 HttpRequest），将 JSON 数据转换为 JavaScript 对象</strong>，然后在网页中使用该数据。</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>通过 JSON 字符串来创建对象<span class="tag">&lt;/<span class="name">h3</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">First Name: <span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">"fname"</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> /&gt;</span> <span class="comment">&lt;!--显示Bill--&gt;</span></span><br><span class="line">Last Name: <span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">"lname"</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> /&gt;</span> <span class="comment">&lt;!--显示Gates--&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span></span><br><span class="line"><span class="actionscript"><span class="keyword">var</span> txt = <span class="string">'&#123;"employees":['</span> +</span></span><br><span class="line"><span class="actionscript"><span class="string">'&#123;"firstName":"Bill","lastName":"Gates" &#125;,'</span> +</span></span><br><span class="line"><span class="actionscript"><span class="string">'&#123;"firstName":"George","lastName":"Bush" &#125;,'</span> +</span></span><br><span class="line"><span class="actionscript"><span class="string">'&#123;"firstName":"Thomas","lastName":"Carter" &#125;]&#125;'</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="javascript"><span class="keyword">var</span> obj = <span class="built_in">eval</span> (<span class="string">"("</span> + txt + <span class="string">")"</span>);</span></span><br><span class="line"></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"fname"</span>).innerHTML=obj.employees[<span class="number">1</span>].firstName </span></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"lname"</span>).innerHTML=obj.employees[<span class="number">1</span>].lastName </span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="JSON解析器"><a href="#JSON解析器" class="headerlink" title="JSON解析器"></a>JSON解析器</h2><p>eval() 函数可编译并执行任何 JavaScript 代码。  </p>
+<p>使用 JSON 解析器将 JSON 转换为 JavaScript 对象是更安全的做法。<strong>JSON 解析器只能识别 JSON 文本，而不会编译脚本</strong>。</p>
+<p>在浏览器中，这提供了原生的 JSON 支持，而且 JSON 解析器的速度更快。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1020.jpg" alt="行走在街头"></p>
+<h1 id="Json应用示例"><a href="#Json应用示例" class="headerlink" title="Json应用示例"></a>Json应用示例</h1><p>从<strong>前端的视角</strong>来解读JSON用法，包括如何将服务端的JSON字符串解析为JSON对象，以及如何将JSON对象转换为JSON字符串传递给服务端。</p>
+<h2 id="JSON-parse"><a href="#JSON-parse" class="headerlink" title="JSON.parse()"></a>JSON.parse()</h2><p>JSON 通常用于与服务端交换数据。前端接收服务器数据时一般是获得字符串。</p>
+<p>我们可以使用 JSON.parse() 方法将JSON字符串数据转换为 JavaScript 对象。</p>
+<p><strong>语法：JSON.parse(text, [reviver])</strong></p>
+<p>reviver:&emsp;一个转换结果的函数， 将为对象的每个成员调用此函数。</p>
+<ul>
+<li>从服务端接收json数据</li>
+<li>从服务端接收数组的json数据</li>
+<li>解析日期</li>
+<li>解析函数（将函数作为字符串存储，<strong>不建议在json中使用函数</strong>）</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>菜鸟教程(runoob.com)<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>字符串转换为 Date 对象<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span> <span class="attr">id</span>=<span class="string">"demo"</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript"><span class="comment">//案例：可选参数reviver的使用（一般为函数）</span></span></span><br><span class="line"></span><br><span class="line"><span class="actionscript"><span class="keyword">var</span> text = <span class="string">'&#123; "name":"Runoob", "initDate":"2013-12-14", "site":"www.runoob.com"&#125;'</span>;</span></span><br><span class="line"><span class="javascript"><span class="keyword">var</span> obj = <span class="built_in">JSON</span>.parse(text, <span class="function"><span class="keyword">function</span> (<span class="params">key, value</span>) </span>&#123;</span></span><br><span class="line"><span class="actionscript">	<span class="keyword">if</span> (key == <span class="string">"initDate"</span>) &#123;</span></span><br><span class="line"><span class="javascript">	    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Date</span>(value);</span></span><br><span class="line"><span class="actionscript">	&#125; <span class="keyword">else</span> &#123;</span></span><br><span class="line"><span class="actionscript">	    <span class="keyword">return</span> value;</span></span><br><span class="line">&#125;&#125;);</span><br><span class="line"></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"demo"</span>).innerHTML = obj.name + <span class="string">"创建日期："</span> + obj.initDate;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="JSON-stringify"><a href="#JSON-stringify" class="headerlink" title="JSON.stringify()"></a>JSON.stringify()</h2><p>JSON 通常用于与服务端交换数据。在<strong>向服务器发送数据时一般是字符串</strong>。</p>
+<p>我们可以使用 JSON.stringify() 方法将 JavaScript 对象转换为字符串。</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>菜鸟教程(runoob.com)<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>将 JavaScript 对象转换为 JSON 字符串<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span> <span class="attr">id</span>=<span class="string">"demo"</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="actionscript"><span class="keyword">var</span> obj = &#123; <span class="string">"name"</span>:<span class="string">"runoob"</span>, <span class="string">"alexa"</span>:<span class="number">10000</span>, <span class="string">"site"</span>:<span class="string">"www.runoob.com"</span>&#125;;</span></span><br><span class="line"><span class="javascript"><span class="keyword">var</span> myJSON = <span class="built_in">JSON</span>.stringify(obj);</span></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"demo"</span>).innerHTML = myJSON;</span></span><br><span class="line"></span><br><span class="line"><span class="actionscript"><span class="comment">//上述两句替换后测试</span></span></span><br><span class="line"><span class="actionscript"><span class="comment">//document.getElementById("demo").innerHTML = obj;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Java中使用JSON"><a href="#Java中使用JSON" class="headerlink" title="Java中使用JSON"></a>Java中使用JSON</h1><p>Java中并没有内置JSON的解析，因此使用JSON需要借助第三方类库。常用的如Gson、FastJson、Jackson。</p>
+<p>编码：从Java变量到JSON格式的编码</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//以FastJson为例</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testJson</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    JSONObject object = <span class="keyword">new</span> JSONObject();</span><br><span class="line">    <span class="comment">//string</span></span><br><span class="line">    object.put(<span class="string">"string"</span>,<span class="string">"string"</span>);</span><br><span class="line">    <span class="comment">//int</span></span><br><span class="line">    object.put(<span class="string">"int"</span>,<span class="number">2</span>);</span><br><span class="line">    <span class="comment">//boolean</span></span><br><span class="line">    object.put(<span class="string">"boolean"</span>,<span class="keyword">true</span>);</span><br><span class="line">    <span class="comment">//array</span></span><br><span class="line">    List&lt;Integer&gt; integers = Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">    object.put(<span class="string">"list"</span>,integers);</span><br><span class="line">    <span class="comment">//null</span></span><br><span class="line">    object.put(<span class="string">"null"</span>,<span class="keyword">null</span>);</span><br><span class="line">​</span><br><span class="line">    System.out.println(object);</span><br><span class="line">    <span class="comment">//&#123;"boolean":true,"string":"string","list":[1,2,3],"int":2&#125;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>解码：从 JSON 对象到 Java 变量的解码过程</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testJson2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">​</span><br><span class="line">  JSONObject object = JSONObject</span><br><span class="line">      .parseObject(<span class="string">"&#123;\"boolean\":true,\"string\":\"string\",\"list\":[1,2,3],\"int\":2&#125;"</span>);</span><br><span class="line">  <span class="comment">//string</span></span><br><span class="line">  String s = object.getString(<span class="string">"string"</span>);</span><br><span class="line">  System.out.println(s);</span><br><span class="line">  <span class="comment">//int</span></span><br><span class="line">  <span class="keyword">int</span> i = object.getIntValue(<span class="string">"int"</span>);</span><br><span class="line">  System.out.println(i);</span><br><span class="line">  <span class="comment">//boolean</span></span><br><span class="line">  <span class="keyword">boolean</span> b = object.getBooleanValue(<span class="string">"boolean"</span>);</span><br><span class="line">  System.out.println(b);</span><br><span class="line">  <span class="comment">//list</span></span><br><span class="line">  List&lt;Integer&gt; integers = JSON.parseArray(object.getJSONArray(<span class="string">"list"</span>).toJSONString(),Integer.class);</span><br><span class="line">  integers.forEach(System.out::println);</span><br><span class="line">  <span class="comment">//null</span></span><br><span class="line">  System.out.println(object.getString(<span class="string">"null"</span>));</span><br><span class="line">​   </span><br><span class="line">  <span class="comment">//输出</span></span><br><span class="line">  <span class="comment">//string</span></span><br><span class="line">  <span class="comment">//2</span></span><br><span class="line">  <span class="comment">//true</span></span><br><span class="line">  <span class="comment">// 1</span></span><br><span class="line">  <span class="comment">// 2</span></span><br><span class="line">  <span class="comment">// 3</span></span><br><span class="line">  <span class="comment">// null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>JSON对象与字符串的相互转化</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//从字符串解析JSON对象</span></span><br><span class="line">JSONObject obj = JSON.parseObject(<span class="string">"&#123;\"runoob\":\"菜鸟教程\"&#125;"</span>);</span><br><span class="line"><span class="comment">//从字符串解析JSON数组</span></span><br><span class="line">JSONArray arr = JSON.parseArray(<span class="string">"[\"菜鸟教程\",\"RUNOOB\"]\n"</span>);</span><br><span class="line"><span class="comment">//将JSON对象转化为字符串</span></span><br><span class="line">String objStr = JSON.toJSONString(obj);</span><br><span class="line"><span class="comment">//将JSON数组转化为字符串</span></span><br><span class="line">String arrStr = JSON.toJSONString(arr);</span><br></pre></td></tr></table></figure>
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://www.runoob.com/json/json-tutorial.html" target="_blank" rel="noopener">菜鸟：JSON教程</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilR0003.jpg" alt="平凡的一天"></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Json</tag>
+        <tag>数据传输</tag>
+        <tag>概念</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>漫谈JSP</title>
     <url>/2020/05/09/%E6%BC%AB%E8%B0%88JSP/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>以前倒是知道<code>JSP</code>概念，但只能算是大概中的大概。今天因缘际会，又大致去查了些资料，然后就知道了个大概。比起<code>JSP</code>本身的语法规则，我对其由盛及衰的发展历史，倒表现出更大的兴趣。</p>
@@ -148,71 +295,6 @@
       <tags>
         <tag>JSP</tag>
         <tag>概念</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hexo与GitHub Pages搭建独立博客</title>
-    <url>/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>博客其实在很久之前按照教程已经搭建完成，现在才回头来写教程步骤。有时候会想是否多此一举，毕竟网上现成的优秀的教程比比皆是。所以权且不说这是搭建基于Hexo的博客教程，只是一个简单的记录。</p>
-<p>写一点东西，像擦肩而过的风。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/7.jpg" alt="起飞"></p>
-<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2><p><code>GitHub Pages</code> 是一项<strong>静态站点托管服务</strong>，它直接从<code>GitHub</code> 上的仓库获取<code>HTML</code>、<code>CSS</code>和<code>JavaScript</code>文件，（可选）通过构建过程运行文件，然后发布网站。</p>
-<p>有三种类型的 <code>GitHub Pages</code> 站点：项目、用户和组织。 项目站点连接到 <code>GitHub</code> 上托管的特定项目，用户和组织站点连接到特定的 <code>GitHub</code> 帐户。只能为每个 <code>GitHub</code>账户创建一个用户或组织站点。项目站点（无论是组织还是用户帐户拥有）没有限制。除非使用自定义域，否则用户和组织站点位于<code>http(s)://&lt;username&gt;.github.io</code> 或 <code>http(s)://&lt;organization&gt;.github.io</code>。</p>
-<p>基于<code>GitHub Pages</code>搭建个人独立博客，即属于用户或组织站点。</p>
-<p><code>GitHub Pages</code> 站点的发布来源是存储站点源文件的分支或文件夹。 所有站点都有默认的发布来源，项目站点还有其他可用的发布来源。用户和组织站点的默认发布来源是<code>master</code>分支。如果用户和组织站点的仓库是<code>master</code> 分支，您的站点将从该分支自动发布。无法为用户或组织站点选择不同的发布来源。</p>
-<p><code>GitHub Pages</code> 站点受到以下使用限制的约束：</p>
-<ul>
-<li><code>GitHub Pages</code> 源仓库建议的限制为1GB。</li>
-<li>发布的 <code>GitHub Pages</code> 站点不得超过 1 GB。</li>
-<li><code>GitHub Pages</code> 站点的软带宽限制为每月 100GB。</li>
-<li><code>GitHub Pages</code> 站点的软限制为每小时 10 次构建。</li>
-</ul>
-<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p><code>Hexo</code>是基于<code>Node.js</code>的快速、简洁且高效的博客框架。<code>Hexo</code> 使用 <code>Markdown</code>（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
-<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul>
-<li>安装<code>Node.js</code></li>
-<li>安装<code>Git</code></li>
-<li>安装<code>Hexo</code><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//进入自己的博客文件夹(如/biggfish/blog)</span></span><br><span class="line">npm install hexo-cli -g </span><br><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><ul>
-<li><p>初始化配置</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 在Hexo安装目录下新建hexo文件夹，如 /biggfish/blog/hexo</span></span><br><span class="line">hexo inint</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>本地生成与部署</p>
-<figure class="highlight verilog"><table><tr><td class="code"><pre><span class="line"><span class="comment">//在hexo文件目录下执行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件</span></span><br><span class="line">hexo <span class="keyword">generate</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地部署</span></span><br><span class="line">hexo server </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地测试</span></span><br><span class="line">http:<span class="comment">//localhost:4000/</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>配置<code>Hexo</code>与远程<code>GitHub</code>仓库关联</p>
-<figure class="highlight dts"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建`GitHub Pages`的站点发布来源，即username.github.io仓库</span></span><br><span class="line"><span class="comment">//配置远程连接的SSH密钥与公钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//将本地Hexo文件（静态网页）更新到GitHub 的username.github.io仓库</span></span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 复制Github仓库的ssh地址</span><br><span class="line"><span class="number">2.</span> 选择hexo文件夹下_config.yml文件，修改deploy相关信息</span><br><span class="line"><span class="symbol">  deploy:</span></span><br><span class="line"><span class="symbol">    type:</span> git</span><br><span class="line"><span class="symbol">    repository:</span> 刚复制的仓库ssh地址</span><br><span class="line"><span class="symbol">    branch:</span> master</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>本地博客推送到远程仓库，<code>GitHub Pages</code>自动发布</p>
-<figure class="highlight stata"><table><tr><td class="code"><pre><span class="line"><span class="comment">//g-&gt;generate  d-&gt;deploy</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件，然后部署</span></span><br><span class="line">hexo <span class="keyword">g</span></span><br><span class="line">hexo <span class="built_in">d</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者联合执行</span></span><br><span class="line">hexo <span class="keyword">g</span> -<span class="built_in">d</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>访问博客 <a href="https://biggfish3147.github.io" target="_blank" rel="noopener">我的博客</a></p>
-</li>
-</ul>
-<h1 id="发表文章"><a href="#发表文章" class="headerlink" title="发表文章"></a>发表文章</h1><p>注意用<code>markdown</code>语法编写文章。</p>
-<ul>
-<li><p><code>Front-matter</code>配置</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">博客伊始</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2019</span><span class="bullet">-09</span><span class="bullet">-20</span> <span class="number">23</span><span class="string">:29:47</span></span><br><span class="line"><span class="attr">comments:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">tags:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">君不见，黄河之水天上来，奔流到海不复回</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 文章正文</span></span><br><span class="line"></span><br><span class="line"><span class="string">注:</span> <span class="string">Front-matter配置支持的变量，其值因主题不同而存在差异</span></span><br><span class="line"><span class="string">/**</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">layout:</span> <span class="string">页面布局（配合主题文档使用）</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章名称</span></span><br><span class="line"><span class="attr">date:</span> <span class="string">文章日期</span></span><br><span class="line"><span class="attr">comments:</span> <span class="string">文章是否开启评论</span></span><br><span class="line"><span class="attr">photos:</span> <span class="string">文章封面图（仅部分主题支持）</span></span><br><span class="line"><span class="attr">tags:</span> </span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签一</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签二</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">文章分类</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">文章描述，即要在首页显示的摘要（仅部分主题支持）</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">*/</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>推送文章</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//.md文章保存在/biggfish/blog/hexo/source/_posts中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者新建文章 默认放置在hexo/source/_posts中</span></span><br><span class="line">hexo <span class="keyword">new</span> <span class="string">"test"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//Next主题新建页面</span></span><br><span class="line">hexo <span class="keyword">new</span> page <span class="string">"分类"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//照样在hexo文件夹下执行</span></span><br><span class="line"></span><br><span class="line">hexo d -g</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
-<li><a href="https://help.github.com/cn/github/working-with-github-pages/about-github-pages" target="_blank" rel="noopener">GitHub Pages官方说明文档</a></li>
-<li><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">Hexo官方文档</a></li>
-<li><a href="https://blog.csdn.net/qq_36759224/article/details/82121420#font_colorFF000_font_12" target="_blank" rel="noopener">使用 GitHub Pages和Hexo搭建自己的独立博客</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>教程</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>GitHub Pages</tag>
       </tags>
   </entry>
 </search>
