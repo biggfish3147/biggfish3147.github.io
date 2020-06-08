@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2020-06-01T04:35:05.884Z</updated>
+  <updated>2020-06-08T14:17:18.666Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>kindle电子书邮箱推送</title>
+    <link href="http://yoursite.com/2020/06/08/kindle%E7%94%B5%E5%AD%90%E4%B9%A6/"/>
+    <id>http://yoursite.com/2020/06/08/kindle%E7%94%B5%E5%AD%90%E4%B9%A6/</id>
+    <published>2020-06-08T14:06:52.000Z</published>
+    <updated>2020-06-08T14:17:18.666Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Kindle入手后已经吃过太多灰，<del>白嫖</del>收集的电子书资源怎么导入到Kindle设备都快忘记了，避免后续再次各处看教程，简单记录。</p><p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilR0005.jpg" alt="人丑就要多读书"></p><h1 id="电子书资源"><a href="#电子书资源" class="headerlink" title="电子书资源"></a>电子书资源</h1><ul><li><del>有钱</del> 最好直接在Amazon官方商城购买（一步到位）</li><li><a href="https://www.jiumodiary.com/" target="_blank" rel="noopener">鸠摩</a></li><li><a href="https://sobooks.cc/" target="_blank" rel="noopener">SoBooks</a></li><li><a href="http://cn.epubee.com/books/" target="_blank" rel="noopener">ePUBee</a> （收费）</li></ul><h1 id="将电子书导入到Kindle"><a href="#将电子书导入到Kindle" class="headerlink" title="将电子书导入到Kindle"></a>将电子书导入到Kindle</h1><p>Kindle支持的电子书格式Kindle格式包括但不限于<code>.mobi</code>  <code>.azw</code> <code>.pdf</code>，不支持<code>.epub</code>格式，但可以通过电子书格式<a href="http://cn.epubee.com/" target="_blank" rel="noopener">转换工具</a>进行转换。</p><h2 id="USB数据线导入"><a href="#USB数据线导入" class="headerlink" title="USB数据线导入"></a>USB数据线导入</h2><p><strong>步骤</strong></p><ul><li>数据线（Micro USB口）连接Kindle与电脑</li><li>将电子书资源拷贝到Kindle磁盘的Documents文件夹  </li></ul><p><strong>注意</strong></p><ul><li>只能在Kindle设备上阅读，不能同步到同一账号下</li></ul><h2 id="邮箱推送"><a href="#邮箱推送" class="headerlink" title="邮箱推送"></a>邮箱推送</h2><p><strong>步骤</strong></p><ul><li>在Amazon账户下，管理我的内容与设备，进行个人文档设置（电子邮箱白名单）</li><li>将电子书资源（支持格式）作为邮件附件发送到***@kindle.cn邮件地址</li></ul><p><strong>注意</strong></p><ul><li>电子书资源能够同步到同一账号下</li></ul><h2 id="其他导入方式"><a href="#其他导入方式" class="headerlink" title="其他导入方式"></a>其他导入方式</h2><ul><li>公众号【亚马逊Kindle服务号】将文章推送到 Kindle</li><li>通过Calibre 传书到Kindle</li><li>通过手机发送传书到Kindle app（手机本地有电子书资源）</li></ul><h2 id="Kindle使用"><a href="#Kindle使用" class="headerlink" title="Kindle使用"></a>Kindle使用</h2><ul><li>关闭广告（First）</li><li>截屏（可以但没必要）</li><li>笔记/标注（可导出）</li><li>续航真的猛，内存也够大</li><li>Kindle神器Calibre（格式转换/推送）</li></ul><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul><li><a href="https://zhuanlan.zhihu.com/p/83882901" target="_blank" rel="noopener">如何把电子书导入到kindle？</a></li><li><a href="https://www.zhihu.com/question/273617420/answer/996496570" target="_blank" rel="noopener">你们都是从哪里找kindle电子书资源的？</a></li></ul><p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1005.jpg" alt="What？何不如买个iPad"></p>]]></content>
+    
+    <summary type="html">
+    
+      白嫖的电子书怎么通过邮箱推送给Kindle
+    
+    </summary>
+    
+    
+      <category term="教程" scheme="http://yoursite.com/categories/%E6%95%99%E7%A8%8B/"/>
+    
+    
+      <category term="kindle" scheme="http://yoursite.com/tags/kindle/"/>
+    
+  </entry>
   
   <entry>
     <title>浅谈图像</title>

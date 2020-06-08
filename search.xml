@@ -83,6 +83,61 @@
       </tags>
   </entry>
   <entry>
+    <title>kindle电子书邮箱推送</title>
+    <url>/2020/06/08/kindle%E7%94%B5%E5%AD%90%E4%B9%A6/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Kindle入手后已经吃过太多灰，<del>白嫖</del>收集的电子书资源怎么导入到Kindle设备都快忘记了，避免后续再次各处看教程，简单记录。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilR0005.jpg" alt="人丑就要多读书"></p>
+<h1 id="电子书资源"><a href="#电子书资源" class="headerlink" title="电子书资源"></a>电子书资源</h1><ul>
+<li><del>有钱</del> 最好直接在Amazon官方商城购买（一步到位）</li>
+<li><a href="https://www.jiumodiary.com/" target="_blank" rel="noopener">鸠摩</a></li>
+<li><a href="https://sobooks.cc/" target="_blank" rel="noopener">SoBooks</a></li>
+<li><a href="http://cn.epubee.com/books/" target="_blank" rel="noopener">ePUBee</a> （收费）</li>
+</ul>
+<h1 id="将电子书导入到Kindle"><a href="#将电子书导入到Kindle" class="headerlink" title="将电子书导入到Kindle"></a>将电子书导入到Kindle</h1><p>Kindle支持的电子书格式Kindle格式包括但不限于<code>.mobi</code>  <code>.azw</code> <code>.pdf</code>，不支持<code>.epub</code>格式，但可以通过电子书格式<a href="http://cn.epubee.com/" target="_blank" rel="noopener">转换工具</a>进行转换。</p>
+<h2 id="USB数据线导入"><a href="#USB数据线导入" class="headerlink" title="USB数据线导入"></a>USB数据线导入</h2><p><strong>步骤</strong></p>
+<ul>
+<li>数据线（Micro USB口）连接Kindle与电脑</li>
+<li>将电子书资源拷贝到Kindle磁盘的Documents文件夹  </li>
+</ul>
+<p><strong>注意</strong></p>
+<ul>
+<li>只能在Kindle设备上阅读，不能同步到同一账号下</li>
+</ul>
+<h2 id="邮箱推送"><a href="#邮箱推送" class="headerlink" title="邮箱推送"></a>邮箱推送</h2><p><strong>步骤</strong></p>
+<ul>
+<li>在Amazon账户下，管理我的内容与设备，进行个人文档设置（电子邮箱白名单）</li>
+<li>将电子书资源（支持格式）作为邮件附件发送到***@kindle.cn邮件地址</li>
+</ul>
+<p><strong>注意</strong></p>
+<ul>
+<li>电子书资源能够同步到同一账号下</li>
+</ul>
+<h2 id="其他导入方式"><a href="#其他导入方式" class="headerlink" title="其他导入方式"></a>其他导入方式</h2><ul>
+<li>公众号【亚马逊Kindle服务号】将文章推送到 Kindle</li>
+<li>通过Calibre 传书到Kindle</li>
+<li>通过手机发送传书到Kindle app（手机本地有电子书资源）</li>
+</ul>
+<h2 id="Kindle使用"><a href="#Kindle使用" class="headerlink" title="Kindle使用"></a>Kindle使用</h2><ul>
+<li>关闭广告（First）</li>
+<li>截屏（可以但没必要）</li>
+<li>笔记/标注（可导出）</li>
+<li>续航真的猛，内存也够大</li>
+<li>Kindle神器Calibre（格式转换/推送）</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/83882901" target="_blank" rel="noopener">如何把电子书导入到kindle？</a></li>
+<li><a href="https://www.zhihu.com/question/273617420/answer/996496570" target="_blank" rel="noopener">你们都是从哪里找kindle电子书资源的？</a></li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1005.jpg" alt="What？何不如买个iPad"></p>
+]]></content>
+      <categories>
+        <category>教程</category>
+      </categories>
+      <tags>
+        <tag>kindle</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hexo与GitHub Pages搭建独立博客</title>
     <url>/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>博客其实在很久之前按照教程已经搭建完成，现在才回头来写教程步骤。有时候会想是否多此一举，毕竟网上现成的优秀的教程比比皆是。所以权且不说这是搭建基于Hexo的博客教程，只是一个简单的记录。</p>
@@ -148,92 +203,34 @@
       </tags>
   </entry>
   <entry>
-    <title>浅谈图像</title>
-    <url>/2020/06/01/%E6%B5%85%E8%B0%88%E5%9B%BE%E5%83%8F/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>一切要从图像分辨率说起。前不久问过自己一个问题：<strong>小米6只有1920x1080的分辨率为什么能拍出4032x3016px的照片？</strong></p>
-<p>不知当时脑袋想什么，问出这样一个特别蠢的问题。但它居然就这样作为一个导火索，让我不得不去了解一下关于图像的基本知识。</p>
-<p>这里需要说明的是，这个问题本身就是个问题。小米6的分辨率1920x1080是说的屏幕分辨率，而4032x3016px的照片是相机拍出来的图像分辨率，也就是米6后置的1200万像素摄像头拍出来的。一个是屏幕显示分辨率，另一个是拍照图像分辨率，就没得啥关联的。</p>
-<p>然后又因为接触<code>React Native</code>，知道其组件的宽高用的是逻辑像素作为单位。之前买的kindle参数里其中一项是PPI，笔记本外设显示器4K屏……</p>
-<p>于是就简单整理一下图像基础知识及相关概念，权作了解。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0001.jpg" alt="图像啊图像"></p>
-<h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><p>位图和矢量图是计算机图形中的两大概念。</p>
-<h2 id="位图"><a href="#位图" class="headerlink" title="位图"></a>位图</h2><p><strong>位图</strong>（bitmap）也叫点阵图、栅格图像、<strong>像素图</strong>。<strong>构成位图的最小单位是像素</strong>，位图就是依靠像素阵列的排列来实现其显示效果的，缩放位图会导致失真（边缘锯齿）。例如放大后的位图出现“马赛克”。</p>
-<p><strong>位图图像善于重现颜色的细微层次</strong>，能够制作出色彩和亮度变化丰富的图像，可逼真地再现这个世界，文件庞大，<strong>不能随意缩放，打印和输出的精度是有限的。</strong></p>
-<p><strong>位图的文件类型</strong>很多，如.bmp、.pcx、.gif、.jpg、.tif等。同样的图形，存盘成以上几种文件时文件的字节数会有一些差别，尤其是jpg格式，它的大小只有同样的bmp格式的1/20到1/35，这是因为它们的点矩阵经过了复杂的压缩算法的缘故。</p>
-<p><strong>位图图像面积越大，图像文件的色彩越丰富，文件的字节数就越多。</strong></p>
-<h2 id="矢量图"><a href="#矢量图" class="headerlink" title="矢量图"></a>矢量图</h2><p><strong>矢量图</strong>（vector）也叫向量图，是一种<strong>缩放不失真</strong>的图像格式。矢量图是通过多个对象的组合生成的，对其中的每一个对象的纪录方式，都是以数学函数来实现的，也就是说，矢量图实际上并不是像位图那样纪录画面上每一点的信息，而是纪录了元素形状及颜色的算法，当你打开矢量图的时候，软件利用图行对应的函数进行运算，将运算结果[图形的形状和颜色]显示给你看。</p>
-<p>矢量图形能<strong>重现清晰的轮廓</strong>，线条非常光滑、且<strong>具有良好的缩放性</strong>。因为图像中保存的是线条和图块的信息，与分辨率和图形大小无关，只与图像的复杂程度有关，所以图像文件所占的存储空间较小（图像不复杂情况下）。</p>
-<p>与位图相比，在显示和打印方面都快的多；<strong>图形不真实生动，颜色不丰富</strong>。无法像照片一样真实地再现这个世界的景色。（矢量图基本都需要专门软件打开）</p>
-<p><strong>矢量图形格式</strong>也很多，常见的如.SVG。</p>
-<p>矢量图形文件的规律：</p>
-<ul>
-<li>可以无限放大图形中的细节，不用担心会造成失真和色块。</li>
-<li>一般的线条的图形和卡通图形，存成矢量图文件就比存成位图文件要小很多。</li>
-<li>存盘后<strong>文件的大小</strong>与图形中<strong>元素的个数</strong>和每个<strong>元素的复杂程度</strong>成正比。而与图形面积和色彩的丰富程度无关。（元素的复杂程度指的是这个元素的结构复杂度，如五角星就比矩形复杂、一个任意曲线就比一个直线段复杂）。</li>
-<li>通过软件，<strong>矢量图可以轻松地转化为位图，而位图转化为矢量图就需要经过复杂而庞大的数据处理</strong>，而且生成的矢量图的质量绝对不能和原来的图形比拟。</li>
-</ul>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0002.jpg" alt="图像啊图像"></p>
-<h2 id="一些单位"><a href="#一些单位" class="headerlink" title="一些单位"></a>一些单位</h2><p>绝对单位与相对单位。比如设备尺寸5.15 inch就是绝对的物理长度，像素（pixel）就是相对单位，1英寸显示屏可以只有1个像素，也可以有100个像素。<strong>相同面积不同分辨率的显示屏，其像素点大小就不相同。</strong></p>
-<p><strong>px</strong>：<code>pixel</code>，像素，是<strong>组成数字图像的基本单元</strong>。这种基本单元越多，越能呈现出图像的细节，图像就越清晰。像素的大小是没有固定长度的，不同设备上一个单位像素色块的大小是不一样的。</p>
-<p><strong>ppi</strong> ：<code>pixels per inch</code>,等于屏幕对角线像素点／屏幕对角线物理宽度，是每英寸对角线上所拥有的像素（pixel）数目，通常也叫<strong>像素密度</strong>。手机屏幕的PPI当达到一定数值（300ppi）时，人眼就分辨不出颗粒感了。</p>
-<p><strong>dpi</strong>：<code>dots per inch</code>,是每英寸所能打印的点数，通常也叫<strong>打印精度</strong>。如：打印机输出可达600DPI的分辨率，表示打印机可以在每一平方英寸的面积中可以输出600X600＝360000个输出点。大多数情况下，PPI与DPI的数值是相等的。</p>
-<p><strong>dp</strong>：<code>density-independent pixels</code>,一种基于屏幕密度的抽象单位。在每英寸160点的显示器上，1dp = 1px。<a href="https://developer.android.com/guide/practices/screens_support.html" target="_blank" rel="noopener">dp的提出</a>是为了解决控件对不同屏幕的适配问题。</p>
-<p><strong>sp</strong>：<code>scale-independent pixel</code>，与缩放无关的抽象像素，安卓开发用的字体大小单位。一般情况下可认为sp=dp。</p>
-<p><strong>density</strong> ：密度。density ≈ 设备PPI/160PPI。比如我是320PPI设备，density＝320PPI/160PPI=2;density是一个int类型的值。</p>
-<p><strong>运算案例</strong></p>
-<p>小米6设备参数：显示屏尺寸5.15英寸（1 inch=2.54 cm），分辨率1920x1080px</p>
-<p>计算得：PPI=428 ，density≈3，1dp=2.67px≈3px。</p>
-<h2 id="分辨率"><a href="#分辨率" class="headerlink" title="分辨率"></a>分辨率</h2><p>分辨率，又称解析度。分辨率=画面水平方向的像素值x画面垂直方向的像素值，分为 <strong>屏幕分辨率</strong>和<strong>图像分辨率</strong>。</p>
-<p>显示分辨率（屏幕分辨率）是屏幕图像的精密度，是指<strong>显示器所能显示的像素有多少</strong>。由于屏幕上的点、线和面都是由像素组成的，显示器可显示的像素越多，画面就越精细，同样的屏幕区域内能显示的信息也越多。显示分辨率一定的情况下，显示屏越小图像越清晰，反之，显示屏大小固定时，显示分辨率越高图像越清晰。</p>
-<p>屏幕分辨率1920x1080（16:9显示屏），就是说设备屏幕的水平方向上有1920个像素点，垂直方向上有1080个像素点。<strong>同一台硬件设备上的屏幕分辨率、像素块大小是不会变的（倾向于说显示器分辨率）</strong>。PC电脑上之所以可以调整屏幕分辨率，其实是通过算法转换实现的。</p>
-<p><strong>图像分辨率是指每英寸图像内的像素点数</strong>（这种定义方式更精准）。图像分辨率是有单位的，叫 像素每英寸。分辨率越高，像素的点密度越高（图像尺寸一定时），图像越逼真。</p>
-<p>分辨率和清晰度不能对等，虽然<strong>很多情况下高分辨率的确意味着高清晰度</strong>。比如一张1920x1080尺寸的图片，放在1920x1080分辨率的PC屏幕上显示没问题（大小合适），但放在4K屏上就会发现图片变模糊（失真）了（因为4K屏幕大，图像放大失真）。又比如1920x1080和1280x720的图片作为手机壁纸，其实清晰度看起来差不多的。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0012.jpg" alt="图像啊图像"></p>
-<h1 id="图像深度与像素深度"><a href="#图像深度与像素深度" class="headerlink" title="图像深度与像素深度"></a>图像深度与像素深度</h1><p>像素深度和图像深度是两个相互关联但又有所不同的两个概念。</p>
-<h2 id="像素深度"><a href="#像素深度" class="headerlink" title="像素深度"></a>像素深度</h2><p><strong>像素深度</strong>是指<strong>存储每个像素所用的位数</strong>，它也是用来度量图像的分辨率。</p>
-<p><strong>像素深度决定彩色图像的每个像素可能有的颜色数，或者确定灰度图像的每个像素可能有的灰度级数</strong>。例如，一幅彩色图像的每个像素用R，G，B三个分量表示，若每个分量用8位，那么一个像素共用24位表示，就说像素的深度为24，每个像素可以是16 777 216（2的24次方）种颜色中的一种。在这个意义上，往往把像素深度说成是图像深度。表示一个像素的位数越多，它能表达的颜色数目就越多，而它的深度就越深。</p>
-<h2 id="图像深度"><a href="#图像深度" class="headerlink" title="图像深度"></a>图像深度</h2><p><strong>图像深度</strong>是指<strong>像素深度中实际用于存储图像的灰度或色彩所需要的比特位数</strong>。假定图像的像素深度为16bit，但用于表示图像的灰度或色彩的位数只有15位，则图像的图像深度为15。</p>
-<p>在用二进制数表示彩色图像的像素时，除R，G，B分量用固定位数表示外，往往还增加1位或几位作为属性(Attribute)位。例如，RGB 5∶5∶5表示一个像素时，用2个字节共16位表示，其中R，G，B各占5位，剩下一位作为属性位。在这种情况下，像素深度为16位，而图像深度为15位。</p>
-<h2 id="图像通道"><a href="#图像通道" class="headerlink" title="图像通道"></a>图像通道</h2><p>我们都知道颜色的三元素 Red, Green, Blue。 如果是深度为24=3*8，我们刚好就可以用第一个8位存储Red值，第二个存储Green值，第三个存储Blue值, 2的8次方刚好是255,所以我们一般看到的RGB值都是(0-255,0-255,0-255)这样的值。如果用rgb来表示图片的颜色值，我们称这样的图片通道为三。<br>每个像素点都有3个值表示 ，所以就是3通道；也有4通道的图（RGB+alpha），灰度图一般为单通道。</p>
-<h2 id="灰度图像"><a href="#灰度图像" class="headerlink" title="灰度图像"></a>灰度图像</h2><p><strong>灰度</strong>也可以认为是亮度，简单说就是<strong>色彩的深浅程度</strong>。</p>
-<p>灰度图像是二值图像的进化版本，是彩色图像的退化版，也就是灰度图保存的信息没有彩色图像多，但比二值图像多，灰度图只包含一个通道的信息，而彩色图通常包含三个通道的信息。</p>
-<p><strong>灰度数字图像是每个像素只有一个采样颜色的图像</strong>（灰度图没有色彩）。这类图像通常显示为从最暗黑色到最亮的白色的灰度，尽管理论上这个采样可以任何颜色的不同深浅，甚至可以是不同亮度上的不同颜色。灰度图像与黑白图像不同，在计算机图像领域中黑白图像只有黑白两种颜色，灰度图像在黑色与白色之间还有许多级的颜色深度。</p>
-<p><strong>彩色图像可以二值化和灰度化</strong>。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1021.jpeg" alt="图像啊图像"></p>
-<h1 id="图像格式"><a href="#图像格式" class="headerlink" title="图像格式"></a>图像格式</h1><p>BMP、PNG、GIF、TIF和JPG格式的文件是位图文件，文件的扩展明指明了图像文件的标准。SVG是矢量图文件格式。<font color="red">图片文件格式本质上是一种对图片进行压缩进而减少文件大小的解决方案。</font></p>
-<p>如果将图像原始格式直接存储到文件中将会非常大，比如一个5000x5000 24位图，所占文件大小为5000x5000x3字节=71.5MB, 其大小非常可观。<br>如果用zip或rar之类的通用算法来压缩像素数据，得到的压缩比例通常不会太高，因为这些压缩算法没有针对图像数据结构进行特殊处理。</p>
-<h2 id="jpeg"><a href="#jpeg" class="headerlink" title="jpeg"></a>jpeg</h2><p>全称<code>JointPhotographicExpertsGroup</code>，<br>JEPG格式，也叫做JPG或JPE格式，是最常用的一种文件格式。<strong>实际测试.jpeg后缀文件更改为.jpg后缀依旧可读</strong>。</p>
-<p>JPEG格式的压缩技术十分先进，<strong>能够将图像压缩在很小的储存空间</strong>，不过这种压缩是<strong>有损耗</strong>的，过度压缩会降低图片的质量。JPEG格式压缩的主要是高频信息，对色彩的信息保留较好，因此特别适合应用于互联网，可减少图像的传输和加载时间。</p>
-<p>jpeg没有透明信息。<strong>jpeg比较适合用来存储相机拍出来的照片，这类图像用jpeg压缩后的体积比较小</strong>。其使用的具体算法核心是离散余弦变换、Huffman编码、算术编码等技术。</p>
-<h2 id="png"><a href="#png" class="headerlink" title="png"></a>png</h2><p>全称<code>Portable Network Graphic Format</code>。<br>png 最重要的特点是<strong>支持alpha 通道透明度</strong>，也就是说，<strong>PNG图片支持透明背景</strong>。一般来说彩色图像是24位3通道图像，png格式的图像就是4通道的。</p>
-<p>png的设计目的是试图替代gif和tiff。png是一种支持无损压缩的图像格式（从LZ77派生的无损数据压缩算法），没有可调整的压缩质量设置（有损程度）。虽然PNG提供的压缩量比JPEG少，但PNG图片却比JPEG图片有更小的文档尺寸，因此现在越来越多的网络图像开始采用PNG格式。</p>
-<p><strong>jpeg比较适合存储色彩“杂乱”的拍摄图片，png比较适合存储几何特征强的图形类图片（颜色值少）</strong>。</p>
-<h2 id="gif"><a href="#gif" class="headerlink" title="gif"></a>gif</h2><p>全称<code>Graphics Interchange Format</code>。<br>GIF也是一种压缩的图片格式，分为动态GIF和静态GIF两种。</p>
-<p>GIF格式的最大特点是<strong>支持动态图片</strong>（多帧），并且支持透明背景。网络上绝大部分动图、表情包都是GIF格式的，相比与动画，GIF动态图片占用的存储空间小，加载速度快，因此非常流行。</p>
-<h2 id="psd"><a href="#psd" class="headerlink" title="psd"></a>psd</h2><p>全称<code>Photoshop Document</code>。<br>PSD格式是Photoshop默认的存储格式，<strong>适用于存储源文档和工作文件</strong>，修改起来比较方便。<br>PSD格式的最大特点是可以保留透明度、图层、路径、通道等PS处理信息，但是需要专业的图形处理软件才能打开。PSD格式的缺点是体积庞大，十分占用存储空间。</p>
-<h2 id="tiff"><a href="#tiff" class="headerlink" title="tiff"></a>tiff</h2><p>全称<code>Tagged Image File Format</code><br>，TIFF格式，也叫做或TIF格式，可以支持不同颜色模式、路径、透明度、以及通道，是打印文档中最常用的格式。Photoshop支持在TIFF文件中保存图层以及其他信息，在很多方面类似于PSD格式文件。</p>
-<h2 id="bmp"><a href="#bmp" class="headerlink" title="bmp"></a>bmp</h2><p>全称<code>Bitmap</code>。<br>BMP 格式是Windows操作系统中的标准图像文件格式，能够被多种Windows应用程序所支持。BMP格式包含的图像信息较丰富，<strong>几乎不进行压缩</strong>，但由此导致了它占用的存储空间很大，所以，目前BMP在单机上比较流行。</p>
-<h2 id="webp"><a href="#webp" class="headerlink" title="webp"></a>webp</h2><p>google开发的一种有损、透明图片格式，相当于jpeg和png的合体，google声称其可以把图片大小减少40%。但是当前支持差，压得慢。</p>
-<h2 id="svg"><a href="#svg" class="headerlink" title="svg"></a>svg</h2><p>全称<code>Scalable Vector Graphics</code>，意思为可缩放的矢量图形。它是<strong>基于XML</strong>（Extensible Markup Language），由World Wide Web Consortium（W3C）联盟进行开发的。严格来说应该是一种开放标准的矢量图形语言，可让你设计激动人心的、高分辨率的Web图形页面。用户可以直接用代码来描绘图像，可以用任何文字处理工具打开SVG图像，通过改变部分代码来使图像具有交互功能，并可以随时插入到HTML中通过浏览器来观看。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0003.jpg" alt="图像啊图像"></p>
-<h1 id="图像的附加信息"><a href="#图像的附加信息" class="headerlink" title="图像的附加信息"></a>图像的附加信息</h1><h2 id="Exif信息"><a href="#Exif信息" class="headerlink" title="Exif信息"></a>Exif信息</h2><p>Exif <code>Exchangeable image file format</code>可交换图像文件格式，是<strong>专门为数码相机的照片设定的，可以记录数码照片的属性信息和拍摄数据</strong>。如米6拍摄的照片，照片文件详情中附带有拍摄参数，便是exif信息。Exif可以附加于JPEG、TIFF、RIFF等文件之中，为其增加有关数码相机拍摄信息的内容和索引图或图像处理软件的版本信息。</p>
-<p>所有的JPEG文件以字符串“0xFFD8”开头，并以字符串“0xFFD9”结束。文件头中有一系列“0xFF??”格式的字符串，称为“标识”，用来标记JPEG文件的信息段。“0xFFD8”表示图像信息开始，“0xFFD9”表示图像信息结束，这两个标识后面没有信息，而其它标识紧跟一些信息字符。0xFFE0 – 0xFFEF之间的标识符称为“<strong>应用标记</strong>”，没有被常规JPEG文件利用，<strong>Exif正是利用这些信息串记录拍摄信息如快门速度、光圈值等，甚至可以包括全球定位信息。</strong></p>
-<h2 id="隐私数据思考"><a href="#隐私数据思考" class="headerlink" title="隐私数据思考"></a>隐私数据思考</h2><p><strong>手机所拍的照片，在查看详情时可能看到地理位置信息，即拍摄地的经纬度坐标信息</strong>。通过经纬度坐标，利用百度的拾取坐标系统进行坐标反查，能够精准定位相片的拍摄地址。这里便思考到隐私数据的问题，如果拍摄的相片都附加这些地址信息，那是不是存在隐私泄露的问题。</p>
-<p>于是我尝试将图片原图（包含地址信息）从手机QQ/微信传到电脑QQ/微信，图片另存为，查看图片详情（文件大小未变化），发现图像的拍摄参数及地址信息依旧能看到。进一步，我下载来自朋友圈和QQ动态的实拍图片（自己上传测试用的照片），并查看详细信息，拍摄参数以及地址信息均为空。</p>
-<p>那么照片的exif信息是被脱敏了吗？还是我们的exif信息在特定的传输过程被丢弃（蓝牙传输文件exif信息仍存在）？当我们的原图上传到qq空间或朋友圈后，图片的存储位置在腾讯的数据中心，腾讯里的我们的照片已经不包含地址信息了吗？还是图片进一步有损压缩（提高网络传输效率）直接丢弃附属信息？</p>
-<p>答案尚且确定不了。但知道一点，<strong>相机设置里可以关闭 保存地理位置信息 的选项</strong>。如此，原图没有位置信息，便不存在地址泄露的隐私问题了。</p>
-<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>大致整理一下，才发现枯燥的文字是真的多。收获就是大概知道web开发过程中为什么logo选择.svg或者.icon格式的矢量图，为什么一亿像素相机的相片用HEIF图片格式（米10高质量图片降低文件大小的解决方案），知道jpeg格式图片改动后保存会导致图片越来越小。</p>
-<p>更重要的是知道这样一种观点：<font color="red">无论哪一种图片格式规范，其本质都是为了图像传输的高效或者图像的高质量，两者不可得兼</font>。没得最完美的，适合你需求的就是最好的选择。</p>
-<h1 id="参考文献："><a href="#参考文献：" class="headerlink" title="参考文献："></a>参考文献：</h1><p><a href="https://www.coreldrawchina.com/xinshourumen/weitu-shiliangtu.html" target="_blank" rel="noopener">矢量图与位图的区别</a><br><a href="https://www.zhihu.com/question/21283005" target="_blank" rel="noopener">知乎：既然矢量图放大缩小都不失真，为什么还要使用位图？</a><br><a href="https://www.zhihu.com/question/20028452" target="_blank" rel="noopener">图片格式 jpg、png、gif各有什么优缺点？什么情况下用什么格式的图片呢？</a><br><a href="https://zhuanlan.zhihu.com/p/143649897" target="_blank" rel="noopener">几种常见图片格式的区别</a><br><a href="https://blog.csdn.net/jianzhengzhouzjz/article/details/7427432" target="_blank" rel="noopener">像素深度与图像深度</a><br><a href="https://blog.csdn.net/tz_zs/article/details/79768201" target="_blank" rel="noopener">二值图像、灰度图像、彩色图像</a><br><a href="https://juejin.im/post/5c8e4feb6fb9a070aa5ce200" target="_blank" rel="noopener">PNG图片压缩原理解析</a>  </p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0013.jpg" alt="图像啊图像"></p>
+    <title>博客伊始</title>
+    <url>/2019/09/20/%E5%8D%9A%E5%AE%A2%E4%BC%8A%E5%A7%8B/</url>
+    <content><![CDATA[<h2 id="博客伊始"><a href="#博客伊始" class="headerlink" title="博客伊始"></a>博客伊始</h2><p align="right"><font color="grey">作者：冬结</font></p>
+
+<blockquote>
+<p>写在前面：<br>偶然看到Hexo模板的博客，观感不错，加上前辈也搭过，就试试以这种相对简单的形式搭建起来玩。一方面简单学习以现有框架搭建专属博客的“技术”，另一方面也能有个容器装一点自己的笔记，尽管可能比较少，可能并不安全，聊胜于无。</p>
+</blockquote>
+<h3 id="兴趣"><a href="#兴趣" class="headerlink" title="兴趣"></a>兴趣</h3><p>我的兴趣，很难讲。佛系（可能）心态的人在平静生活中貌似对所有的事不放心上，所以，电影可以不看、单车可以不骑、乒乓球可以不打、书可以不阅读、随笔可以不写、游戏可以不玩。自我认知是一个漫长的过程，从浪漫理想主义到实用现实主义，说到底也划不清界限。妥协的做法是就此作罢，不去深究，也就能将困惑搁置一旁。况且说辞也是一大把，比如复杂的个体就能说服我自己。一贯的自我否定，也可以说深究一法至少能够审视自我更加全面深刻，更加接近真实。否定之否定，打住！</p>
+<p>接着说兴趣。从某种维度上讲，兴趣带来愉悦、专注与充实感。</p>
+<p>这样说来，好的电影是我的兴趣，带给我专注与思考。看过的电影也不少，影评却没尝试过一篇。电影没有带给我充实感，但我并不认为它在浪费时间。娱乐的底质，依旧能够容纳艺术与生活。尽管总能从这种媒介中看到不真实，生活的经验依然鲜活。现在的我能以相对包容的眼光对待现实的种种“怪象”，大抵与之有所关联。</p>
+<p>骑单车溜达也算得上。单车是真的单车，单人单骑，随便找个目标，也就慢慢悠悠的去。骑行就不能描述我的方式了，老老实实地去骑单车溜达。某次，什么背景的现在全无记忆，只是感到沉闷的低落，简直到不能忍受的地步，然后就溜达着去后海那边。也许逛胡同，也许没有。至于能否缓解我的状态，我也记不得。只是到那种状态，我能想到这种方式去排解，多少也算是一种认同吧。</p>
+<p>至于随笔（恰当称谓？），也能算是我的兴趣。偶尔写写东西，偶尔是真的偶偶尔。我从写文字当中获取的安静、专注、充实感显而易见，而文字大多都是当时的情绪与想法，可能脱胎于日记，但也将一些真实到黑暗的思考隐藏起来，多少能见光。不知道将自我产出的文字视若珍宝算不算病态，但我的确珍视，在我眼里这些文字能真切表示一种状态，这一刻我就是美化的真实的。至于这种方式何以占据重要的位置，大概因为内心戏丰富如我，不善表达情绪，多少是关掉大门开几扇窗。</p>
+<p>其他能说的，读书、乒乓和游戏，目前的程度都还比较浅。曾经都热过一阵的行为，慢慢沉寂下来也沾上了尘土。所谓的我的兴趣，没得一项算是个人特长。骑车只是休闲，电影只是娱乐，随笔也只是偶尔的文艺，但是至少这些，能够成为生活的调剂，是能够令我感到舒适的生活方式。</p>
+<h3 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h3><p>整理些技术向的学习内容，也多少要往这博客里边搁，况且，这本就是搭建这玩意的初衷。尽管不太喜欢用“工作”一词，但还是必须得慢慢习惯的。</p>
+<p>求学时期拥有很好的学习环境，这段时间也就余下几年，两者都不得不承认。实验室的一些开发工作，还有自己看过的、学过的、实践过的一些内容，选择性的往这个博客里边搁。尽量减少一些空洞的文字（多一些图），减少随处可见的教程，多一点自己的总结，就是描述不规范，甚至有错误也无关紧要。他人的是他人的，转化为自己的才是自己的。尽管这些话可有可无，也就这样摆在这里了。</p>
+<p>至于具体的工作内容，也没法细说。只是一段时间过去，觉得稍微闲下来时，慢悠悠写一点总结，多少能够察觉出自己在缓慢的生长，就很开心了。至于成长的快与慢，也不多去琢磨。吃饭慢，跑步慢，性子慢……真要快节奏起来，真就为难我“胖虎”了！</p>
+<h3 id="成长"><a href="#成长" class="headerlink" title="成长"></a>成长</h3><p>现在过多的想法与计划一如既往地空白，只是希望每天有点进步，慢慢生长吧。</p>
+<p>趁现在还有点记忆，罗列下自初中以来每个阶段自我希求的关键词。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">改变 ：白墙上丑陋的浓墨毛笔字，墨迹未干尚不回望，小屋也拆了，斑驳的往事不能再找回。</span><br><span class="line">掌控 ：年少时总希望能够决定自己的命运，可是连早睡早起也没有做到。</span><br><span class="line">自由 ：那四年时光，持续性潇洒，间歇性焦虑。觉睡得很饱，书读得也少。向自己一样平平淡淡。</span><br><span class="line">成长 ：有的人每天跑步，有的人会慢慢散步。蜗牛和火箭，都在自以为的前进。</span><br></pre></td></tr></table></figure>
+
+<h3 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h3><p>今天是2019年9月20日，算是一个开始吧！</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/xingkong.jpeg" alt="星空"></p>
 ]]></content>
       <categories>
-        <category>常识</category>
+        <category>随笔</category>
       </categories>
       <tags>
-        <tag>概念</tag>
-        <tag>图像</tag>
-        <tag>常识</tag>
+        <tag>随笔</tag>
       </tags>
   </entry>
   <entry>
@@ -356,34 +353,92 @@
       </tags>
   </entry>
   <entry>
-    <title>博客伊始</title>
-    <url>/2019/09/20/%E5%8D%9A%E5%AE%A2%E4%BC%8A%E5%A7%8B/</url>
-    <content><![CDATA[<h2 id="博客伊始"><a href="#博客伊始" class="headerlink" title="博客伊始"></a>博客伊始</h2><p align="right"><font color="grey">作者：冬结</font></p>
-
-<blockquote>
-<p>写在前面：<br>偶然看到Hexo模板的博客，观感不错，加上前辈也搭过，就试试以这种相对简单的形式搭建起来玩。一方面简单学习以现有框架搭建专属博客的“技术”，另一方面也能有个容器装一点自己的笔记，尽管可能比较少，可能并不安全，聊胜于无。</p>
-</blockquote>
-<h3 id="兴趣"><a href="#兴趣" class="headerlink" title="兴趣"></a>兴趣</h3><p>我的兴趣，很难讲。佛系（可能）心态的人在平静生活中貌似对所有的事不放心上，所以，电影可以不看、单车可以不骑、乒乓球可以不打、书可以不阅读、随笔可以不写、游戏可以不玩。自我认知是一个漫长的过程，从浪漫理想主义到实用现实主义，说到底也划不清界限。妥协的做法是就此作罢，不去深究，也就能将困惑搁置一旁。况且说辞也是一大把，比如复杂的个体就能说服我自己。一贯的自我否定，也可以说深究一法至少能够审视自我更加全面深刻，更加接近真实。否定之否定，打住！</p>
-<p>接着说兴趣。从某种维度上讲，兴趣带来愉悦、专注与充实感。</p>
-<p>这样说来，好的电影是我的兴趣，带给我专注与思考。看过的电影也不少，影评却没尝试过一篇。电影没有带给我充实感，但我并不认为它在浪费时间。娱乐的底质，依旧能够容纳艺术与生活。尽管总能从这种媒介中看到不真实，生活的经验依然鲜活。现在的我能以相对包容的眼光对待现实的种种“怪象”，大抵与之有所关联。</p>
-<p>骑单车溜达也算得上。单车是真的单车，单人单骑，随便找个目标，也就慢慢悠悠的去。骑行就不能描述我的方式了，老老实实地去骑单车溜达。某次，什么背景的现在全无记忆，只是感到沉闷的低落，简直到不能忍受的地步，然后就溜达着去后海那边。也许逛胡同，也许没有。至于能否缓解我的状态，我也记不得。只是到那种状态，我能想到这种方式去排解，多少也算是一种认同吧。</p>
-<p>至于随笔（恰当称谓？），也能算是我的兴趣。偶尔写写东西，偶尔是真的偶偶尔。我从写文字当中获取的安静、专注、充实感显而易见，而文字大多都是当时的情绪与想法，可能脱胎于日记，但也将一些真实到黑暗的思考隐藏起来，多少能见光。不知道将自我产出的文字视若珍宝算不算病态，但我的确珍视，在我眼里这些文字能真切表示一种状态，这一刻我就是美化的真实的。至于这种方式何以占据重要的位置，大概因为内心戏丰富如我，不善表达情绪，多少是关掉大门开几扇窗。</p>
-<p>其他能说的，读书、乒乓和游戏，目前的程度都还比较浅。曾经都热过一阵的行为，慢慢沉寂下来也沾上了尘土。所谓的我的兴趣，没得一项算是个人特长。骑车只是休闲，电影只是娱乐，随笔也只是偶尔的文艺，但是至少这些，能够成为生活的调剂，是能够令我感到舒适的生活方式。</p>
-<h3 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h3><p>整理些技术向的学习内容，也多少要往这博客里边搁，况且，这本就是搭建这玩意的初衷。尽管不太喜欢用“工作”一词，但还是必须得慢慢习惯的。</p>
-<p>求学时期拥有很好的学习环境，这段时间也就余下几年，两者都不得不承认。实验室的一些开发工作，还有自己看过的、学过的、实践过的一些内容，选择性的往这个博客里边搁。尽量减少一些空洞的文字（多一些图），减少随处可见的教程，多一点自己的总结，就是描述不规范，甚至有错误也无关紧要。他人的是他人的，转化为自己的才是自己的。尽管这些话可有可无，也就这样摆在这里了。</p>
-<p>至于具体的工作内容，也没法细说。只是一段时间过去，觉得稍微闲下来时，慢悠悠写一点总结，多少能够察觉出自己在缓慢的生长，就很开心了。至于成长的快与慢，也不多去琢磨。吃饭慢，跑步慢，性子慢……真要快节奏起来，真就为难我“胖虎”了！</p>
-<h3 id="成长"><a href="#成长" class="headerlink" title="成长"></a>成长</h3><p>现在过多的想法与计划一如既往地空白，只是希望每天有点进步，慢慢生长吧。</p>
-<p>趁现在还有点记忆，罗列下自初中以来每个阶段自我希求的关键词。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">改变 ：白墙上丑陋的浓墨毛笔字，墨迹未干尚不回望，小屋也拆了，斑驳的往事不能再找回。</span><br><span class="line">掌控 ：年少时总希望能够决定自己的命运，可是连早睡早起也没有做到。</span><br><span class="line">自由 ：那四年时光，持续性潇洒，间歇性焦虑。觉睡得很饱，书读得也少。向自己一样平平淡淡。</span><br><span class="line">成长 ：有的人每天跑步，有的人会慢慢散步。蜗牛和火箭，都在自以为的前进。</span><br></pre></td></tr></table></figure>
-
-<h3 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h3><p>今天是2019年9月20日，算是一个开始吧！</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/xingkong.jpeg" alt="星空"></p>
+    <title>浅谈图像</title>
+    <url>/2020/06/01/%E6%B5%85%E8%B0%88%E5%9B%BE%E5%83%8F/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>一切要从图像分辨率说起。前不久问过自己一个问题：<strong>小米6只有1920x1080的分辨率为什么能拍出4032x3016px的照片？</strong></p>
+<p>不知当时脑袋想什么，问出这样一个特别蠢的问题。但它居然就这样作为一个导火索，让我不得不去了解一下关于图像的基本知识。</p>
+<p>这里需要说明的是，这个问题本身就是个问题。小米6的分辨率1920x1080是说的屏幕分辨率，而4032x3016px的照片是相机拍出来的图像分辨率，也就是米6后置的1200万像素摄像头拍出来的。一个是屏幕显示分辨率，另一个是拍照图像分辨率，就没得啥关联的。</p>
+<p>然后又因为接触<code>React Native</code>，知道其组件的宽高用的是逻辑像素作为单位。之前买的kindle参数里其中一项是PPI，笔记本外设显示器4K屏……</p>
+<p>于是就简单整理一下图像基础知识及相关概念，权作了解。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0001.jpg" alt="图像啊图像"></p>
+<h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><p>位图和矢量图是计算机图形中的两大概念。</p>
+<h2 id="位图"><a href="#位图" class="headerlink" title="位图"></a>位图</h2><p><strong>位图</strong>（bitmap）也叫点阵图、栅格图像、<strong>像素图</strong>。<strong>构成位图的最小单位是像素</strong>，位图就是依靠像素阵列的排列来实现其显示效果的，缩放位图会导致失真（边缘锯齿）。例如放大后的位图出现“马赛克”。</p>
+<p><strong>位图图像善于重现颜色的细微层次</strong>，能够制作出色彩和亮度变化丰富的图像，可逼真地再现这个世界，文件庞大，<strong>不能随意缩放，打印和输出的精度是有限的。</strong></p>
+<p><strong>位图的文件类型</strong>很多，如.bmp、.pcx、.gif、.jpg、.tif等。同样的图形，存盘成以上几种文件时文件的字节数会有一些差别，尤其是jpg格式，它的大小只有同样的bmp格式的1/20到1/35，这是因为它们的点矩阵经过了复杂的压缩算法的缘故。</p>
+<p><strong>位图图像面积越大，图像文件的色彩越丰富，文件的字节数就越多。</strong></p>
+<h2 id="矢量图"><a href="#矢量图" class="headerlink" title="矢量图"></a>矢量图</h2><p><strong>矢量图</strong>（vector）也叫向量图，是一种<strong>缩放不失真</strong>的图像格式。矢量图是通过多个对象的组合生成的，对其中的每一个对象的纪录方式，都是以数学函数来实现的，也就是说，矢量图实际上并不是像位图那样纪录画面上每一点的信息，而是纪录了元素形状及颜色的算法，当你打开矢量图的时候，软件利用图行对应的函数进行运算，将运算结果[图形的形状和颜色]显示给你看。</p>
+<p>矢量图形能<strong>重现清晰的轮廓</strong>，线条非常光滑、且<strong>具有良好的缩放性</strong>。因为图像中保存的是线条和图块的信息，与分辨率和图形大小无关，只与图像的复杂程度有关，所以图像文件所占的存储空间较小（图像不复杂情况下）。</p>
+<p>与位图相比，在显示和打印方面都快的多；<strong>图形不真实生动，颜色不丰富</strong>。无法像照片一样真实地再现这个世界的景色。（矢量图基本都需要专门软件打开）</p>
+<p><strong>矢量图形格式</strong>也很多，常见的如.SVG。</p>
+<p>矢量图形文件的规律：</p>
+<ul>
+<li>可以无限放大图形中的细节，不用担心会造成失真和色块。</li>
+<li>一般的线条的图形和卡通图形，存成矢量图文件就比存成位图文件要小很多。</li>
+<li>存盘后<strong>文件的大小</strong>与图形中<strong>元素的个数</strong>和每个<strong>元素的复杂程度</strong>成正比。而与图形面积和色彩的丰富程度无关。（元素的复杂程度指的是这个元素的结构复杂度，如五角星就比矩形复杂、一个任意曲线就比一个直线段复杂）。</li>
+<li>通过软件，<strong>矢量图可以轻松地转化为位图，而位图转化为矢量图就需要经过复杂而庞大的数据处理</strong>，而且生成的矢量图的质量绝对不能和原来的图形比拟。</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0002.jpg" alt="图像啊图像"></p>
+<h2 id="一些单位"><a href="#一些单位" class="headerlink" title="一些单位"></a>一些单位</h2><p>绝对单位与相对单位。比如设备尺寸5.15 inch就是绝对的物理长度，像素（pixel）就是相对单位，1英寸显示屏可以只有1个像素，也可以有100个像素。<strong>相同面积不同分辨率的显示屏，其像素点大小就不相同。</strong></p>
+<p><strong>px</strong>：<code>pixel</code>，像素，是<strong>组成数字图像的基本单元</strong>。这种基本单元越多，越能呈现出图像的细节，图像就越清晰。像素的大小是没有固定长度的，不同设备上一个单位像素色块的大小是不一样的。</p>
+<p><strong>ppi</strong> ：<code>pixels per inch</code>,等于屏幕对角线像素点／屏幕对角线物理宽度，是每英寸对角线上所拥有的像素（pixel）数目，通常也叫<strong>像素密度</strong>。手机屏幕的PPI当达到一定数值（300ppi）时，人眼就分辨不出颗粒感了。</p>
+<p><strong>dpi</strong>：<code>dots per inch</code>,是每英寸所能打印的点数，通常也叫<strong>打印精度</strong>。如：打印机输出可达600DPI的分辨率，表示打印机可以在每一平方英寸的面积中可以输出600X600＝360000个输出点。大多数情况下，PPI与DPI的数值是相等的。</p>
+<p><strong>dp</strong>：<code>density-independent pixels</code>,一种基于屏幕密度的抽象单位。在每英寸160点的显示器上，1dp = 1px。<a href="https://developer.android.com/guide/practices/screens_support.html" target="_blank" rel="noopener">dp的提出</a>是为了解决控件对不同屏幕的适配问题。</p>
+<p><strong>sp</strong>：<code>scale-independent pixel</code>，与缩放无关的抽象像素，安卓开发用的字体大小单位。一般情况下可认为sp=dp。</p>
+<p><strong>density</strong> ：密度。density ≈ 设备PPI/160PPI。比如我是320PPI设备，density＝320PPI/160PPI=2;density是一个int类型的值。</p>
+<p><strong>运算案例</strong></p>
+<p>小米6设备参数：显示屏尺寸5.15英寸（1 inch=2.54 cm），分辨率1920x1080px</p>
+<p>计算得：PPI=428 ，density≈3，1dp=2.67px≈3px。</p>
+<h2 id="分辨率"><a href="#分辨率" class="headerlink" title="分辨率"></a>分辨率</h2><p>分辨率，又称解析度。分辨率=画面水平方向的像素值x画面垂直方向的像素值，分为 <strong>屏幕分辨率</strong>和<strong>图像分辨率</strong>。</p>
+<p>显示分辨率（屏幕分辨率）是屏幕图像的精密度，是指<strong>显示器所能显示的像素有多少</strong>。由于屏幕上的点、线和面都是由像素组成的，显示器可显示的像素越多，画面就越精细，同样的屏幕区域内能显示的信息也越多。显示分辨率一定的情况下，显示屏越小图像越清晰，反之，显示屏大小固定时，显示分辨率越高图像越清晰。</p>
+<p>屏幕分辨率1920x1080（16:9显示屏），就是说设备屏幕的水平方向上有1920个像素点，垂直方向上有1080个像素点。<strong>同一台硬件设备上的屏幕分辨率、像素块大小是不会变的（倾向于说显示器分辨率）</strong>。PC电脑上之所以可以调整屏幕分辨率，其实是通过算法转换实现的。</p>
+<p><strong>图像分辨率是指每英寸图像内的像素点数</strong>（这种定义方式更精准）。图像分辨率是有单位的，叫 像素每英寸。分辨率越高，像素的点密度越高（图像尺寸一定时），图像越逼真。</p>
+<p>分辨率和清晰度不能对等，虽然<strong>很多情况下高分辨率的确意味着高清晰度</strong>。比如一张1920x1080尺寸的图片，放在1920x1080分辨率的PC屏幕上显示没问题（大小合适），但放在4K屏上就会发现图片变模糊（失真）了（因为4K屏幕大，图像放大失真）。又比如1920x1080和1280x720的图片作为手机壁纸，其实清晰度看起来差不多的。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0012.jpg" alt="图像啊图像"></p>
+<h1 id="图像深度与像素深度"><a href="#图像深度与像素深度" class="headerlink" title="图像深度与像素深度"></a>图像深度与像素深度</h1><p>像素深度和图像深度是两个相互关联但又有所不同的两个概念。</p>
+<h2 id="像素深度"><a href="#像素深度" class="headerlink" title="像素深度"></a>像素深度</h2><p><strong>像素深度</strong>是指<strong>存储每个像素所用的位数</strong>，它也是用来度量图像的分辨率。</p>
+<p><strong>像素深度决定彩色图像的每个像素可能有的颜色数，或者确定灰度图像的每个像素可能有的灰度级数</strong>。例如，一幅彩色图像的每个像素用R，G，B三个分量表示，若每个分量用8位，那么一个像素共用24位表示，就说像素的深度为24，每个像素可以是16 777 216（2的24次方）种颜色中的一种。在这个意义上，往往把像素深度说成是图像深度。表示一个像素的位数越多，它能表达的颜色数目就越多，而它的深度就越深。</p>
+<h2 id="图像深度"><a href="#图像深度" class="headerlink" title="图像深度"></a>图像深度</h2><p><strong>图像深度</strong>是指<strong>像素深度中实际用于存储图像的灰度或色彩所需要的比特位数</strong>。假定图像的像素深度为16bit，但用于表示图像的灰度或色彩的位数只有15位，则图像的图像深度为15。</p>
+<p>在用二进制数表示彩色图像的像素时，除R，G，B分量用固定位数表示外，往往还增加1位或几位作为属性(Attribute)位。例如，RGB 5∶5∶5表示一个像素时，用2个字节共16位表示，其中R，G，B各占5位，剩下一位作为属性位。在这种情况下，像素深度为16位，而图像深度为15位。</p>
+<h2 id="图像通道"><a href="#图像通道" class="headerlink" title="图像通道"></a>图像通道</h2><p>我们都知道颜色的三元素 Red, Green, Blue。 如果是深度为24=3*8，我们刚好就可以用第一个8位存储Red值，第二个存储Green值，第三个存储Blue值, 2的8次方刚好是255,所以我们一般看到的RGB值都是(0-255,0-255,0-255)这样的值。如果用rgb来表示图片的颜色值，我们称这样的图片通道为三。<br>每个像素点都有3个值表示 ，所以就是3通道；也有4通道的图（RGB+alpha），灰度图一般为单通道。</p>
+<h2 id="灰度图像"><a href="#灰度图像" class="headerlink" title="灰度图像"></a>灰度图像</h2><p><strong>灰度</strong>也可以认为是亮度，简单说就是<strong>色彩的深浅程度</strong>。</p>
+<p>灰度图像是二值图像的进化版本，是彩色图像的退化版，也就是灰度图保存的信息没有彩色图像多，但比二值图像多，灰度图只包含一个通道的信息，而彩色图通常包含三个通道的信息。</p>
+<p><strong>灰度数字图像是每个像素只有一个采样颜色的图像</strong>（灰度图没有色彩）。这类图像通常显示为从最暗黑色到最亮的白色的灰度，尽管理论上这个采样可以任何颜色的不同深浅，甚至可以是不同亮度上的不同颜色。灰度图像与黑白图像不同，在计算机图像领域中黑白图像只有黑白两种颜色，灰度图像在黑色与白色之间还有许多级的颜色深度。</p>
+<p><strong>彩色图像可以二值化和灰度化</strong>。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1021.jpeg" alt="图像啊图像"></p>
+<h1 id="图像格式"><a href="#图像格式" class="headerlink" title="图像格式"></a>图像格式</h1><p>BMP、PNG、GIF、TIF和JPG格式的文件是位图文件，文件的扩展明指明了图像文件的标准。SVG是矢量图文件格式。<font color="red">图片文件格式本质上是一种对图片进行压缩进而减少文件大小的解决方案。</font></p>
+<p>如果将图像原始格式直接存储到文件中将会非常大，比如一个5000x5000 24位图，所占文件大小为5000x5000x3字节=71.5MB, 其大小非常可观。<br>如果用zip或rar之类的通用算法来压缩像素数据，得到的压缩比例通常不会太高，因为这些压缩算法没有针对图像数据结构进行特殊处理。</p>
+<h2 id="jpeg"><a href="#jpeg" class="headerlink" title="jpeg"></a>jpeg</h2><p>全称<code>JointPhotographicExpertsGroup</code>，<br>JEPG格式，也叫做JPG或JPE格式，是最常用的一种文件格式。<strong>实际测试.jpeg后缀文件更改为.jpg后缀依旧可读</strong>。</p>
+<p>JPEG格式的压缩技术十分先进，<strong>能够将图像压缩在很小的储存空间</strong>，不过这种压缩是<strong>有损耗</strong>的，过度压缩会降低图片的质量。JPEG格式压缩的主要是高频信息，对色彩的信息保留较好，因此特别适合应用于互联网，可减少图像的传输和加载时间。</p>
+<p>jpeg没有透明信息。<strong>jpeg比较适合用来存储相机拍出来的照片，这类图像用jpeg压缩后的体积比较小</strong>。其使用的具体算法核心是离散余弦变换、Huffman编码、算术编码等技术。</p>
+<h2 id="png"><a href="#png" class="headerlink" title="png"></a>png</h2><p>全称<code>Portable Network Graphic Format</code>。<br>png 最重要的特点是<strong>支持alpha 通道透明度</strong>，也就是说，<strong>PNG图片支持透明背景</strong>。一般来说彩色图像是24位3通道图像，png格式的图像就是4通道的。</p>
+<p>png的设计目的是试图替代gif和tiff。png是一种支持无损压缩的图像格式（从LZ77派生的无损数据压缩算法），没有可调整的压缩质量设置（有损程度）。虽然PNG提供的压缩量比JPEG少，但PNG图片却比JPEG图片有更小的文档尺寸，因此现在越来越多的网络图像开始采用PNG格式。</p>
+<p><strong>jpeg比较适合存储色彩“杂乱”的拍摄图片，png比较适合存储几何特征强的图形类图片（颜色值少）</strong>。</p>
+<h2 id="gif"><a href="#gif" class="headerlink" title="gif"></a>gif</h2><p>全称<code>Graphics Interchange Format</code>。<br>GIF也是一种压缩的图片格式，分为动态GIF和静态GIF两种。</p>
+<p>GIF格式的最大特点是<strong>支持动态图片</strong>（多帧），并且支持透明背景。网络上绝大部分动图、表情包都是GIF格式的，相比与动画，GIF动态图片占用的存储空间小，加载速度快，因此非常流行。</p>
+<h2 id="psd"><a href="#psd" class="headerlink" title="psd"></a>psd</h2><p>全称<code>Photoshop Document</code>。<br>PSD格式是Photoshop默认的存储格式，<strong>适用于存储源文档和工作文件</strong>，修改起来比较方便。<br>PSD格式的最大特点是可以保留透明度、图层、路径、通道等PS处理信息，但是需要专业的图形处理软件才能打开。PSD格式的缺点是体积庞大，十分占用存储空间。</p>
+<h2 id="tiff"><a href="#tiff" class="headerlink" title="tiff"></a>tiff</h2><p>全称<code>Tagged Image File Format</code><br>，TIFF格式，也叫做或TIF格式，可以支持不同颜色模式、路径、透明度、以及通道，是打印文档中最常用的格式。Photoshop支持在TIFF文件中保存图层以及其他信息，在很多方面类似于PSD格式文件。</p>
+<h2 id="bmp"><a href="#bmp" class="headerlink" title="bmp"></a>bmp</h2><p>全称<code>Bitmap</code>。<br>BMP 格式是Windows操作系统中的标准图像文件格式，能够被多种Windows应用程序所支持。BMP格式包含的图像信息较丰富，<strong>几乎不进行压缩</strong>，但由此导致了它占用的存储空间很大，所以，目前BMP在单机上比较流行。</p>
+<h2 id="webp"><a href="#webp" class="headerlink" title="webp"></a>webp</h2><p>google开发的一种有损、透明图片格式，相当于jpeg和png的合体，google声称其可以把图片大小减少40%。但是当前支持差，压得慢。</p>
+<h2 id="svg"><a href="#svg" class="headerlink" title="svg"></a>svg</h2><p>全称<code>Scalable Vector Graphics</code>，意思为可缩放的矢量图形。它是<strong>基于XML</strong>（Extensible Markup Language），由World Wide Web Consortium（W3C）联盟进行开发的。严格来说应该是一种开放标准的矢量图形语言，可让你设计激动人心的、高分辨率的Web图形页面。用户可以直接用代码来描绘图像，可以用任何文字处理工具打开SVG图像，通过改变部分代码来使图像具有交互功能，并可以随时插入到HTML中通过浏览器来观看。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0003.jpg" alt="图像啊图像"></p>
+<h1 id="图像的附加信息"><a href="#图像的附加信息" class="headerlink" title="图像的附加信息"></a>图像的附加信息</h1><h2 id="Exif信息"><a href="#Exif信息" class="headerlink" title="Exif信息"></a>Exif信息</h2><p>Exif <code>Exchangeable image file format</code>可交换图像文件格式，是<strong>专门为数码相机的照片设定的，可以记录数码照片的属性信息和拍摄数据</strong>。如米6拍摄的照片，照片文件详情中附带有拍摄参数，便是exif信息。Exif可以附加于JPEG、TIFF、RIFF等文件之中，为其增加有关数码相机拍摄信息的内容和索引图或图像处理软件的版本信息。</p>
+<p>所有的JPEG文件以字符串“0xFFD8”开头，并以字符串“0xFFD9”结束。文件头中有一系列“0xFF??”格式的字符串，称为“标识”，用来标记JPEG文件的信息段。“0xFFD8”表示图像信息开始，“0xFFD9”表示图像信息结束，这两个标识后面没有信息，而其它标识紧跟一些信息字符。0xFFE0 – 0xFFEF之间的标识符称为“<strong>应用标记</strong>”，没有被常规JPEG文件利用，<strong>Exif正是利用这些信息串记录拍摄信息如快门速度、光圈值等，甚至可以包括全球定位信息。</strong></p>
+<h2 id="隐私数据思考"><a href="#隐私数据思考" class="headerlink" title="隐私数据思考"></a>隐私数据思考</h2><p><strong>手机所拍的照片，在查看详情时可能看到地理位置信息，即拍摄地的经纬度坐标信息</strong>。通过经纬度坐标，利用百度的拾取坐标系统进行坐标反查，能够精准定位相片的拍摄地址。这里便思考到隐私数据的问题，如果拍摄的相片都附加这些地址信息，那是不是存在隐私泄露的问题。</p>
+<p>于是我尝试将图片原图（包含地址信息）从手机QQ/微信传到电脑QQ/微信，图片另存为，查看图片详情（文件大小未变化），发现图像的拍摄参数及地址信息依旧能看到。进一步，我下载来自朋友圈和QQ动态的实拍图片（自己上传测试用的照片），并查看详细信息，拍摄参数以及地址信息均为空。</p>
+<p>那么照片的exif信息是被脱敏了吗？还是我们的exif信息在特定的传输过程被丢弃（蓝牙传输文件exif信息仍存在）？当我们的原图上传到qq空间或朋友圈后，图片的存储位置在腾讯的数据中心，腾讯里的我们的照片已经不包含地址信息了吗？还是图片进一步有损压缩（提高网络传输效率）直接丢弃附属信息？</p>
+<p>答案尚且确定不了。但知道一点，<strong>相机设置里可以关闭 保存地理位置信息 的选项</strong>。如此，原图没有位置信息，便不存在地址泄露的隐私问题了。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>大致整理一下，才发现枯燥的文字是真的多。收获就是大概知道web开发过程中为什么logo选择.svg或者.icon格式的矢量图，为什么一亿像素相机的相片用HEIF图片格式（米10高质量图片降低文件大小的解决方案），知道jpeg格式图片改动后保存会导致图片越来越小。</p>
+<p>更重要的是知道这样一种观点：<font color="red">无论哪一种图片格式规范，其本质都是为了图像传输的高效或者图像的高质量，两者不可得兼</font>。没得最完美的，适合你需求的就是最好的选择。</p>
+<h1 id="参考文献："><a href="#参考文献：" class="headerlink" title="参考文献："></a>参考文献：</h1><p><a href="https://www.coreldrawchina.com/xinshourumen/weitu-shiliangtu.html" target="_blank" rel="noopener">矢量图与位图的区别</a><br><a href="https://www.zhihu.com/question/21283005" target="_blank" rel="noopener">知乎：既然矢量图放大缩小都不失真，为什么还要使用位图？</a><br><a href="https://www.zhihu.com/question/20028452" target="_blank" rel="noopener">图片格式 jpg、png、gif各有什么优缺点？什么情况下用什么格式的图片呢？</a><br><a href="https://zhuanlan.zhihu.com/p/143649897" target="_blank" rel="noopener">几种常见图片格式的区别</a><br><a href="https://blog.csdn.net/jianzhengzhouzjz/article/details/7427432" target="_blank" rel="noopener">像素深度与图像深度</a><br><a href="https://blog.csdn.net/tz_zs/article/details/79768201" target="_blank" rel="noopener">二值图像、灰度图像、彩色图像</a><br><a href="https://juejin.im/post/5c8e4feb6fb9a070aa5ce200" target="_blank" rel="noopener">PNG图片压缩原理解析</a>  </p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0013.jpg" alt="图像啊图像"></p>
 ]]></content>
       <categories>
-        <category>随笔</category>
+        <category>常识</category>
       </categories>
       <tags>
-        <tag>随笔</tag>
+        <tag>概念</tag>
+        <tag>图像</tag>
+        <tag>常识</tag>
       </tags>
   </entry>
 </search>
