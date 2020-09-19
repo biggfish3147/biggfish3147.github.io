@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2020-09-19T14:49:13.158Z</updated>
+  <updated>2020-09-19T15:21:27.454Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>POJO与JavaBean的区别</title>
+    <link href="http://yoursite.com/2020/09/19/POJO%E4%B8%8EJavaBean%E7%9A%84%E5%8C%BA%E5%88%AB/"/>
+    <id>http://yoursite.com/2020/09/19/POJO%E4%B8%8EJavaBean%E7%9A%84%E5%8C%BA%E5%88%AB/</id>
+    <published>2020-09-19T15:19:27.000Z</published>
+    <updated>2020-09-19T15:21:27.454Z</updated>
+    
+    <content type="html"><![CDATA[<p>本文转载自 <a href="https://www.jianshu.com/p/224489dfdec8" target="_blank" rel="noopener">简书 (匠丶): java对象 POJO和JavaBean的区别</a></p><p>POJO与JavaBean的区别，其实就是两个概念的区别。</p><p>至于对实际编程有没有太大的影响，倒也没啥。</p><p>只是同行说起来时，大概知道是个啥，谁还不知道这两玩意儿都是类呢！</p><h1 id="POJO"><a href="#POJO" class="headerlink" title="POJO"></a>POJO</h1><p>“Plain Ordinary Java Object”，简单普通的java对象。主要用来指代那些没有遵循特定的java对象模型，约定或者框架的对象。</p><p>POJO的内在含义是指那些:<br>有一些private的参数作为对象的属性，然后针对每一个参数定义get和set方法访问的接口。<br><strong>没有从任何类继承、也没有实现任何接口，更没有被其它框架侵入的java对象。</strong></p><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BasicInfoVo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> String orderId;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> Integer uid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getOrderId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderId</span><span class="params">(String orderId)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.orderId = orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> Integer <span class="title">getUid</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> uid;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUid</span><span class="params">(Integer uid)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.uid = uid;</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure><h1 id="JavaBean"><a href="#JavaBean" class="headerlink" title="JavaBean"></a>JavaBean</h1><p>JavaBean 是<strong>一种JAVA语言写成的可重用组件</strong>。JavaBean符合一定规范编写的Java类，不是一种技术，而是一种规范。大家针对这种规范，总结了很多开发技巧、工具函数。符合这种规范的类，可以被其它的程序员或者框架使用。它的方法命名，构造及行为必须符合特定的约定：</p><ul><li><p><strong>所有属性为private</strong>。</p></li><li><p>这个类必须有一个公共的缺省构造函数。即是<strong>提供无参数的构造器</strong>。</p></li><li><p>这个类的<strong>属性使用getter和setter来访问</strong>，其他方法遵从标准命名规范。</p></li><li><p>这个类应是可序列化的。<strong>实现serializable接口</strong>。</p></li></ul><p>因为这些要求主要是靠约定而不是靠实现接口，所以<strong>许多开发者把JavaBean看作遵从特定命名约定的POJO</strong>。</p><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserInfo</span> <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span></span>&#123;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//实现serializable接口。  </span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">private</span> String name;  </span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> age;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//无参构造器  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">UserInfo</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">      </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.name = name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.age = age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">//javabean当中可以有其它的方法  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">userInfoPrint</span><span class="params">()</span></span>&#123;  </span><br><span class="line">    System.out.println(<span class="string">""</span>);  </span><br><span class="line">&#125;  &#125;</span><br></pre></td></tr></table></figure><h1 id="两者有什么区别"><a href="#两者有什么区别" class="headerlink" title="两者有什么区别"></a>两者有什么区别</h1><p>POJO其实是比javabean更纯净的简单类或接口。POJO严格地遵守简单对象的概念，而一些JavaBean中往往会封装一些简单逻辑。</p><p>POJO主要用于数据的临时传递，它只能装载数据， 作为数据存储的载体，而不具有业务逻辑处理的能力。</p><p>Javabean虽然数据的获取与POJO一样，但是javabean当中可以有其它的方法。</p>]]></content>
+    
+    <summary type="html">
+    
+      曾经理解得不清楚，放在这里纪念与怀念
+    
+    </summary>
+    
+    
+      <category term="java" scheme="http://yoursite.com/categories/java/"/>
+    
+    
+      <category term="java" scheme="http://yoursite.com/tags/java/"/>
+    
+      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
+    
+  </entry>
   
   <entry>
     <title>面向对象设计原则</title>
@@ -35,9 +60,9 @@
       <category term="java" scheme="http://yoursite.com/categories/java/"/>
     
     
-      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
-    
       <category term="java" scheme="http://yoursite.com/tags/java/"/>
+    
+      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
     
       <category term="设计原则" scheme="http://yoursite.com/tags/%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/"/>
     
@@ -191,11 +216,11 @@
       <category term="Java" scheme="http://yoursite.com/categories/Java/"/>
     
     
+      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
+    
       <category term="Json" scheme="http://yoursite.com/tags/Json/"/>
     
       <category term="数据传输" scheme="http://yoursite.com/tags/%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93/"/>
-    
-      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
     
   </entry>
   

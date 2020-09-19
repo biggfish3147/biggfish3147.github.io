@@ -1,6 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>POJO与JavaBean的区别</title>
+    <url>/2020/09/19/POJO%E4%B8%8EJavaBean%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<p>本文转载自 <a href="https://www.jianshu.com/p/224489dfdec8" target="_blank" rel="noopener">简书 (匠丶): java对象 POJO和JavaBean的区别</a></p>
+<p>POJO与JavaBean的区别，其实就是两个概念的区别。</p>
+<p>至于对实际编程有没有太大的影响，倒也没啥。</p>
+<p>只是同行说起来时，大概知道是个啥，谁还不知道这两玩意儿都是类呢！</p>
+<h1 id="POJO"><a href="#POJO" class="headerlink" title="POJO"></a>POJO</h1><p>“Plain Ordinary Java Object”，简单普通的java对象。主要用来指代那些没有遵循特定的java对象模型，约定或者框架的对象。</p>
+<p>POJO的内在含义是指那些:<br>有一些private的参数作为对象的属性，然后针对每一个参数定义get和set方法访问的接口。<br><strong>没有从任何类继承、也没有实现任何接口，更没有被其它框架侵入的java对象。</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BasicInfoVo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> String orderId;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> Integer uid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getOrderId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderId</span><span class="params">(String orderId)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.orderId = orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> Integer <span class="title">getUid</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> uid;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUid</span><span class="params">(Integer uid)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.uid = uid;</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="JavaBean"><a href="#JavaBean" class="headerlink" title="JavaBean"></a>JavaBean</h1><p>JavaBean 是<strong>一种JAVA语言写成的可重用组件</strong>。JavaBean符合一定规范编写的Java类，不是一种技术，而是一种规范。大家针对这种规范，总结了很多开发技巧、工具函数。符合这种规范的类，可以被其它的程序员或者框架使用。它的方法命名，构造及行为必须符合特定的约定：</p>
+<ul>
+<li><p><strong>所有属性为private</strong>。</p>
+</li>
+<li><p>这个类必须有一个公共的缺省构造函数。即是<strong>提供无参数的构造器</strong>。</p>
+</li>
+<li><p>这个类的<strong>属性使用getter和setter来访问</strong>，其他方法遵从标准命名规范。</p>
+</li>
+<li><p>这个类应是可序列化的。<strong>实现serializable接口</strong>。</p>
+</li>
+</ul>
+<p>因为这些要求主要是靠约定而不是靠实现接口，所以<strong>许多开发者把JavaBean看作遵从特定命名约定的POJO</strong>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserInfo</span> <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span></span>&#123;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//实现serializable接口。  </span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">private</span> String name;  </span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> age;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//无参构造器  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">UserInfo</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">      </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.name = name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.age = age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">//javabean当中可以有其它的方法  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">userInfoPrint</span><span class="params">()</span></span>&#123;  </span><br><span class="line">    System.out.println(<span class="string">""</span>);  </span><br><span class="line">&#125;  &#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="两者有什么区别"><a href="#两者有什么区别" class="headerlink" title="两者有什么区别"></a>两者有什么区别</h1><p>POJO其实是比javabean更纯净的简单类或接口。POJO严格地遵守简单对象的概念，而一些JavaBean中往往会封装一些简单逻辑。</p>
+<p>POJO主要用于数据的临时传递，它只能装载数据， 作为数据存储的载体，而不具有业务逻辑处理的能力。</p>
+<p>Javabean虽然数据的获取与POJO一样，但是javabean当中可以有其它的方法。</p>
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>概念</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>docker通过nginx镜像部署静态文件</title>
     <url>/2020/09/18/docker%E9%80%9A%E8%BF%87nginx%E9%95%9C%E5%83%8F%E9%83%A8%E7%BD%B2%E9%9D%99%E6%80%81%E6%96%87%E4%BB%B6/</url>
     <content><![CDATA[<p>docker通过nginx镜像部署项目的实质，就是<strong>将（项目）静态文件和及其依赖（nginx）制作成镜像(image)，然后通过镜像生成容器</strong>的过程。这样，通过运行容器就能运行服务，而且image可以方便分享。</p>
@@ -36,6 +73,61 @@
       <tags>
         <tag>docker</tag>
         <tag>命令</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>kindle电子书邮箱推送</title>
+    <url>/2020/06/08/kindle%E7%94%B5%E5%AD%90%E4%B9%A6/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Kindle入手后已经吃过太多灰，<del>白嫖</del>收集的电子书资源怎么导入到Kindle设备都快忘记了，避免后续再次各处看教程，简单记录。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilR0005.jpg" alt="人丑就要多读书"></p>
+<h1 id="电子书资源"><a href="#电子书资源" class="headerlink" title="电子书资源"></a>电子书资源</h1><ul>
+<li><del>有钱</del> 最好直接在Amazon官方商城购买（一步到位）</li>
+<li><a href="https://www.jiumodiary.com/" target="_blank" rel="noopener">鸠摩</a></li>
+<li><a href="https://sobooks.cc/" target="_blank" rel="noopener">SoBooks</a></li>
+<li><a href="http://cn.epubee.com/books/" target="_blank" rel="noopener">ePUBee</a> （收费）</li>
+</ul>
+<h1 id="将电子书导入到Kindle"><a href="#将电子书导入到Kindle" class="headerlink" title="将电子书导入到Kindle"></a>将电子书导入到Kindle</h1><p>Kindle支持的电子书格式Kindle格式包括但不限于<code>.mobi</code>  <code>.azw</code> <code>.pdf</code>，不支持<code>.epub</code>格式，但可以通过电子书格式<a href="http://cn.epubee.com/" target="_blank" rel="noopener">转换工具</a>进行转换。</p>
+<h2 id="USB数据线导入"><a href="#USB数据线导入" class="headerlink" title="USB数据线导入"></a>USB数据线导入</h2><p><strong>步骤</strong></p>
+<ul>
+<li>数据线（Micro USB口）连接Kindle与电脑</li>
+<li>将电子书资源拷贝到Kindle磁盘的Documents文件夹  </li>
+</ul>
+<p><strong>注意</strong></p>
+<ul>
+<li>只能在Kindle设备上阅读，不能同步到同一账号下</li>
+</ul>
+<h2 id="邮箱推送"><a href="#邮箱推送" class="headerlink" title="邮箱推送"></a>邮箱推送</h2><p><strong>步骤</strong></p>
+<ul>
+<li>在Amazon账户下，管理我的内容与设备，进行个人文档设置（电子邮箱白名单）</li>
+<li>将电子书资源（支持格式）作为邮件附件发送到***@kindle.cn邮件地址</li>
+</ul>
+<p><strong>注意</strong></p>
+<ul>
+<li>电子书资源能够同步到同一账号下</li>
+</ul>
+<h2 id="其他导入方式"><a href="#其他导入方式" class="headerlink" title="其他导入方式"></a>其他导入方式</h2><ul>
+<li>公众号【亚马逊Kindle服务号】将文章推送到 Kindle</li>
+<li>通过Calibre 传书到Kindle</li>
+<li>通过手机发送传书到Kindle app（手机本地有电子书资源）</li>
+</ul>
+<h2 id="Kindle使用"><a href="#Kindle使用" class="headerlink" title="Kindle使用"></a>Kindle使用</h2><ul>
+<li>关闭广告（First）</li>
+<li>截屏（可以但没必要）</li>
+<li>笔记/标注（可导出）</li>
+<li>续航真的猛，内存也够大</li>
+<li>Kindle神器Calibre（格式转换/推送）</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/83882901" target="_blank" rel="noopener">如何把电子书导入到kindle？</a></li>
+<li><a href="https://www.zhihu.com/question/273617420/answer/996496570" target="_blank" rel="noopener">你们都是从哪里找kindle电子书资源的？</a></li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1005.jpg" alt="What？何不如买个iPad"></p>
+]]></content>
+      <categories>
+        <category>教程</category>
+      </categories>
+      <tags>
+        <tag>kindle</tag>
       </tags>
   </entry>
   <entry>
@@ -115,9 +207,9 @@
         <category>Java</category>
       </categories>
       <tags>
+        <tag>概念</tag>
         <tag>Json</tag>
         <tag>数据传输</tag>
-        <tag>概念</tag>
       </tags>
   </entry>
   <entry>
@@ -212,71 +304,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Hexo与GitHub Pages搭建独立博客</title>
-    <url>/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>博客其实在很久之前按照教程已经搭建完成，现在才回头来写教程步骤。有时候会想是否多此一举，毕竟网上现成的优秀的教程比比皆是。所以权且不说这是搭建基于Hexo的博客教程，只是一个简单的记录。</p>
-<p>写一点东西，像擦肩而过的风。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/7.jpg" alt="起飞"></p>
-<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2><p><code>GitHub Pages</code> 是一项<strong>静态站点托管服务</strong>，它直接从<code>GitHub</code> 上的仓库获取<code>HTML</code>、<code>CSS</code>和<code>JavaScript</code>文件，（可选）通过构建过程运行文件，然后发布网站。</p>
-<p>有三种类型的 <code>GitHub Pages</code> 站点：项目、用户和组织。 项目站点连接到 <code>GitHub</code> 上托管的特定项目，用户和组织站点连接到特定的 <code>GitHub</code> 帐户。只能为每个 <code>GitHub</code>账户创建一个用户或组织站点。项目站点（无论是组织还是用户帐户拥有）没有限制。除非使用自定义域，否则用户和组织站点位于<code>http(s)://&lt;username&gt;.github.io</code> 或 <code>http(s)://&lt;organization&gt;.github.io</code>。</p>
-<p>基于<code>GitHub Pages</code>搭建个人独立博客，即属于用户或组织站点。</p>
-<p><code>GitHub Pages</code> 站点的发布来源是存储站点源文件的分支或文件夹。 所有站点都有默认的发布来源，项目站点还有其他可用的发布来源。用户和组织站点的默认发布来源是<code>master</code>分支。如果用户和组织站点的仓库是<code>master</code> 分支，您的站点将从该分支自动发布。无法为用户或组织站点选择不同的发布来源。</p>
-<p><code>GitHub Pages</code> 站点受到以下使用限制的约束：</p>
-<ul>
-<li><code>GitHub Pages</code> 源仓库建议的限制为1GB。</li>
-<li>发布的 <code>GitHub Pages</code> 站点不得超过 1 GB。</li>
-<li><code>GitHub Pages</code> 站点的软带宽限制为每月 100GB。</li>
-<li><code>GitHub Pages</code> 站点的软限制为每小时 10 次构建。</li>
-</ul>
-<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p><code>Hexo</code>是基于<code>Node.js</code>的快速、简洁且高效的博客框架。<code>Hexo</code> 使用 <code>Markdown</code>（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
-<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul>
-<li>安装<code>Node.js</code></li>
-<li>安装<code>Git</code></li>
-<li>安装<code>Hexo</code><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//进入自己的博客文件夹(如/biggfish/blog)</span></span><br><span class="line">npm install hexo-cli -g </span><br><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><ul>
-<li><p>初始化配置</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 在Hexo安装目录下新建hexo文件夹，如 /biggfish/blog/hexo</span></span><br><span class="line">hexo inint</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>本地生成与部署</p>
-<figure class="highlight verilog"><table><tr><td class="code"><pre><span class="line"><span class="comment">//在hexo文件目录下执行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件</span></span><br><span class="line">hexo <span class="keyword">generate</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地部署</span></span><br><span class="line">hexo server </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地测试</span></span><br><span class="line">http:<span class="comment">//localhost:4000/</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>配置<code>Hexo</code>与远程<code>GitHub</code>仓库关联</p>
-<figure class="highlight dts"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建`GitHub Pages`的站点发布来源，即username.github.io仓库</span></span><br><span class="line"><span class="comment">//配置远程连接的SSH密钥与公钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//将本地Hexo文件（静态网页）更新到GitHub 的username.github.io仓库</span></span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 复制Github仓库的ssh地址</span><br><span class="line"><span class="number">2.</span> 选择hexo文件夹下_config.yml文件，修改deploy相关信息</span><br><span class="line"><span class="symbol">  deploy:</span></span><br><span class="line"><span class="symbol">    type:</span> git</span><br><span class="line"><span class="symbol">    repository:</span> 刚复制的仓库ssh地址</span><br><span class="line"><span class="symbol">    branch:</span> master</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>本地博客推送到远程仓库，<code>GitHub Pages</code>自动发布</p>
-<figure class="highlight stata"><table><tr><td class="code"><pre><span class="line"><span class="comment">//g-&gt;generate  d-&gt;deploy</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件，然后部署</span></span><br><span class="line">hexo <span class="keyword">g</span></span><br><span class="line">hexo <span class="built_in">d</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者联合执行</span></span><br><span class="line">hexo <span class="keyword">g</span> -<span class="built_in">d</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>访问博客 <a href="https://biggfish3147.github.io" target="_blank" rel="noopener">我的博客</a></p>
-</li>
-</ul>
-<h1 id="发表文章"><a href="#发表文章" class="headerlink" title="发表文章"></a>发表文章</h1><p>注意用<code>markdown</code>语法编写文章。</p>
-<ul>
-<li><p><code>Front-matter</code>配置</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">博客伊始</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2019</span><span class="bullet">-09</span><span class="bullet">-20</span> <span class="number">23</span><span class="string">:29:47</span></span><br><span class="line"><span class="attr">comments:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">tags:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">君不见，黄河之水天上来，奔流到海不复回</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 文章正文</span></span><br><span class="line"></span><br><span class="line"><span class="string">注:</span> <span class="string">Front-matter配置支持的变量，其值因主题不同而存在差异</span></span><br><span class="line"><span class="string">/**</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">layout:</span> <span class="string">页面布局（配合主题文档使用）</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章名称</span></span><br><span class="line"><span class="attr">date:</span> <span class="string">文章日期</span></span><br><span class="line"><span class="attr">comments:</span> <span class="string">文章是否开启评论</span></span><br><span class="line"><span class="attr">photos:</span> <span class="string">文章封面图（仅部分主题支持）</span></span><br><span class="line"><span class="attr">tags:</span> </span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签一</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签二</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">文章分类</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">文章描述，即要在首页显示的摘要（仅部分主题支持）</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">*/</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>推送文章</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//.md文章保存在/biggfish/blog/hexo/source/_posts中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者新建文章 默认放置在hexo/source/_posts中</span></span><br><span class="line">hexo <span class="keyword">new</span> <span class="string">"test"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//Next主题新建页面</span></span><br><span class="line">hexo <span class="keyword">new</span> page <span class="string">"分类"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//照样在hexo文件夹下执行</span></span><br><span class="line"></span><br><span class="line">hexo d -g</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
-<li><a href="https://help.github.com/cn/github/working-with-github-pages/about-github-pages" target="_blank" rel="noopener">GitHub Pages官方说明文档</a></li>
-<li><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">Hexo官方文档</a></li>
-<li><a href="https://blog.csdn.net/qq_36759224/article/details/82121420#font_colorFF000_font_12" target="_blank" rel="noopener">使用 GitHub Pages和Hexo搭建自己的独立博客</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>教程</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>GitHub Pages</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>浅谈图像</title>
     <url>/2020/06/01/%E6%B5%85%E8%B0%88%E5%9B%BE%E5%83%8F/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>一切要从图像分辨率说起。前不久问过自己一个问题：<strong>小米6只有1920x1080的分辨率为什么能拍出4032x3016px的照片？</strong></p>
@@ -366,58 +393,186 @@
       </tags>
   </entry>
   <entry>
-    <title>kindle电子书邮箱推送</title>
-    <url>/2020/06/08/kindle%E7%94%B5%E5%AD%90%E4%B9%A6/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Kindle入手后已经吃过太多灰，<del>白嫖</del>收集的电子书资源怎么导入到Kindle设备都快忘记了，避免后续再次各处看教程，简单记录。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilR0005.jpg" alt="人丑就要多读书"></p>
-<h1 id="电子书资源"><a href="#电子书资源" class="headerlink" title="电子书资源"></a>电子书资源</h1><ul>
-<li><del>有钱</del> 最好直接在Amazon官方商城购买（一步到位）</li>
-<li><a href="https://www.jiumodiary.com/" target="_blank" rel="noopener">鸠摩</a></li>
-<li><a href="https://sobooks.cc/" target="_blank" rel="noopener">SoBooks</a></li>
-<li><a href="http://cn.epubee.com/books/" target="_blank" rel="noopener">ePUBee</a> （收费）</li>
-</ul>
-<h1 id="将电子书导入到Kindle"><a href="#将电子书导入到Kindle" class="headerlink" title="将电子书导入到Kindle"></a>将电子书导入到Kindle</h1><p>Kindle支持的电子书格式Kindle格式包括但不限于<code>.mobi</code>  <code>.azw</code> <code>.pdf</code>，不支持<code>.epub</code>格式，但可以通过电子书格式<a href="http://cn.epubee.com/" target="_blank" rel="noopener">转换工具</a>进行转换。</p>
-<h2 id="USB数据线导入"><a href="#USB数据线导入" class="headerlink" title="USB数据线导入"></a>USB数据线导入</h2><p><strong>步骤</strong></p>
+    <title>Hexo与GitHub Pages搭建独立博客</title>
+    <url>/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>博客其实在很久之前按照教程已经搭建完成，现在才回头来写教程步骤。有时候会想是否多此一举，毕竟网上现成的优秀的教程比比皆是。所以权且不说这是搭建基于Hexo的博客教程，只是一个简单的记录。</p>
+<p>写一点东西，像擦肩而过的风。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/7.jpg" alt="起飞"></p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2><p><code>GitHub Pages</code> 是一项<strong>静态站点托管服务</strong>，它直接从<code>GitHub</code> 上的仓库获取<code>HTML</code>、<code>CSS</code>和<code>JavaScript</code>文件，（可选）通过构建过程运行文件，然后发布网站。</p>
+<p>有三种类型的 <code>GitHub Pages</code> 站点：项目、用户和组织。 项目站点连接到 <code>GitHub</code> 上托管的特定项目，用户和组织站点连接到特定的 <code>GitHub</code> 帐户。只能为每个 <code>GitHub</code>账户创建一个用户或组织站点。项目站点（无论是组织还是用户帐户拥有）没有限制。除非使用自定义域，否则用户和组织站点位于<code>http(s)://&lt;username&gt;.github.io</code> 或 <code>http(s)://&lt;organization&gt;.github.io</code>。</p>
+<p>基于<code>GitHub Pages</code>搭建个人独立博客，即属于用户或组织站点。</p>
+<p><code>GitHub Pages</code> 站点的发布来源是存储站点源文件的分支或文件夹。 所有站点都有默认的发布来源，项目站点还有其他可用的发布来源。用户和组织站点的默认发布来源是<code>master</code>分支。如果用户和组织站点的仓库是<code>master</code> 分支，您的站点将从该分支自动发布。无法为用户或组织站点选择不同的发布来源。</p>
+<p><code>GitHub Pages</code> 站点受到以下使用限制的约束：</p>
 <ul>
-<li>数据线（Micro USB口）连接Kindle与电脑</li>
-<li>将电子书资源拷贝到Kindle磁盘的Documents文件夹  </li>
+<li><code>GitHub Pages</code> 源仓库建议的限制为1GB。</li>
+<li>发布的 <code>GitHub Pages</code> 站点不得超过 1 GB。</li>
+<li><code>GitHub Pages</code> 站点的软带宽限制为每月 100GB。</li>
+<li><code>GitHub Pages</code> 站点的软限制为每小时 10 次构建。</li>
 </ul>
-<p><strong>注意</strong></p>
+<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p><code>Hexo</code>是基于<code>Node.js</code>的快速、简洁且高效的博客框架。<code>Hexo</code> 使用 <code>Markdown</code>（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
+<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul>
+<li>安装<code>Node.js</code></li>
+<li>安装<code>Git</code></li>
+<li>安装<code>Hexo</code><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//进入自己的博客文件夹(如/biggfish/blog)</span></span><br><span class="line">npm install hexo-cli -g </span><br><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><ul>
+<li><p>初始化配置</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 在Hexo安装目录下新建hexo文件夹，如 /biggfish/blog/hexo</span></span><br><span class="line">hexo inint</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>本地生成与部署</p>
+<figure class="highlight verilog"><table><tr><td class="code"><pre><span class="line"><span class="comment">//在hexo文件目录下执行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件</span></span><br><span class="line">hexo <span class="keyword">generate</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地部署</span></span><br><span class="line">hexo server </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地测试</span></span><br><span class="line">http:<span class="comment">//localhost:4000/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置<code>Hexo</code>与远程<code>GitHub</code>仓库关联</p>
+<figure class="highlight dts"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建`GitHub Pages`的站点发布来源，即username.github.io仓库</span></span><br><span class="line"><span class="comment">//配置远程连接的SSH密钥与公钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//将本地Hexo文件（静态网页）更新到GitHub 的username.github.io仓库</span></span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 复制Github仓库的ssh地址</span><br><span class="line"><span class="number">2.</span> 选择hexo文件夹下_config.yml文件，修改deploy相关信息</span><br><span class="line"><span class="symbol">  deploy:</span></span><br><span class="line"><span class="symbol">    type:</span> git</span><br><span class="line"><span class="symbol">    repository:</span> 刚复制的仓库ssh地址</span><br><span class="line"><span class="symbol">    branch:</span> master</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>本地博客推送到远程仓库，<code>GitHub Pages</code>自动发布</p>
+<figure class="highlight stata"><table><tr><td class="code"><pre><span class="line"><span class="comment">//g-&gt;generate  d-&gt;deploy</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件，然后部署</span></span><br><span class="line">hexo <span class="keyword">g</span></span><br><span class="line">hexo <span class="built_in">d</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者联合执行</span></span><br><span class="line">hexo <span class="keyword">g</span> -<span class="built_in">d</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>访问博客 <a href="https://biggfish3147.github.io" target="_blank" rel="noopener">我的博客</a></p>
+</li>
+</ul>
+<h1 id="发表文章"><a href="#发表文章" class="headerlink" title="发表文章"></a>发表文章</h1><p>注意用<code>markdown</code>语法编写文章。</p>
 <ul>
-<li>只能在Kindle设备上阅读，不能同步到同一账号下</li>
-</ul>
-<h2 id="邮箱推送"><a href="#邮箱推送" class="headerlink" title="邮箱推送"></a>邮箱推送</h2><p><strong>步骤</strong></p>
-<ul>
-<li>在Amazon账户下，管理我的内容与设备，进行个人文档设置（电子邮箱白名单）</li>
-<li>将电子书资源（支持格式）作为邮件附件发送到***@kindle.cn邮件地址</li>
-</ul>
-<p><strong>注意</strong></p>
-<ul>
-<li>电子书资源能够同步到同一账号下</li>
-</ul>
-<h2 id="其他导入方式"><a href="#其他导入方式" class="headerlink" title="其他导入方式"></a>其他导入方式</h2><ul>
-<li>公众号【亚马逊Kindle服务号】将文章推送到 Kindle</li>
-<li>通过Calibre 传书到Kindle</li>
-<li>通过手机发送传书到Kindle app（手机本地有电子书资源）</li>
-</ul>
-<h2 id="Kindle使用"><a href="#Kindle使用" class="headerlink" title="Kindle使用"></a>Kindle使用</h2><ul>
-<li>关闭广告（First）</li>
-<li>截屏（可以但没必要）</li>
-<li>笔记/标注（可导出）</li>
-<li>续航真的猛，内存也够大</li>
-<li>Kindle神器Calibre（格式转换/推送）</li>
+<li><p><code>Front-matter</code>配置</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">博客伊始</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2019</span><span class="bullet">-09</span><span class="bullet">-20</span> <span class="number">23</span><span class="string">:29:47</span></span><br><span class="line"><span class="attr">comments:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">tags:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">君不见，黄河之水天上来，奔流到海不复回</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 文章正文</span></span><br><span class="line"></span><br><span class="line"><span class="string">注:</span> <span class="string">Front-matter配置支持的变量，其值因主题不同而存在差异</span></span><br><span class="line"><span class="string">/**</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">layout:</span> <span class="string">页面布局（配合主题文档使用）</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章名称</span></span><br><span class="line"><span class="attr">date:</span> <span class="string">文章日期</span></span><br><span class="line"><span class="attr">comments:</span> <span class="string">文章是否开启评论</span></span><br><span class="line"><span class="attr">photos:</span> <span class="string">文章封面图（仅部分主题支持）</span></span><br><span class="line"><span class="attr">tags:</span> </span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签一</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签二</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">文章分类</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">文章描述，即要在首页显示的摘要（仅部分主题支持）</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">*/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>推送文章</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//.md文章保存在/biggfish/blog/hexo/source/_posts中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者新建文章 默认放置在hexo/source/_posts中</span></span><br><span class="line">hexo <span class="keyword">new</span> <span class="string">"test"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//Next主题新建页面</span></span><br><span class="line">hexo <span class="keyword">new</span> page <span class="string">"分类"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//照样在hexo文件夹下执行</span></span><br><span class="line"></span><br><span class="line">hexo d -g</span><br></pre></td></tr></table></figure>
+
+</li>
 </ul>
 <h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
-<li><a href="https://zhuanlan.zhihu.com/p/83882901" target="_blank" rel="noopener">如何把电子书导入到kindle？</a></li>
-<li><a href="https://www.zhihu.com/question/273617420/answer/996496570" target="_blank" rel="noopener">你们都是从哪里找kindle电子书资源的？</a></li>
+<li><a href="https://help.github.com/cn/github/working-with-github-pages/about-github-pages" target="_blank" rel="noopener">GitHub Pages官方说明文档</a></li>
+<li><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">Hexo官方文档</a></li>
+<li><a href="https://blog.csdn.net/qq_36759224/article/details/82121420#font_colorFF000_font_12" target="_blank" rel="noopener">使用 GitHub Pages和Hexo搭建自己的独立博客</a></li>
 </ul>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1005.jpg" alt="What？何不如买个iPad"></p>
 ]]></content>
       <categories>
         <category>教程</category>
       </categories>
       <tags>
-        <tag>kindle</tag>
+        <tag>Hexo</tag>
+        <tag>GitHub Pages</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>面向对象设计原则</title>
+    <url>/2020/09/19/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/</url>
+    <content><![CDATA[<p>软件开发设计模式，不见得都会用到，但不得不知道。</p>
+<p>设计模式是经验总结的成果，说里边蕴藏着多妙的思想也好，说已经成为开发的规范也罢，无非就是提升<strong>系统稳定性与可维护性</strong>的手段。</p>
+<p>它们是设计方法，但也不是全能的。</p>
+<p>现在编程世界里出现众多框架，约定规范，日趋完善的IDE，归根结底就是为了效益。<strong>低成本，高效率，是最终目的。</strong></p>
+<p>java中有23种设计模式，都是围绕六大设计原则的具体运用。</p>
+<p>六大设计原则看起来容易理解，实际实现起来也偶有冲突，取舍适当即可。</p>
+<p>那就开始知道，皮毛也是毛，蚂蚁肉也是肉！</p>
+<h1 id="开闭原则"><a href="#开闭原则" class="headerlink" title="开闭原则"></a>开闭原则</h1><p><font color="red"><strong>软件实体应当对扩展开放，对修改关闭</strong>。软件开发的终极目标。</font></p>
+<p>当应用的需求改变时，在不修改软件实体的源代码或者二进制代码的前提下，可以扩展模块的功能，使其满足新的需求。</p>
+<p>软件实体包括：项目划分的模块，类/接口，方法。</p>
+<p>实现方法： </p>
+<p><strong>“抽象约束、封装变化”</strong>。通过接口或者抽象类为软件实体定义一个相对稳定的抽象层，而将相同的可变因素封装在相同的具体实现类中。</p>
+<p>好处：  </p>
+<ul>
+<li>软件测试可以只测扩展的代码，不必重复测试基础代码</li>
+<li>提升可复用性</li>
+<li>提高软件的可维护性</li>
+</ul>
+<h1 id="里氏替换原则"><a href="#里氏替换原则" class="headerlink" title="里氏替换原则"></a>里氏替换原则</h1><p><font color="red"><strong>更愿意称之为继承原则</strong>。继承必须确保超类所拥有的性质在子类中仍然成立。</font></p>
+<p>通俗来讲，<strong>子类可以扩展父类的功能，但不能改变父类原有的功能</strong>。子类继承父类时，除添加新的方法完成新增功能外，尽量不要重写父类的方法。</p>
+<p>实现方法：</p>
+<p>使用继承时，遵循里氏替换原则。类T2继承类T1时，除添加新的方法完成新增功能P2外，尽量不要重写父类T1的方法，也尽量不要重载父类T1的方法。</p>
+<p>例外：当父类存在缺省实现的方法时；需要实现多态时要求重写/重载；部分子类继承父类（类方法体为空）时，必须要求重写。  </p>
+<p>好处：</p>
+<p>继承原则实际上保证父类的可复用性，是继承复用的基础。</p>
+<h1 id="依赖倒置原则"><a href="#依赖倒置原则" class="headerlink" title="依赖倒置原则"></a>依赖倒置原则</h1><p><font color="red"><strong>核心要义是面向接口编程，不要面向实现编程</strong>。高层模块不应该依赖低层模块，两者都应该依赖其抽象；抽象不应该依赖细节，细节应该依赖抽象。</font></p>
+<p>在软件设计中，细节具有多变性，而抽象层则相对稳定，因此<strong>以抽象为基础搭建起来的架构要比以细节为基础搭建起来的架构要稳定得多</strong>。这里的抽象指接口或抽象类，细节指具体实现类。</p>
+<p>使用接口或者抽象类的目的是制定好规范和契约。</p>
+<p>实现方法：</p>
+<ul>
+<li>每个类尽量提供接口或抽象类，或者两者都具备</li>
+<li>变量的声明类型尽量是接口或者是抽象类</li>
+<li>任何类都不应该从具体类派生</li>
+<li>使用继承时尽量遵循里氏替换原则</li>
+</ul>
+<p>好处：</p>
+<ul>
+<li>降低类之间的耦合性</li>
+<li>提高系统稳定性</li>
+<li>减少并行开发引起的风险</li>
+<li>提高代码的可读性与可维护性</li>
+</ul>
+<h1 id="单一职责原则"><a href="#单一职责原则" class="headerlink" title="单一职责原则"></a>单一职责原则</h1><p><font color="red"><strong>就是说每个类的功能相对独立</strong>。单一职责原则规定一个类应该有且仅有一个引起它变化的原因，否则类应该被拆分。</font></p>
+<p>若一个类T有职责A、B，当需要变更职责A时，更改类T可能会影响职责B的正常应用</p>
+<p>实现方法：  </p>
+<p>看似简单实则不易，只是需要优秀设计。需要设计人员<strong>发现类的不同职责并将其分离</strong>，再封装到不同的类或模块中。考验分析设计能力和重构经验。</p>
+<p>好处：</p>
+<ul>
+<li>降低类的复杂度</li>
+<li>提高类的可读性</li>
+<li>提高系统的可维护性</li>
+<li>变更引起的风险降低</li>
+</ul>
+<h1 id="接口隔离原则"><a href="#接口隔离原则" class="headerlink" title="接口隔离原则"></a>接口隔离原则</h1><p><font color="red"><strong>一个类对另一个类的依赖应该建立在最小的接口上</strong>。客户端不应该被迫依赖于它不使用的方法。程序员需要尽量将臃肿庞大的接口拆分成更小的和更具体的接口，让接口中只包含客户感兴趣的方法。</font></p>
+<p>要为各个类建立它们需要的专用接口，而不要试图去建立一个很庞大的接口供所有依赖它的类去调用。</p>
+<p>接口隔离原则和单一职责都是为了<strong>提高类的内聚性、降低它们之间的耦合性</strong>，体现了封装的思想。</p>
+<p>但单一职责原则注重的是职责，而接口隔离原则注重的是对接口依赖的隔离。</p>
+<p>且单一职责原则主要是约束类，它针对的是程序中的实现和细节；接口隔离原则主要约束接口，主要针对抽象和程序整体框架的构建。</p>
+<p>实现方法：</p>
+<ul>
+<li>接口尽量小，但是要有限度</li>
+<li>为依赖接口的类定制服务</li>
+<li>接口拆分的标准需要深入了解业务逻辑</li>
+<li>使接口用最少的方法去完成最多的事情</li>
+</ul>
+<p>好处：</p>
+<ul>
+<li>粒度小的接口，可以预防外来变更的扩散，提高系统的灵活性和可维护性</li>
+<li>高了系统的内聚性，降低了系统的耦合性</li>
+<li>能减少项目工程中的代码冗余（过大的大接口里面通常放置许多不用的方法，这些方法可能被冗余实现）</li>
+</ul>
+<p>注意接口的粒度。如果定义过小，则会造成接口数量过多，使设计复杂化；如果定义太大，灵活性降低，无法提供定制服务，给整体项目带来无法预料的风险。</p>
+<h1 id="迪米特原则"><a href="#迪米特原则" class="headerlink" title="迪米特原则"></a>迪米特原则</h1><p><font color="red"><strong>只与你的直接朋友交谈，不跟“陌生人”说话。最少知识原则，只知道朋友</strong>。如果两个软件实体无须直接通信，那么就不应当发生直接的相互调用，可以通过第三方转发该调用。</font></p>
+<p>这里的朋友是指：<strong>当前对象本身、当前对象的成员对象、当前对象所创建的对象、当前对象的方法参数</strong>等，这些对象同当前对象存在关联、聚合或组合关系，可以直接访问这些对象的方法。</p>
+<p>目的就是降低类之间的耦合度，提高模块的相对独立性。</p>
+<p>实现方法：<br>从依赖者的角度来说，只依赖应该依赖的对象。从被依赖者的角度说，只暴露应该暴露的方法。</p>
+<ul>
+<li>在类的结构设计上，尽量降低类成员的访问权限</li>
+<li>在类的设计上，优先考虑将一个类设置成不变类</li>
+<li>在对其他类的引用上，将引用其他对象的次数降到最低。</li>
+<li>不暴露类的属性成员，而应该提供相应的访问器（set 和 get 方法）</li>
+<li>谨慎使用序列化（Serializable）功能</li>
+</ul>
+<p>好处：</p>
+<ul>
+<li>降低了类之间的耦合度，提高了模块的相对独立性</li>
+<li>由于亲合度降低，从而提高了类的可复用率和系统的扩展性</li>
+</ul>
+<p>过度使用迪米特法则会使系统产生大量的中介类，从而增加系统的复杂性，使模块之间的通信效率降低。</p>
+<h1 id="合成复用原则"><a href="#合成复用原则" class="headerlink" title="合成复用原则"></a>合成复用原则</h1><p><font color="red"><strong>组合/聚合复用原则。在软件复用时，要尽量先使用组合或者聚合等关联关系来实现，其次才考虑使用继承关系来实现</strong>。合成复用原则同里氏替换原则相辅相成的，两者都是开闭原则的具体实现规范。</font></p>
+<p>通常类的复用分为继承复用和合成复用两种。</p>
+<p>继承复用也叫“白箱”复用，简单易实现。但</p>
+<ul>
+<li>子类与父类的耦合度高</li>
+<li>继承会将父类的实现细节暴露给子类（父类透明）</li>
+<li>从父类继承而来的实现是静态的，在编译时已经定义，所以在运行时不可能发生变化</li>
+</ul>
+<p>组合或聚合复用，将已有对象纳入新对象中，使之成为新对象的一部分，新对象可以调用已有对象。这样</p>
+<ul>
+<li>它维持了类的封装性。因为成分对象的内部细节是新对象看不见的，所以这种复用又称为“黑箱”复用</li>
+<li>新旧类之间的耦合度低。这种复用所需的依赖较少，新对象存取成分对象的唯一方法是通过成分对象的接口</li>
+<li>复用的灵活性高。这种复用可以在运行时动态进行，新对象可以动态地引用与成分对象类型相同的对象</li>
+</ul>
+<p>实现方法：<br>合成复用原则是通过将已有的对象纳入新对象中，作为新对象的成员对象来实现的，新对象可以调用已有对象的功能，从而达到复用。就是<strong>需要某类里边的方法，不用去继承该类，直接以其对象作为本类的成员，再进行调用</strong>。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://c.biancheng.net/design_pattern/" target="_blank" rel="noopener">C语言中文网：Java设计模式</a></p>
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>概念</tag>
+        <tag>设计原则</tag>
       </tags>
   </entry>
   <entry>
@@ -537,124 +692,6 @@
       <tags>
         <tag>概念</tag>
         <tag>JSP</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>面向对象设计原则</title>
-    <url>/2020/09/19/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/</url>
-    <content><![CDATA[<p>软件开发设计模式，不见得都会用到，但不得不知道。</p>
-<p>设计模式是经验总结的成果，说里边蕴藏着多妙的思想也好，说已经成为开发的规范也罢，无非就是提升<strong>系统稳定性与可维护性</strong>的手段。</p>
-<p>它们是设计方法，但也不是全能的。</p>
-<p>现在编程世界里出现众多框架，约定规范，日趋完善的IDE，归根结底就是为了效益。<strong>低成本，高效率，是最终目的。</strong></p>
-<p>java中有23种设计模式，都是围绕六大设计原则的具体运用。</p>
-<p>六大设计原则看起来容易理解，实际实现起来也偶有冲突，取舍适当即可。</p>
-<p>那就开始知道，皮毛也是毛，蚂蚁肉也是肉！</p>
-<h1 id="开闭原则"><a href="#开闭原则" class="headerlink" title="开闭原则"></a>开闭原则</h1><p><font color="red"><strong>软件实体应当对扩展开放，对修改关闭</strong>。软件开发的终极目标。</font></p>
-<p>当应用的需求改变时，在不修改软件实体的源代码或者二进制代码的前提下，可以扩展模块的功能，使其满足新的需求。</p>
-<p>软件实体包括：项目划分的模块，类/接口，方法。</p>
-<p>实现方法： </p>
-<p><strong>“抽象约束、封装变化”</strong>。通过接口或者抽象类为软件实体定义一个相对稳定的抽象层，而将相同的可变因素封装在相同的具体实现类中。</p>
-<p>好处：  </p>
-<ul>
-<li>软件测试可以只测扩展的代码，不必重复测试基础代码</li>
-<li>提升可复用性</li>
-<li>提高软件的可维护性</li>
-</ul>
-<h1 id="里氏替换原则"><a href="#里氏替换原则" class="headerlink" title="里氏替换原则"></a>里氏替换原则</h1><p><font color="red"><strong>更愿意称之为继承原则</strong>。继承必须确保超类所拥有的性质在子类中仍然成立。</font></p>
-<p>通俗来讲，<strong>子类可以扩展父类的功能，但不能改变父类原有的功能</strong>。子类继承父类时，除添加新的方法完成新增功能外，尽量不要重写父类的方法。</p>
-<p>实现方法：</p>
-<p>使用继承时，遵循里氏替换原则。类T2继承类T1时，除添加新的方法完成新增功能P2外，尽量不要重写父类T1的方法，也尽量不要重载父类T1的方法。</p>
-<p>例外：当父类存在缺省实现的方法时；需要实现多态时要求重写/重载；部分子类继承父类（类方法体为空）时，必须要求重写。  </p>
-<p>好处：</p>
-<p>继承原则实际上保证父类的可复用性，是继承复用的基础。</p>
-<h1 id="依赖倒置原则"><a href="#依赖倒置原则" class="headerlink" title="依赖倒置原则"></a>依赖倒置原则</h1><p><font color="red"><strong>核心要义是面向接口编程，不要面向实现编程</strong>。高层模块不应该依赖低层模块，两者都应该依赖其抽象；抽象不应该依赖细节，细节应该依赖抽象。</font></p>
-<p>在软件设计中，细节具有多变性，而抽象层则相对稳定，因此<strong>以抽象为基础搭建起来的架构要比以细节为基础搭建起来的架构要稳定得多</strong>。这里的抽象指接口或抽象类，细节指具体实现类。</p>
-<p>使用接口或者抽象类的目的是制定好规范和契约。</p>
-<p>实现方法：</p>
-<ul>
-<li>每个类尽量提供接口或抽象类，或者两者都具备</li>
-<li>变量的声明类型尽量是接口或者是抽象类</li>
-<li>任何类都不应该从具体类派生</li>
-<li>使用继承时尽量遵循里氏替换原则</li>
-</ul>
-<p>好处：</p>
-<ul>
-<li>降低类之间的耦合性</li>
-<li>提高系统稳定性</li>
-<li>减少并行开发引起的风险</li>
-<li>提高代码的可读性与可维护性</li>
-</ul>
-<h1 id="单一职责原则"><a href="#单一职责原则" class="headerlink" title="单一职责原则"></a>单一职责原则</h1><p><font color="red"><strong>就是说每个类的功能相对独立</strong>。单一职责原则规定一个类应该有且仅有一个引起它变化的原因，否则类应该被拆分。</font></p>
-<p>若一个类T有职责A、B，当需要变更职责A时，更改类T可能会影响职责B的正常应用</p>
-<p>实现方法：  </p>
-<p>看似简单实则不易，只是需要优秀设计。需要设计人员<strong>发现类的不同职责并将其分离</strong>，再封装到不同的类或模块中。考验分析设计能力和重构经验。</p>
-<p>好处：</p>
-<ul>
-<li>降低类的复杂度</li>
-<li>提高类的可读性</li>
-<li>提高系统的可维护性</li>
-<li>变更引起的风险降低</li>
-</ul>
-<h1 id="接口隔离原则"><a href="#接口隔离原则" class="headerlink" title="接口隔离原则"></a>接口隔离原则</h1><p><font color="red"><strong>一个类对另一个类的依赖应该建立在最小的接口上</strong>。客户端不应该被迫依赖于它不使用的方法。程序员需要尽量将臃肿庞大的接口拆分成更小的和更具体的接口，让接口中只包含客户感兴趣的方法。</font></p>
-<p>要为各个类建立它们需要的专用接口，而不要试图去建立一个很庞大的接口供所有依赖它的类去调用。</p>
-<p>接口隔离原则和单一职责都是为了<strong>提高类的内聚性、降低它们之间的耦合性</strong>，体现了封装的思想。</p>
-<p>但单一职责原则注重的是职责，而接口隔离原则注重的是对接口依赖的隔离。</p>
-<p>且单一职责原则主要是约束类，它针对的是程序中的实现和细节；接口隔离原则主要约束接口，主要针对抽象和程序整体框架的构建。</p>
-<p>实现方法：</p>
-<ul>
-<li>接口尽量小，但是要有限度</li>
-<li>为依赖接口的类定制服务</li>
-<li>接口拆分的标准需要深入了解业务逻辑</li>
-<li>使接口用最少的方法去完成最多的事情</li>
-</ul>
-<p>好处：</p>
-<ul>
-<li>粒度小的接口，可以预防外来变更的扩散，提高系统的灵活性和可维护性</li>
-<li>高了系统的内聚性，降低了系统的耦合性</li>
-<li>能减少项目工程中的代码冗余（过大的大接口里面通常放置许多不用的方法，这些方法可能被冗余实现）</li>
-</ul>
-<p>注意接口的粒度。如果定义过小，则会造成接口数量过多，使设计复杂化；如果定义太大，灵活性降低，无法提供定制服务，给整体项目带来无法预料的风险。</p>
-<h1 id="迪米特原则"><a href="#迪米特原则" class="headerlink" title="迪米特原则"></a>迪米特原则</h1><p><font color="red"><strong>只与你的直接朋友交谈，不跟“陌生人”说话。最少知识原则，只知道朋友</strong>。如果两个软件实体无须直接通信，那么就不应当发生直接的相互调用，可以通过第三方转发该调用。</font></p>
-<p>这里的朋友是指：<strong>当前对象本身、当前对象的成员对象、当前对象所创建的对象、当前对象的方法参数</strong>等，这些对象同当前对象存在关联、聚合或组合关系，可以直接访问这些对象的方法。</p>
-<p>目的就是降低类之间的耦合度，提高模块的相对独立性。</p>
-<p>实现方法：<br>从依赖者的角度来说，只依赖应该依赖的对象。从被依赖者的角度说，只暴露应该暴露的方法。</p>
-<ul>
-<li>在类的结构设计上，尽量降低类成员的访问权限</li>
-<li>在类的设计上，优先考虑将一个类设置成不变类</li>
-<li>在对其他类的引用上，将引用其他对象的次数降到最低。</li>
-<li>不暴露类的属性成员，而应该提供相应的访问器（set 和 get 方法）</li>
-<li>谨慎使用序列化（Serializable）功能</li>
-</ul>
-<p>好处：</p>
-<ul>
-<li>降低了类之间的耦合度，提高了模块的相对独立性</li>
-<li>由于亲合度降低，从而提高了类的可复用率和系统的扩展性</li>
-</ul>
-<p>过度使用迪米特法则会使系统产生大量的中介类，从而增加系统的复杂性，使模块之间的通信效率降低。</p>
-<h1 id="合成复用原则"><a href="#合成复用原则" class="headerlink" title="合成复用原则"></a>合成复用原则</h1><p><font color="red"><strong>组合/聚合复用原则。在软件复用时，要尽量先使用组合或者聚合等关联关系来实现，其次才考虑使用继承关系来实现</strong>。合成复用原则同里氏替换原则相辅相成的，两者都是开闭原则的具体实现规范。</font></p>
-<p>通常类的复用分为继承复用和合成复用两种。</p>
-<p>继承复用也叫“白箱”复用，简单易实现。但</p>
-<ul>
-<li>子类与父类的耦合度高</li>
-<li>继承会将父类的实现细节暴露给子类（父类透明）</li>
-<li>从父类继承而来的实现是静态的，在编译时已经定义，所以在运行时不可能发生变化</li>
-</ul>
-<p>组合或聚合复用，将已有对象纳入新对象中，使之成为新对象的一部分，新对象可以调用已有对象。这样</p>
-<ul>
-<li>它维持了类的封装性。因为成分对象的内部细节是新对象看不见的，所以这种复用又称为“黑箱”复用</li>
-<li>新旧类之间的耦合度低。这种复用所需的依赖较少，新对象存取成分对象的唯一方法是通过成分对象的接口</li>
-<li>复用的灵活性高。这种复用可以在运行时动态进行，新对象可以动态地引用与成分对象类型相同的对象</li>
-</ul>
-<p>实现方法：<br>合成复用原则是通过将已有的对象纳入新对象中，作为新对象的成员对象来实现的，新对象可以调用已有对象的功能，从而达到复用。就是<strong>需要某类里边的方法，不用去继承该类，直接以其对象作为本类的成员，再进行调用</strong>。</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://c.biancheng.net/design_pattern/" target="_blank" rel="noopener">C语言中文网：Java设计模式</a></p>
-]]></content>
-      <categories>
-        <category>java</category>
-      </categories>
-      <tags>
-        <tag>概念</tag>
-        <tag>java</tag>
-        <tag>设计原则</tag>
       </tags>
   </entry>
 </search>
