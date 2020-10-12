@@ -75,7 +75,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="java,Serializable接口,">
 
 
 
@@ -88,16 +88,18 @@
 
 
 
-<meta name="description" content="给时光以生命，给岁月以文明">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Biggfish">
-<meta property="og:url" content="http://yoursite.com/tags/常识/index.html">
+<meta name="description" content="我们经常使用String这个类，但不一定知道原来它实现了Serializable接口。">
+<meta name="keywords" content="java,Serializable接口">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对象的序列化：Serializable接口">
+<meta property="og:url" content="http://yoursite.com/2020/10/12/对象的序列化：Serializable接口/index.html">
 <meta property="og:site_name" content="Biggfish">
-<meta property="og:description" content="给时光以生命，给岁月以文明">
+<meta property="og:description" content="我们经常使用String这个类，但不一定知道原来它实现了Serializable接口。">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-10-12T05:39:08.365Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Biggfish">
-<meta name="twitter:description" content="给时光以生命，给岁月以文明">
+<meta name="twitter:title" content="对象的序列化：Serializable接口">
+<meta name="twitter:description" content="我们经常使用String这个类，但不一定知道原来它实现了Serializable接口。">
 
 
 
@@ -127,13 +129,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/tags/常识/">
+  <link rel="canonical" href="http://yoursite.com/2020/10/12/对象的序列化：Serializable接口/">
 
 
 
 
 
-  <title>标签: 常识 | Biggfish</title>
+  <title>对象的序列化：Serializable接口 | Biggfish</title>
   
 
 
@@ -162,7 +164,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -308,52 +310,273 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>常识<small>标签</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/10/12/对象的序列化：Serializable接口/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Dongjie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/cyber_avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Biggfish">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2020/06/01/浅谈图像/" itemprop="url">
-              
-                <span itemprop="name">浅谈图像</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">对象的序列化：Serializable接口</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2020-06-01T12:21:54+08:00" content="2020-06-01">
-          06-01
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-10-12T13:34:11+08:00">
+                2020-10-12
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/10/12/对象的序列化：Serializable接口/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/10/12/对象的序列化：Serializable接口/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-eye"></i> 浏览
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  994 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  3 分钟
+                </span>
+              
+            </div>
+          
+
+          
+              <div class="post-description">
+                  我们经常使用String这个类，但不一定知道原来它实现了Serializable接口。
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>一般而言，定义实体类时会实现 <code>Serializable</code>接口，同时还要显示指定<code>serialVersionUID</code>的值。</p>
+<p>为什么要有这些操作呢？这里就试图简单理解。</p>
+<h1 id="1-序列化与反序列化"><a href="#1-序列化与反序列化" class="headerlink" title="1. 序列化与反序列化"></a>1. 序列化与反序列化</h1><p><font color="red">序列化</font>：把对象转换为字节序列的过程称为对象的序列化。</p>
+<p><font color="red">反序列化</font>：把字节序列恢复为对象的过程称为对象的反序列化。</p>
+<p>从概念上看，<strong>序列化操作只是针对于对象层面的</strong>，包含对象的成员变量和成员方法。那么被static修饰的成员变量呢？结论是被static修饰的属性不会被序列化。</p>
+<p>但这并不意味着static修饰的变量会缺失。这个变量不管被什么修饰词修饰，始终还算对象里边的成员变量。只是可能存在变量值不一致的情况，因为无法序列化代表对象的该变量的值无法硬性写入字节序列（有点饶，描述serialVersionUID进一步阐述）</p>
+<h1 id="2-Serializable接口"><a href="#2-Serializable接口" class="headerlink" title="2. Serializable接口"></a>2. Serializable接口</h1><p>一个对象序列化的接口，<strong>一个类只有实现了Serializable接口，它的对象才能被序列化</strong>。</p>
+<p>日常接触的String类，其底层也实现了Serializable接口，所以JSON字符串才能在前后端自由传输。</p>
+<p>但观察Serializable接口就会发现，接口内部啥也没有，就是说，它是一个空接口。<font color="red">其实，可以将它理解为一个标识接口。实现这个接口，就是给JVM看的，JVM会帮助当前类实现序列化（或反序列化）的具体操作。</font></p>
+<p>Serializable接口就是<font color="red">Java提供用来进行高效率的异地共享实例对象的机制</font>，实现这个接口即可。</p>
+<h1 id="3-serialversionUID变量"><a href="#3-serialversionUID变量" class="headerlink" title="3. serialversionUID变量"></a>3. serialversionUID变量</h1><p>通常的写法是：</p>
+<figure class="highlight aspectj"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">12356</span>L;</span><br></pre></td></tr></table></figure>
+
+<p>显示声明这个变量并赋予字面量的作用是啥？保证类的一致性。如果类发生变化，依然能够对旧类的对象（已经序列化）执行反序列化操作。</p>
+<p>很多时候我们未显示声明该变量，程序照常运行。<font color="red">实际上，是JVM在序列化时根据属性自动生成一个serialVersionUID，然后与属性一起序列化。在反序列化时，JVM会再根据属性自动生成一个新版serialVersionUID，然后将新serialVersionUID与旧serialVersionUID比较，如果一致，则反序列化成功，否则报错。</font></p>
+<p>类发生变化（旧类与新类），JVM自动生成的serialVersionUID值就不一致，所以就可能出现问题。</p>
+<h1 id="4-serialversionUID变量也被static修饰"><a href="#4-serialversionUID变量也被static修饰" class="headerlink" title="4. serialversionUID变量也被static修饰"></a>4. serialversionUID变量也被static修饰</h1><p>前面提到，被static修饰的属性不会被序列化，但serialversionUID变量也被static修饰确可以被序列化，这不是打脸吗？</p>
+<p>答案是，你用static修饰的那个变量并没有被序列化，只不过是工具变量拿来传值的。JVM 在序列化对象时会自动生成一个 serialVersionUID, 然后将我们显示指定的 serialVersionUID 属性值赋给自动生成的 serialVersionUID。</p>
+<p>至于其他的static修饰的属性，这些属性是跟着类走的。一种合理的解释是，<font color="red">序列化是针对对象而言的, 而 static 属性优先于对象存在, 随着类的加载而加载, 所以不会被序列化。</font></p>
+<h1 id="5-什么时候需要序列化和反序列化"><a href="#5-什么时候需要序列化和反序列化" class="headerlink" title="5. 什么时候需要序列化和反序列化"></a>5. 什么时候需要序列化和反序列化</h1><p>答案是：<font color="red">对内存中的对象进行数据（指对象的状态信息）传输（通信）与数据存储（持久化）。</font>很多时候我们可能并不是将整个对象存储或者传输，而是其中的字段信息，比如说将数据保存在数据库。这个过程每个字段的变量类型都应该是可序列化的，也即实现了Serializable接口。</p>
+<p>我们经常这么用，但不一定想到原来它们都默默实现了Serializable接口。</p>
+<h1 id="6-参考资料"><a href="#6-参考资料" class="headerlink" title="6. 参考资料"></a>6. 参考资料</h1><p><a href="https://blog.csdn.net/litianxiang_kaola/article/details/100097019" target="_blank" rel="noopener">Java序列化和反序列化为什么要实现Serializable接口</a></p>
 
       
     </div>
+    
+    
+    
 
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="Dongjie 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="Dongjie 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"><i class="fa fa-tag"></i> java</a>
+          
+            <a href="/tags/Serializable接口/" rel="tag"><i class="fa fa-tag"></i> Serializable接口</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/09/19/POJO与JavaBean的区别/" rel="next" title="POJO与JavaBean的区别">
+                <i class="fa fa-chevron-left"></i> POJO与JavaBean的区别
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -361,6 +584,13 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
 
         </div>
         
@@ -381,8 +611,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -461,6 +700,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-序列化与反序列化"><span class="nav-text">1. 序列化与反序列化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-Serializable接口"><span class="nav-text">2. Serializable接口</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-serialversionUID变量"><span class="nav-text">3. serialversionUID变量</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-serialversionUID变量也被static修饰"><span class="nav-text">4. serialversionUID变量也被static修饰</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-什么时候需要序列化和反序列化"><span class="nav-text">5. 什么时候需要序列化和反序列化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-参考资料"><span class="nav-text">6. 参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -625,6 +880,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
