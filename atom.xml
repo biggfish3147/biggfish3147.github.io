@@ -289,11 +289,11 @@
       <category term="java" scheme="http://yoursite.com/categories/java/"/>
     
     
-      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
-    
       <category term="Json" scheme="http://yoursite.com/tags/Json/"/>
     
       <category term="数据传输" scheme="http://yoursite.com/tags/%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93/"/>
+    
+      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
     
   </entry>
   
