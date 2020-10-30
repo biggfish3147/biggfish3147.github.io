@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2020-10-30T09:02:58.429Z</updated>
+  <updated>2020-10-30T13:35:59.706Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>阿里云宝塔面板部署java项目</title>
+    <link href="http://yoursite.com/2020/10/30/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E9%83%A8%E7%BD%B2java%E9%A1%B9%E7%9B%AE/"/>
+    <id>http://yoursite.com/2020/10/30/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E9%83%A8%E7%BD%B2java%E9%A1%B9%E7%9B%AE/</id>
+    <published>2020-10-30T13:33:37.000Z</published>
+    <updated>2020-10-30T13:35:59.706Z</updated>
+    
+    <content type="html"><![CDATA[<p>背景故事是这样的。</p><p>一个老项目，“上级”指示需要再次启用。</p><p>阿里云实例一周前过期的，如果续费的话，后端代码不用改，前端的请求ip也不用改。原有的java环境就能支持老项目跑起来。</p><p>不要问为什么代码里边不用域名表示主机（映射关系）。如果用域名的话，只需要改一下域名与ip的映射记录就行。这个法儿我是现在才想到的。</p><p>然后就是需要重新租用一个云服务器，配置java运行环境，再把项目扔上去跑（用的是war包）。</p><p>9.5块钱/月的阿里云学生机，选择的是轻量应用服务器，宝塔面板应用镜像。</p><p>宝塔面板一键配置环境真的是“傻瓜”操作，真香。</p><h1 id="1-镜像的理解"><a href="#1-镜像的理解" class="headerlink" title="1. 镜像的理解"></a>1. 镜像的理解</h1><p>任何镜像都是基于系统镜像制作的。</p><p>宝塔面板应用镜像就是在系统镜像的基础上，配置好宝塔面板，然后生成的镜像。</p><p>镜像流行的原因，其中一个原因就是简化配置。特别是运行环境的配置。</p><p>纯净的操作系统镜像，还需要我们自己部署java web运行环境，比如下载tomcat、jdk、mysql等。如果是java运行环境镜像，其内已经装好了相关软件，我们只要知道如何使用即可。</p><p>宝塔面板，顾名思义，就是一个面板控制工具。通过Web页面，即可控制远端服务器的服务开闭、端口开放、项目部署等。</p><h1 id="2-云服务器宝塔面板"><a href="#2-云服务器宝塔面板" class="headerlink" title="2. 云服务器宝塔面板"></a>2. 云服务器宝塔面板</h1><p>一般而言，选购云服务器时需要配置基本参数，其中一项就是<strong>镜像</strong>。</p><p>可以选择纯净的系统镜像，也可以去镜像市场选择免费的定制化镜像使用。</p><p>如果选择宝塔控制面板，即镜像内已经安装并配置好了宝塔面板，那么由该镜像最后生成的实例，就可以直接使用宝塔面板了。</p><p>相当于，别人配好环境，我拿到后开箱即用。</p><h1 id="3-云服务器控制台"><a href="#3-云服务器控制台" class="headerlink" title="3. 云服务器控制台"></a>3. 云服务器控制台</h1><p>宝塔面板是一个控制中心，云服务器（或者轻量应用服务器）也是一个控制中心。云服务器作为上游控制中心，除了对服务器实例的必要运维监控外，还决定着服务器对外开放的端口。</p><p>当然，如果云服务器安装有宝塔面板的话，需要开放TCP 8888端口供外部连接。而且，要进入宝塔面板，需要的账户与密码，也可以在云服务器的控制台进行设置。</p><h1 id="4-宝塔控制面板"><a href="#4-宝塔控制面板" class="headerlink" title="4. 宝塔控制面板"></a>4. 宝塔控制面板</h1><p>如果选择宝塔面板，那么大多数与服务器的交互都变得简洁直观（可视化）。</p><p>云服务器控制台的作用大多数时候就是放行端口（服务器防火墙）。</p><blockquote><p>宝塔控制面板也能对端口放行。但是如果云服务器不放行，在宝塔面板设置放行其实是无效的。大概就是上下游两道闸门的关系。</p></blockquote><p>在宝塔面板，你可以以安装软件的形式（软件商店）来配置环境。这区别于远程登录云服务器，并在终端输入shell命令。面板的操作对新人更加友好，但也相对没有技术含量，不能学到服务器内部的知识。</p><h1 id="5-部署java-web项目"><a href="#5-部署java-web项目" class="headerlink" title="5. 部署java web项目"></a>5. 部署java web项目</h1><p>基本上都是与宝塔控制面板进行交互。</p><ul><li>配置环境</li><li>导入war包</li><li>放行端口</li><li>启动tomcat</li></ul><p>虽然java环境需要jdk，但是在宝塔面板上配置tomcat时，会自动下载jdk。</p><p>导入的war包直接放入到tomcat文件的webapps目录下即可，tomcat会自动解压。</p><h1 id="6-参考"><a href="#6-参考" class="headerlink" title="6. 参考"></a>6. 参考</h1><p><a href="https://my.oschina.net/u/4340796/blog/4315488" target="_blank" rel="noopener">阿里云宝塔面板配置及部署Java项目</a></p><p><a href="https://developer.aliyun.com/article/761633" target="_blank" rel="noopener">阿里云轻量应用服务器应用镜像和系统镜像选择详细介绍</a></p>]]></content>
+    
+    <summary type="html">
+    
+      宝塔面板，“傻瓜式”操作真香！
+    
+    </summary>
+    
+    
+      <category term="教程" scheme="http://yoursite.com/categories/%E6%95%99%E7%A8%8B/"/>
+    
+    
+      <category term="java" scheme="http://yoursite.com/tags/java/"/>
+    
+      <category term="宝塔面板" scheme="http://yoursite.com/tags/%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF/"/>
+    
+  </entry>
   
   <entry>
     <title>二叉树的遍历</title>
@@ -160,9 +185,9 @@
       <category term="docker" scheme="http://yoursite.com/categories/docker/"/>
     
     
-      <category term="docker" scheme="http://yoursite.com/tags/docker/"/>
-    
       <category term="教程" scheme="http://yoursite.com/tags/%E6%95%99%E7%A8%8B/"/>
+    
+      <category term="docker" scheme="http://yoursite.com/tags/docker/"/>
     
       <category term="nginx" scheme="http://yoursite.com/tags/nginx/"/>
     
@@ -289,11 +314,11 @@
       <category term="java" scheme="http://yoursite.com/categories/java/"/>
     
     
+      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
+    
       <category term="Json" scheme="http://yoursite.com/tags/Json/"/>
     
       <category term="数据传输" scheme="http://yoursite.com/tags/%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93/"/>
-    
-      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
     
   </entry>
   
