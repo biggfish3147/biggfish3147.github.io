@@ -69,30 +69,6 @@
       </tags>
   </entry>
   <entry>
-    <title>docker通过nginx镜像部署静态文件</title>
-    <url>/2020/09/18/docker%E9%80%9A%E8%BF%87nginx%E9%95%9C%E5%83%8F%E9%83%A8%E7%BD%B2%E9%9D%99%E6%80%81%E6%96%87%E4%BB%B6/</url>
-    <content><![CDATA[<p>docker通过nginx镜像部署项目的实质，就是<strong>将（项目）静态文件和及其依赖（nginx）制作成镜像(image)，然后通过镜像生成容器</strong>的过程。这样，通过运行容器就能运行服务，而且image可以方便分享。</p>
-<p>准备工作包括：需要部署的静态文件，自定义的nginx配置文件，<strong>Dockerfile文件</strong>（制作镜像）。</p>
-<h2 id="1-获得打包后的静态文件"><a href="#1-获得打包后的静态文件" class="headerlink" title="1. 获得打包后的静态文件"></a>1. 获得打包后的静态文件</h2><p>vue项目与react项目的打包方式不一样，基本上执行<code>yarn build</code>类似的指令就可以构建打包，获得<code>dist/</code>目录（内部保存的就是静态文件）。一般而言，开发环境中<code>node_module</code>依赖包特别多，打包过程只有用到的依赖进入了静态文件。所以开发环境中项目可能几个GB，但打包完成的静态文件只占几十MB。</p>
-<h2 id="2-准备default-conf文件"><a href="#2-准备default-conf文件" class="headerlink" title="2. 准备default.conf文件"></a>2. 准备default.conf文件</h2><figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="string">===</span> <span class="string">default.conf文件（替换nginx镜像中默认的配置文件）</span> <span class="string">===</span></span><br><span class="line"></span><br><span class="line"><span class="string">server</span> <span class="string">&#123;</span></span><br><span class="line">    <span class="string">listen</span>       <span class="number">3000</span><span class="string">;</span> <span class="string">//项目中的端口号(真实使用#注释)</span></span><br><span class="line">    <span class="string">server_name</span>  <span class="string">localhost;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#charset koi8-r;</span></span><br><span class="line">    <span class="comment">#access_log  /var/log/nginx/log/host.access.log  main;</span></span><br><span class="line"></span><br><span class="line">    <span class="string">location</span> <span class="string">/</span> <span class="string">&#123;</span></span><br><span class="line">        <span class="string">root</span>   <span class="string">/usr/share/nginx/html;</span>   <span class="string">//配置url映射的真实位置</span></span><br><span class="line">        <span class="string">index</span>  <span class="string">index.html</span> <span class="string">index.htm;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#error_page  404              /404.html;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># redirect server error pages to the static page /50x.html</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    <span class="string">error_page</span>   <span class="number">500</span> <span class="number">502</span> <span class="number">503</span> <span class="number">504</span>  <span class="string">/50x.html;</span></span><br><span class="line">    <span class="string">location</span> <span class="string">=</span> <span class="string">/50x.html</span> <span class="string">&#123;</span></span><br><span class="line">        <span class="string">root</span>   <span class="string">html;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="3-编写Dockerfile文件"><a href="#3-编写Dockerfile文件" class="headerlink" title="3. 编写Dockerfile文件"></a>3. 编写Dockerfile文件</h2><figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="string">===</span> <span class="string">Dockerfile文件</span> <span class="string">===</span></span><br><span class="line"></span><br><span class="line"><span class="string">FROM</span> <span class="attr">nginx:1.14.0</span> <span class="string">//使用Nginx作为基础镜像（从镜像仓库拉取）</span></span><br><span class="line"></span><br><span class="line"><span class="string">MAINTAINER</span> <span class="string">ldj</span> <span class="string">//作者</span></span><br><span class="line"></span><br><span class="line"><span class="string">RUN</span> <span class="string">rm</span> <span class="string">/etc/nginx/conf.d/default.conf</span> <span class="string">//删除nginx</span> <span class="string">默认配置(后边路径说明nginx镜像以linux系统作为基础镜像)</span></span><br><span class="line"></span><br><span class="line"><span class="string">ADD</span> <span class="string">default.conf</span> <span class="string">/etc/nginx/conf.d/</span> <span class="string">//添加我们自己的配置</span> <span class="string">default.conf</span> <span class="string">在下面</span></span><br><span class="line"></span><br><span class="line"><span class="string">COPY</span> <span class="string">dist/</span>  <span class="string">/usr/share/nginx/html/</span>  <span class="string">//把刚才生成dist文件夹下的文件copy到nginx下面去</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="4-创建镜像"><a href="#4-创建镜像" class="headerlink" title="4. 创建镜像"></a>4. 创建镜像</h2><figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 当前文件结构</span></span><br><span class="line"></span><br><span class="line">├── <span class="keyword">default</span>.conf</span><br><span class="line">├── dist</span><br><span class="line">└── Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="meta"># docker打包</span></span><br><span class="line"><span class="meta"># -t指定镜像名称:版本号（tag）</span></span><br><span class="line">docker image build -t biggfish:<span class="number">1.0</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 生成容器</span></span><br><span class="line"><span class="meta"># 末尾千万不要加 /bin/bash 否则端口不能正常映射</span></span><br><span class="line">docker container run -p <span class="number">3000</span>:<span class="number">3000</span> -itd --name biggfishContainer biggfish:<span class="number">1.0</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="5-访问测试"><a href="#5-访问测试" class="headerlink" title="5. 访问测试"></a>5. 访问测试</h2><figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">通过 本机ip:<span class="number">3000</span> 访问</span><br><span class="line"></span><br><span class="line">如果能看到项目首页：成功</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>docker</category>
-      </categories>
-      <tags>
-        <tag>教程</tag>
-        <tag>docker</tag>
-        <tag>nginx</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>POJO与JavaBean的区别</title>
     <url>/2020/09/19/POJO%E4%B8%8EJavaBean%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
     <content><![CDATA[<p>本文转载自 <a href="https://www.jianshu.com/p/224489dfdec8" target="_blank" rel="noopener">简书 (匠丶): java对象 POJO和JavaBean的区别</a></p>
@@ -127,6 +103,69 @@
       <tags>
         <tag>java</tag>
         <tag>概念</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>docker常用指令</title>
+    <url>/2020/09/18/docker%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/</url>
+    <content><![CDATA[<figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 进入容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//（run方式）运行容器时在使用 -d 参数时，容器启动后会进入后台</span></span><br><span class="line"><span class="comment">// -it参数：命令提示符效果（i：交互式 t：伪终端）</span></span><br><span class="line"><span class="comment">// /bin/bash 参数表明进入容器后执行的cmd命令（使用shell指令）</span></span><br><span class="line"></span><br><span class="line">docker exec -it 容器id /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment">//退出当前容器（exec进入，exit退出时不停止容器；attach进入，停止）</span></span><br><span class="line"></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta"># 拉取镜像（从docker hub镜像仓库）</span></span><br><span class="line">docker pull nginx(镜像名称)</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看镜像 </span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta"># 创建镜像（提前写好Dockerfile） </span></span><br><span class="line"><span class="comment">// -t 指定构建的镜像名称（target）</span></span><br><span class="line">docker image build -t diyimage:<span class="number">0.0</span><span class="number">.1</span> .</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除镜像 </span></span><br><span class="line"><span class="comment">// -f参数：force</span></span><br><span class="line">docker image rm 镜像id</span><br><span class="line">docker rmi [-f] 镜像id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 通过镜像生成容器 </span></span><br><span class="line">docker container run -p <span class="number">8000</span>:<span class="number">3000</span> -itd --name 容器名称 image01:<span class="number">0.0</span><span class="number">.1</span> /bin/bash</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">注：</span></span><br><span class="line"><span class="comment">每次run都会新增容器</span></span><br><span class="line"><span class="comment">-p参数：容器的 3000 端口映射到本机的 8000 端口。</span></span><br><span class="line"><span class="comment">-it参数：容器的 Shell 映射到当前的 Shell，然后你在本机窗口输入的命令，就会传入容器。</span></span><br><span class="line"><span class="comment">-d参数：容器生成后，后台运行</span></span><br><span class="line"><span class="comment">--name参数：指定容器的名称（不指定系统随机命名）</span></span><br><span class="line"><span class="comment">image01:0.0.1：image 文件的名字（如果有标签，还需要提供标签，默认是 latest 标签）</span></span><br><span class="line"><span class="comment">/bin/bash：容器启动以后，内部第一个执行的命令。这里是启动 Bash，保证用户可以使用 Shell。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">又注：如果镜像是基于nginx的，则不要写/bin/bash，否则映射出去的端口失效(无法访问)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 停止/启动容器 </span></span><br><span class="line">docker container kill/stop/start [containID]</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除容器 </span></span><br><span class="line">docker container rm 容器id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看容器 </span></span><br><span class="line">docker container ls</span><br><span class="line">docker container ls -all</span><br><span class="line"></span><br><span class="line">docker ps</span><br><span class="line">docker ps -a</span><br><span class="line"></span><br><span class="line"><span class="meta"># 保存镜像（eg：viewer-镜像名） </span></span><br><span class="line"></span><br><span class="line">docker save viewers-images  -o  /home/ldj/viewers-image.tar</span><br><span class="line"></span><br><span class="line"><span class="meta"># 载入本地镜像 </span></span><br><span class="line"></span><br><span class="line">docker load -i viewers-image.tar</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>docker</category>
+      </categories>
+      <tags>
+        <tag>docker</tag>
+        <tag>命令</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>二叉树的遍历</title>
+    <url>/2020/10/30/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E9%81%8D%E5%8E%86/</url>
+    <content><![CDATA[<p>二叉树的遍历主要分为<strong>深度优先遍历</strong>(dfs)和<strong>广度优先遍历</strong>(bfs)。</p>
+<p>深度优先遍历包括前序遍历、中序遍历和后序遍历，这三种遍历方式都有<strong>递归</strong>和<strong>迭代</strong>两种实现方式。</p>
+<p>广度优先遍历也就是通常我们所说的层次遍历，通常用迭代方式实现。</p>
+<p>前序、中序与后序都是从根节点的视角描述的，前序遍历顺序是<code>根节点——左子树——右子树</code>，中序是<code>左子树——根节点——右子树</code>，后序是<code>左子树——右子树——根节点</code>。</p>
+<p>树的定义本身就是递归定义，所以采用递归方式实现树的前序、中序、后序遍历容易理解且代码简洁。方法的调用栈会保证树的完全遍历。</p>
+<p>而通过非递归的方式实现遍历，则需要借助其他的数据结构，比如栈、队列、堆等。</p>
+<p>递归和迭代本质上都是循环。</p>
+<p>递归存在着方法调用方法自身。迭代暗示着循环的某次计算结果（输出）会作为下一次循环计算的参数（输入）。</p>
+<h1 id="1-深度优先遍历"><a href="#1-深度优先遍历" class="headerlink" title="1. 深度优先遍历"></a>1. 深度优先遍历</h1><p>节点定义。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="symbol">TreeNode</span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="built_in">int</span> val;</span><br><span class="line">	<span class="keyword">public</span> TreeNode left;</span><br><span class="line">	<span class="keyword">public</span> TreeNode right;</span><br><span class="line">	<span class="keyword">public</span> TreeNode(<span class="built_in">int</span> v)&#123;</span><br><span class="line">		<span class="keyword">this</span>.val=v;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-1-前序遍历"><a href="#1-1-前序遍历" class="headerlink" title="1.1 前序遍历"></a>1.1 前序遍历</h2><p>递归方式实现。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">preOrderTraversal</span><span class="params">(TreeNode root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root != <span class="keyword">null</span>)&#123;</span><br><span class="line">        System.out.print(root.val+<span class="string">" "</span>);</span><br><span class="line">        preOrderTraversal(root.left);</span><br><span class="line">        preOrderTraversal(root.right);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>迭代方式实现。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//利用 栈 模拟 递归过程 实现循环前序遍历二叉树</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">nonrecursivePreOrderTraversal</span><span class="params">(TreeNode root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root==<span class="keyword">null</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    Deque&lt;TreeNode&gt; stack = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">    </span><br><span class="line">   <span class="keyword">while</span>(root != <span class="keyword">null</span> || !stack.isEmpty())&#123;</span><br><span class="line">       <span class="keyword">while</span>(root != <span class="keyword">null</span>)&#123;</span><br><span class="line">           System.out.print(root.val+<span class="string">" "</span>);</span><br><span class="line">           stack.push(root); <span class="comment">//先访问，再入栈</span></span><br><span class="line">           </span><br><span class="line">           root=root.left;</span><br><span class="line">       &#125;</span><br><span class="line">       </span><br><span class="line">       <span class="keyword">if</span>(!stack.isEmpty())&#123;</span><br><span class="line">            TreeNode root = stack.pop();    <span class="comment">//出栈，并处理右子树</span></span><br><span class="line">            root=root.right;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-2-中序遍历"><a href="#1-2-中序遍历" class="headerlink" title="1.2 中序遍历"></a>1.2 中序遍历</h2><p>递归方式实现。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">inOrderTraversal</span><span class="params">(TreeNode root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root != <span class="keyword">null</span>)&#123;</span><br><span class="line">        inOrderTraversal(root.left);</span><br><span class="line">        System.out.print(root.val+<span class="string">" "</span>);</span><br><span class="line">        inOrderTraversal(root.right);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>迭代方式实现。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">nonrecursiveInOrderTraversal</span><span class="params">(TreeNode root)</span></span>&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span>(root == <span class="keyword">null</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    Deque&lt;TreeNode&gt; stack = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>( root != <span class="keyword">null</span> || !stack.isEmpty())&#123;</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">while</span>(root != <span class="keyword">null</span>)&#123;</span><br><span class="line">          stack.push(root);</span><br><span class="line">          root = root.left;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(!stack.isEmpty())&#123;</span><br><span class="line">            TreeNode root=stack.pop();  <span class="comment">//出栈</span></span><br><span class="line">            System.out.print(root.val+<span class="string">" "</span>);</span><br><span class="line">            root=root.right;    <span class="comment">//处理右子树</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-3-后序遍历"><a href="#1-3-后序遍历" class="headerlink" title="1.3 后序遍历"></a>1.3 后序遍历</h2><p>递归方式实现。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">postOrderTraversal</span><span class="params">(TreeNode root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root != <span class="keyword">null</span>)&#123;</span><br><span class="line">        postOrderTraversal(root.left);</span><br><span class="line">        postOrderTraversal(root.right);</span><br><span class="line">        System.out.print(root.val+<span class="string">" "</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>迭代方式实现。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//后序遍历与前、中序遍历不太一样</span></span><br><span class="line"><span class="comment">//当前节点是否打印：它的右子树为 null ,或者它的右子树已经被访问了（游标标识）</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">nonrecursivePostOrderTraversal</span><span class="params">(TreeNode root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root==<span class="keyword">null</span>) &#123;<span class="keyword">return</span>;&#125;</span><br><span class="line">    </span><br><span class="line">    Deque&lt;TreeNode&gt; stack = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">    </span><br><span class="line">    TreeNode node = root; <span class="comment">//替换，使用node变量</span></span><br><span class="line">    TreeNode lastVisit = root;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>(node != <span class="keyword">null</span> || !stack.isEmpty())&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span>(node != <span class="keyword">null</span>)&#123;</span><br><span class="line">            stack.push(node);</span><br><span class="line">            node=node.left;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        node=stack.peek();  <span class="comment">//查看当前栈顶元素</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(node.right == <span class="keyword">null</span> || node.right==lastVisit)&#123;  <span class="comment">//如果当前节点右子树为空或者右子树已经被访问</span></span><br><span class="line">            System.out.print(node.val+<span class="string">" "</span>);</span><br><span class="line">            stack.pop();</span><br><span class="line">            lastVisit=node;</span><br><span class="line">            node=<span class="keyword">null</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;  <span class="comment">//否则，继续遍历右子树（保证遍历完全部节点）</span></span><br><span class="line">            node=node.right;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="2-广度优先遍历-层次遍历"><a href="#2-广度优先遍历-层次遍历" class="headerlink" title="2. 广度优先遍历(层次遍历)"></a>2. 广度优先遍历(层次遍历)</h1><p>通过迭代方式实现。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">levelTraversal</span><span class="params">(TreeNode root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root==<span class="keyword">null</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    Queue&lt;TreeNode&gt; queue=<span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">    </span><br><span class="line">    queue.add(root);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>(!queue.isEmpty())&#123;</span><br><span class="line">        TreeNode node=queue.remove();</span><br><span class="line">        System.out.print(node.val+<span class="string">" "</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(node.left != <span class="keyword">null</span>)&#123;</span><br><span class="line">            queue.add(node.left);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(node.right != <span class="keyword">null</span>)&#123;</span><br><span class="line">            queue.add(node.right);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里可以对照着广度优先遍历的代码形式，重新描述一下深度优先遍历（非递归实现前序遍历）。</p>
+<p>下述这种遍历方式不具备扩展性，类似于图的深度优先遍历（DFS）。这种方式应该是对先序遍历的一种特殊实现，思路清晰明了，在中序和后序方式中不适用。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">depthOrderTraversal</span><span class="params">(TreeNode root)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(root==<span class="keyword">null</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    Deque&lt;TreeNode&gt; stack=<span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">    </span><br><span class="line">    stack.push(root);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>(!stack.isEmpty())&#123;</span><br><span class="line">        </span><br><span class="line">        TreeNode node=stack.pop();</span><br><span class="line">        System.out.print(node.val+<span class="string">" "</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(node.right != <span class="keyword">null</span>)&#123;</span><br><span class="line">            stack.push(node.right);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(node.left != <span class="keyword">null</span>)&#123;</span><br><span class="line">            stack.push(node.left);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="3-参考资料"><a href="#3-参考资料" class="headerlink" title="3. 参考资料"></a>3. 参考资料</h1><p><a href="https://www.jianshu.com/p/456af5480cee" target="_blank" rel="noopener">二叉树遍历(先序、中序、后序)</a></p>
+<p><a href="https://blog.csdn.net/kerryfish/article/details/24309617" target="_blank" rel="noopener">JAVA下实现二叉树的先序、中序、后序、层序遍历（递归和循环）</a></p>
+]]></content>
+      <categories>
+        <category>算法</category>
+      </categories>
+      <tags>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
@@ -212,9 +251,18 @@
       </tags>
   </entry>
   <entry>
-    <title>docker常用指令</title>
-    <url>/2020/09/18/docker%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/</url>
-    <content><![CDATA[<figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 进入容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//（run方式）运行容器时在使用 -d 参数时，容器启动后会进入后台</span></span><br><span class="line"><span class="comment">// -it参数：命令提示符效果（i：交互式 t：伪终端）</span></span><br><span class="line"><span class="comment">// /bin/bash 参数表明进入容器后执行的cmd命令（使用shell指令）</span></span><br><span class="line"></span><br><span class="line">docker exec -it 容器id /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment">//退出当前容器（exec进入，exit退出时不停止容器；attach进入，停止）</span></span><br><span class="line"></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta"># 拉取镜像（从docker hub镜像仓库）</span></span><br><span class="line">docker pull nginx(镜像名称)</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看镜像 </span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta"># 创建镜像（提前写好Dockerfile） </span></span><br><span class="line"><span class="comment">// -t 指定构建的镜像名称（target）</span></span><br><span class="line">docker image build -t diyimage:<span class="number">0.0</span><span class="number">.1</span> .</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除镜像 </span></span><br><span class="line"><span class="comment">// -f参数：force</span></span><br><span class="line">docker image rm 镜像id</span><br><span class="line">docker rmi [-f] 镜像id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 通过镜像生成容器 </span></span><br><span class="line">docker container run -p <span class="number">8000</span>:<span class="number">3000</span> -itd --name 容器名称 image01:<span class="number">0.0</span><span class="number">.1</span> /bin/bash</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">注：</span></span><br><span class="line"><span class="comment">每次run都会新增容器</span></span><br><span class="line"><span class="comment">-p参数：容器的 3000 端口映射到本机的 8000 端口。</span></span><br><span class="line"><span class="comment">-it参数：容器的 Shell 映射到当前的 Shell，然后你在本机窗口输入的命令，就会传入容器。</span></span><br><span class="line"><span class="comment">-d参数：容器生成后，后台运行</span></span><br><span class="line"><span class="comment">--name参数：指定容器的名称（不指定系统随机命名）</span></span><br><span class="line"><span class="comment">image01:0.0.1：image 文件的名字（如果有标签，还需要提供标签，默认是 latest 标签）</span></span><br><span class="line"><span class="comment">/bin/bash：容器启动以后，内部第一个执行的命令。这里是启动 Bash，保证用户可以使用 Shell。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">又注：如果镜像是基于nginx的，则不要写/bin/bash，否则映射出去的端口失效(无法访问)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 停止/启动容器 </span></span><br><span class="line">docker container kill/stop/start [containID]</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除容器 </span></span><br><span class="line">docker container rm 容器id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看容器 </span></span><br><span class="line">docker container ls</span><br><span class="line">docker container ls -all</span><br><span class="line"></span><br><span class="line">docker ps</span><br><span class="line">docker ps -a</span><br><span class="line"></span><br><span class="line"><span class="meta"># 保存镜像（eg：viewer-镜像名） </span></span><br><span class="line"></span><br><span class="line">docker save viewers-images  -o  /home/ldj/viewers-image.tar</span><br><span class="line"></span><br><span class="line"><span class="meta"># 载入本地镜像 </span></span><br><span class="line"></span><br><span class="line">docker load -i viewers-image.tar</span><br></pre></td></tr></table></figure>
+    <title>docker通过nginx镜像部署静态文件</title>
+    <url>/2020/09/18/docker%E9%80%9A%E8%BF%87nginx%E9%95%9C%E5%83%8F%E9%83%A8%E7%BD%B2%E9%9D%99%E6%80%81%E6%96%87%E4%BB%B6/</url>
+    <content><![CDATA[<p>docker通过nginx镜像部署项目的实质，就是<strong>将（项目）静态文件和及其依赖（nginx）制作成镜像(image)，然后通过镜像生成容器</strong>的过程。这样，通过运行容器就能运行服务，而且image可以方便分享。</p>
+<p>准备工作包括：需要部署的静态文件，自定义的nginx配置文件，<strong>Dockerfile文件</strong>（制作镜像）。</p>
+<h2 id="1-获得打包后的静态文件"><a href="#1-获得打包后的静态文件" class="headerlink" title="1. 获得打包后的静态文件"></a>1. 获得打包后的静态文件</h2><p>vue项目与react项目的打包方式不一样，基本上执行<code>yarn build</code>类似的指令就可以构建打包，获得<code>dist/</code>目录（内部保存的就是静态文件）。一般而言，开发环境中<code>node_module</code>依赖包特别多，打包过程只有用到的依赖进入了静态文件。所以开发环境中项目可能几个GB，但打包完成的静态文件只占几十MB。</p>
+<h2 id="2-准备default-conf文件"><a href="#2-准备default-conf文件" class="headerlink" title="2. 准备default.conf文件"></a>2. 准备default.conf文件</h2><figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="string">===</span> <span class="string">default.conf文件（替换nginx镜像中默认的配置文件）</span> <span class="string">===</span></span><br><span class="line"></span><br><span class="line"><span class="string">server</span> <span class="string">&#123;</span></span><br><span class="line">    <span class="string">listen</span>       <span class="number">3000</span><span class="string">;</span> <span class="string">//项目中的端口号(真实使用#注释)</span></span><br><span class="line">    <span class="string">server_name</span>  <span class="string">localhost;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#charset koi8-r;</span></span><br><span class="line">    <span class="comment">#access_log  /var/log/nginx/log/host.access.log  main;</span></span><br><span class="line"></span><br><span class="line">    <span class="string">location</span> <span class="string">/</span> <span class="string">&#123;</span></span><br><span class="line">        <span class="string">root</span>   <span class="string">/usr/share/nginx/html;</span>   <span class="string">//配置url映射的真实位置</span></span><br><span class="line">        <span class="string">index</span>  <span class="string">index.html</span> <span class="string">index.htm;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#error_page  404              /404.html;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># redirect server error pages to the static page /50x.html</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    <span class="string">error_page</span>   <span class="number">500</span> <span class="number">502</span> <span class="number">503</span> <span class="number">504</span>  <span class="string">/50x.html;</span></span><br><span class="line">    <span class="string">location</span> <span class="string">=</span> <span class="string">/50x.html</span> <span class="string">&#123;</span></span><br><span class="line">        <span class="string">root</span>   <span class="string">html;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="3-编写Dockerfile文件"><a href="#3-编写Dockerfile文件" class="headerlink" title="3. 编写Dockerfile文件"></a>3. 编写Dockerfile文件</h2><figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="string">===</span> <span class="string">Dockerfile文件</span> <span class="string">===</span></span><br><span class="line"></span><br><span class="line"><span class="string">FROM</span> <span class="attr">nginx:1.14.0</span> <span class="string">//使用Nginx作为基础镜像（从镜像仓库拉取）</span></span><br><span class="line"></span><br><span class="line"><span class="string">MAINTAINER</span> <span class="string">ldj</span> <span class="string">//作者</span></span><br><span class="line"></span><br><span class="line"><span class="string">RUN</span> <span class="string">rm</span> <span class="string">/etc/nginx/conf.d/default.conf</span> <span class="string">//删除nginx</span> <span class="string">默认配置(后边路径说明nginx镜像以linux系统作为基础镜像)</span></span><br><span class="line"></span><br><span class="line"><span class="string">ADD</span> <span class="string">default.conf</span> <span class="string">/etc/nginx/conf.d/</span> <span class="string">//添加我们自己的配置</span> <span class="string">default.conf</span> <span class="string">在下面</span></span><br><span class="line"></span><br><span class="line"><span class="string">COPY</span> <span class="string">dist/</span>  <span class="string">/usr/share/nginx/html/</span>  <span class="string">//把刚才生成dist文件夹下的文件copy到nginx下面去</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="4-创建镜像"><a href="#4-创建镜像" class="headerlink" title="4. 创建镜像"></a>4. 创建镜像</h2><figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 当前文件结构</span></span><br><span class="line"></span><br><span class="line">├── <span class="keyword">default</span>.conf</span><br><span class="line">├── dist</span><br><span class="line">└── Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="meta"># docker打包</span></span><br><span class="line"><span class="meta"># -t指定镜像名称:版本号（tag）</span></span><br><span class="line">docker image build -t biggfish:<span class="number">1.0</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 生成容器</span></span><br><span class="line"><span class="meta"># 末尾千万不要加 /bin/bash 否则端口不能正常映射</span></span><br><span class="line">docker container run -p <span class="number">3000</span>:<span class="number">3000</span> -itd --name biggfishContainer biggfish:<span class="number">1.0</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="5-访问测试"><a href="#5-访问测试" class="headerlink" title="5. 访问测试"></a>5. 访问测试</h2><figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">通过 本机ip:<span class="number">3000</span> 访问</span><br><span class="line"></span><br><span class="line">如果能看到项目首页：成功</span><br></pre></td></tr></table></figure>
 
 ]]></content>
       <categories>
@@ -222,7 +270,39 @@
       </categories>
       <tags>
         <tag>docker</tag>
-        <tag>命令</tag>
+        <tag>教程</tag>
+        <tag>nginx</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>博客伊始</title>
+    <url>/2019/09/20/%E5%8D%9A%E5%AE%A2%E4%BC%8A%E5%A7%8B/</url>
+    <content><![CDATA[<h2 id="博客伊始"><a href="#博客伊始" class="headerlink" title="博客伊始"></a>博客伊始</h2><p align="right"><font color="grey">作者：冬结</font></p>
+
+<blockquote>
+<p>写在前面：<br>偶然看到Hexo模板的博客，观感不错，加上前辈也搭过，就试试以这种相对简单的形式搭建起来玩。一方面简单学习以现有框架搭建专属博客的“技术”，另一方面也能有个容器装一点自己的笔记，尽管可能比较少，可能并不安全，聊胜于无。</p>
+</blockquote>
+<h3 id="兴趣"><a href="#兴趣" class="headerlink" title="兴趣"></a>兴趣</h3><p>我的兴趣，很难讲。佛系（可能）心态的人在平静生活中貌似对所有的事不放心上，所以，电影可以不看、单车可以不骑、乒乓球可以不打、书可以不阅读、随笔可以不写、游戏可以不玩。自我认知是一个漫长的过程，从浪漫理想主义到实用现实主义，说到底也划不清界限。妥协的做法是就此作罢，不去深究，也就能将困惑搁置一旁。况且说辞也是一大把，比如复杂的个体就能说服我自己。一贯的自我否定，也可以说深究一法至少能够审视自我更加全面深刻，更加接近真实。否定之否定，打住！</p>
+<p>接着说兴趣。从某种维度上讲，兴趣带来愉悦、专注与充实感。</p>
+<p>这样说来，好的电影是我的兴趣，带给我专注与思考。看过的电影也不少，影评却没尝试过一篇。电影没有带给我充实感，但我并不认为它在浪费时间。娱乐的底质，依旧能够容纳艺术与生活。尽管总能从这种媒介中看到不真实，生活的经验依然鲜活。现在的我能以相对包容的眼光对待现实的种种“怪象”，大抵与之有所关联。</p>
+<p>骑单车溜达也算得上。单车是真的单车，单人单骑，随便找个目标，也就慢慢悠悠的去。骑行就不能描述我的方式了，老老实实地去骑单车溜达。某次，什么背景的现在全无记忆，只是感到沉闷的低落，简直到不能忍受的地步，然后就溜达着去后海那边。也许逛胡同，也许没有。至于能否缓解我的状态，我也记不得。只是到那种状态，我能想到这种方式去排解，多少也算是一种认同吧。</p>
+<p>至于随笔（恰当称谓？），也能算是我的兴趣。偶尔写写东西，偶尔是真的偶偶尔。我从写文字当中获取的安静、专注、充实感显而易见，而文字大多都是当时的情绪与想法，可能脱胎于日记，但也将一些真实到黑暗的思考隐藏起来，多少能见光。不知道将自我产出的文字视若珍宝算不算病态，但我的确珍视，在我眼里这些文字能真切表示一种状态，这一刻我就是美化的真实的。至于这种方式何以占据重要的位置，大概因为内心戏丰富如我，不善表达情绪，多少是关掉大门开几扇窗。</p>
+<p>其他能说的，读书、乒乓和游戏，目前的程度都还比较浅。曾经都热过一阵的行为，慢慢沉寂下来也沾上了尘土。所谓的我的兴趣，没得一项算是个人特长。骑车只是休闲，电影只是娱乐，随笔也只是偶尔的文艺，但是至少这些，能够成为生活的调剂，是能够令我感到舒适的生活方式。</p>
+<h3 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h3><p>整理些技术向的学习内容，也多少要往这博客里边搁，况且，这本就是搭建这玩意的初衷。尽管不太喜欢用“工作”一词，但还是必须得慢慢习惯的。</p>
+<p>求学时期拥有很好的学习环境，这段时间也就余下几年，两者都不得不承认。实验室的一些开发工作，还有自己看过的、学过的、实践过的一些内容，选择性的往这个博客里边搁。尽量减少一些空洞的文字（多一些图），减少随处可见的教程，多一点自己的总结，就是描述不规范，甚至有错误也无关紧要。他人的是他人的，转化为自己的才是自己的。尽管这些话可有可无，也就这样摆在这里了。</p>
+<p>至于具体的工作内容，也没法细说。只是一段时间过去，觉得稍微闲下来时，慢悠悠写一点总结，多少能够察觉出自己在缓慢的生长，就很开心了。至于成长的快与慢，也不多去琢磨。吃饭慢，跑步慢，性子慢……真要快节奏起来，真就为难我“胖虎”了！</p>
+<h3 id="成长"><a href="#成长" class="headerlink" title="成长"></a>成长</h3><p>现在过多的想法与计划一如既往地空白，只是希望每天有点进步，慢慢生长吧。</p>
+<p>趁现在还有点记忆，罗列下自初中以来每个阶段自我希求的关键词。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">改变 ：白墙上丑陋的浓墨毛笔字，墨迹未干尚不回望，小屋也拆了，斑驳的往事不能再找回。</span><br><span class="line">掌控 ：年少时总希望能够决定自己的命运，可是连早睡早起也没有做到。</span><br><span class="line">自由 ：那四年时光，持续性潇洒，间歇性焦虑。觉睡得很饱，书读得也少。向自己一样平平淡淡。</span><br><span class="line">成长 ：有的人每天跑步，有的人会慢慢散步。蜗牛和火箭，都在自以为的前进。</span><br></pre></td></tr></table></figure>
+
+<h3 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h3><p>今天是2019年9月20日，算是一个开始吧！</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/xingkong.jpeg" alt="星空"></p>
+]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>随笔</tag>
       </tags>
   </entry>
   <entry>
@@ -281,37 +361,6 @@
       </tags>
   </entry>
   <entry>
-    <title>博客伊始</title>
-    <url>/2019/09/20/%E5%8D%9A%E5%AE%A2%E4%BC%8A%E5%A7%8B/</url>
-    <content><![CDATA[<h2 id="博客伊始"><a href="#博客伊始" class="headerlink" title="博客伊始"></a>博客伊始</h2><p align="right"><font color="grey">作者：冬结</font></p>
-
-<blockquote>
-<p>写在前面：<br>偶然看到Hexo模板的博客，观感不错，加上前辈也搭过，就试试以这种相对简单的形式搭建起来玩。一方面简单学习以现有框架搭建专属博客的“技术”，另一方面也能有个容器装一点自己的笔记，尽管可能比较少，可能并不安全，聊胜于无。</p>
-</blockquote>
-<h3 id="兴趣"><a href="#兴趣" class="headerlink" title="兴趣"></a>兴趣</h3><p>我的兴趣，很难讲。佛系（可能）心态的人在平静生活中貌似对所有的事不放心上，所以，电影可以不看、单车可以不骑、乒乓球可以不打、书可以不阅读、随笔可以不写、游戏可以不玩。自我认知是一个漫长的过程，从浪漫理想主义到实用现实主义，说到底也划不清界限。妥协的做法是就此作罢，不去深究，也就能将困惑搁置一旁。况且说辞也是一大把，比如复杂的个体就能说服我自己。一贯的自我否定，也可以说深究一法至少能够审视自我更加全面深刻，更加接近真实。否定之否定，打住！</p>
-<p>接着说兴趣。从某种维度上讲，兴趣带来愉悦、专注与充实感。</p>
-<p>这样说来，好的电影是我的兴趣，带给我专注与思考。看过的电影也不少，影评却没尝试过一篇。电影没有带给我充实感，但我并不认为它在浪费时间。娱乐的底质，依旧能够容纳艺术与生活。尽管总能从这种媒介中看到不真实，生活的经验依然鲜活。现在的我能以相对包容的眼光对待现实的种种“怪象”，大抵与之有所关联。</p>
-<p>骑单车溜达也算得上。单车是真的单车，单人单骑，随便找个目标，也就慢慢悠悠的去。骑行就不能描述我的方式了，老老实实地去骑单车溜达。某次，什么背景的现在全无记忆，只是感到沉闷的低落，简直到不能忍受的地步，然后就溜达着去后海那边。也许逛胡同，也许没有。至于能否缓解我的状态，我也记不得。只是到那种状态，我能想到这种方式去排解，多少也算是一种认同吧。</p>
-<p>至于随笔（恰当称谓？），也能算是我的兴趣。偶尔写写东西，偶尔是真的偶偶尔。我从写文字当中获取的安静、专注、充实感显而易见，而文字大多都是当时的情绪与想法，可能脱胎于日记，但也将一些真实到黑暗的思考隐藏起来，多少能见光。不知道将自我产出的文字视若珍宝算不算病态，但我的确珍视，在我眼里这些文字能真切表示一种状态，这一刻我就是美化的真实的。至于这种方式何以占据重要的位置，大概因为内心戏丰富如我，不善表达情绪，多少是关掉大门开几扇窗。</p>
-<p>其他能说的，读书、乒乓和游戏，目前的程度都还比较浅。曾经都热过一阵的行为，慢慢沉寂下来也沾上了尘土。所谓的我的兴趣，没得一项算是个人特长。骑车只是休闲，电影只是娱乐，随笔也只是偶尔的文艺，但是至少这些，能够成为生活的调剂，是能够令我感到舒适的生活方式。</p>
-<h3 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h3><p>整理些技术向的学习内容，也多少要往这博客里边搁，况且，这本就是搭建这玩意的初衷。尽管不太喜欢用“工作”一词，但还是必须得慢慢习惯的。</p>
-<p>求学时期拥有很好的学习环境，这段时间也就余下几年，两者都不得不承认。实验室的一些开发工作，还有自己看过的、学过的、实践过的一些内容，选择性的往这个博客里边搁。尽量减少一些空洞的文字（多一些图），减少随处可见的教程，多一点自己的总结，就是描述不规范，甚至有错误也无关紧要。他人的是他人的，转化为自己的才是自己的。尽管这些话可有可无，也就这样摆在这里了。</p>
-<p>至于具体的工作内容，也没法细说。只是一段时间过去，觉得稍微闲下来时，慢悠悠写一点总结，多少能够察觉出自己在缓慢的生长，就很开心了。至于成长的快与慢，也不多去琢磨。吃饭慢，跑步慢，性子慢……真要快节奏起来，真就为难我“胖虎”了！</p>
-<h3 id="成长"><a href="#成长" class="headerlink" title="成长"></a>成长</h3><p>现在过多的想法与计划一如既往地空白，只是希望每天有点进步，慢慢生长吧。</p>
-<p>趁现在还有点记忆，罗列下自初中以来每个阶段自我希求的关键词。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">改变 ：白墙上丑陋的浓墨毛笔字，墨迹未干尚不回望，小屋也拆了，斑驳的往事不能再找回。</span><br><span class="line">掌控 ：年少时总希望能够决定自己的命运，可是连早睡早起也没有做到。</span><br><span class="line">自由 ：那四年时光，持续性潇洒，间歇性焦虑。觉睡得很饱，书读得也少。向自己一样平平淡淡。</span><br><span class="line">成长 ：有的人每天跑步，有的人会慢慢散步。蜗牛和火箭，都在自以为的前进。</span><br></pre></td></tr></table></figure>
-
-<h3 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h3><p>今天是2019年9月20日，算是一个开始吧！</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/xingkong.jpeg" alt="星空"></p>
-]]></content>
-      <categories>
-        <category>随笔</category>
-      </categories>
-      <tags>
-        <tag>随笔</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>对象的序列化：Serializable接口</title>
     <url>/2020/10/12/%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9ASerializable%E6%8E%A5%E5%8F%A3/</url>
     <content><![CDATA[<p>一般而言，定义实体类时会实现 <code>Serializable</code>接口，同时还要显示指定<code>serialVersionUID</code>的值。</p>
@@ -343,131 +392,6 @@
       <tags>
         <tag>java</tag>
         <tag>Serializable接口</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>常见乱码问题及分析</title>
-    <url>/2020/07/03/%E5%B8%B8%E8%A7%81%E4%B9%B1%E7%A0%81%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/</url>
-    <content><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>有一个现成的古老的web项目，技术栈包括<code>JSP</code> <code>JAVA</code> <code>MYSQL</code>，<code>MyEclipse 10.5</code>作为开发工具，开发环境<code>JDK1.7</code> <code>Tomcat7</code> <code>Mysql5.5</code>。</p>
-<p>现在项目能够部署成功，正常访问。</p>
-<p>但是当提交的表单数据中包含中文时，数据库存储的相关数据显示为???。</p>
-<p>因为这个<code>BUG</code>，诞生这篇小结。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/pk0001.png" alt="朋克风"></p>
-<h1 id="常见乱码问题分析和总结"><a href="#常见乱码问题分析和总结" class="headerlink" title="常见乱码问题分析和总结"></a>常见乱码问题分析和总结</h1><p>本节内容选自<a href="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/index.html" target="_blank" rel="noopener">IBM Developer : 常见乱码问题分析和总结 </a></p>
-<h2 id="编码与解码"><a href="#编码与解码" class="headerlink" title="编码与解码"></a>编码与解码</h2><p>计算机不能直接存储字母，数字，图片，符号等，计算机能处理和工作的唯一单位是”比特位（bit）”，一个比特位通常只有 0 和 1，是（yes）和否（no），真（true）或者假（false）等等我们喜欢的称呼。利用比特位序列来代表字母，数字，图片，符号等，我们就需要一个存储规则，不同的比特序列代表不同的字符，这就是所谓的”编码”。反之，将存储在计算机中的比特位序列（或者叫二进制序列）解析显示出来成对应的字母，数字，图片和符号，称为”解码”，如同密码学中的加密和解密，下面将详细解释编码解码过程中涉及到的一些术语：</p>
-<p><strong>字符集合（Character set）</strong>：是各种文字和符号的总称，包括各国家文字、标点符号、图形符号、数字等，简单理解就是一个字库，与计算机以及编码无关。</p>
-<p><strong>字符编码集（Coded character set）</strong>：是一组字符对应的编码（即数字），为字符集合中的每一个字符给予一个数字，如 Unicode 为每一个字符分配一个唯一的码点与之一一对应。</p>
-<p><strong>字符编码（Character Encoding）</strong>：简单理解就是一个映射关系，将字符集对应的码点映射为一个个二进制序列，从而使得计算机可以存储和处理。常见的编码方式有 ASCII 编码、ISO-8859-1(不支持中文)、GBK、GB2312（中国编码，支持中文）、UTF-8 等等,详情见表 1。</p>
-<p><strong>字符集（Charset）</strong>：包括编码字符集合和字符编码，如 ASCII 字符集、ISO-8859-X、GB2312 字符集（简中）、BIG5 字符集（繁中）、GB18030 字符集、Shift-JIS 等，即下文中提到的字符集。</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">这里提到的字符集合与字符集是不同的概念，后者包含前者。</span><br><span class="line">一般乱码现象都是因为中文数据导致的，汉字占用双字节，所以支持中文的编码方式（GBK、UTF<span class="number">-8</span>等）也就是可以支持对双字节汉字进行编码。</span><br></pre></td></tr></table></figure>
-
-<p><strong>字符解码（Character Decoding）</strong>: 根据一定规则，将二进制序列映射成对应的正确字符串，即二进制序列–&gt;字符串，个人将其理解为”翻译”。</p>
-<p><strong>Code Point</strong>：称作码点或码位，是组成编码空间（或代码页）的数值。例如，ASCII 码包含 128 个码点，范围是 0 到 7F（16 进制）；ISO-8859-1 包含 256 个码点，范围是 0 到 FF；而 Unicode 包含 1,114,112 个码点，范围是 0 到 10FFFF。Unicode 码空间划分为 17 个 Unicode 字符平面（基本多文种平面，16 个辅助平面），每个平面有 65,536（= 216）个码点。因此 Unicode 码空间总计是 17 x 65,536 = 1,114,112。</p>
-<p><strong>Code Page</strong>：代码页或者内码表，是 IBM 早期称呼计算机的 BIOS 所支持的字符集编码（也称作 OEM 代码页）。Windows 系统在没有使用 UTF-16 之前，为了解决由于不同国家和地区采用的字符集不一致，很可能出现无法正常显示所有字符的问题，使用了代码页（Codepage）转换表的技术来过渡性的部分解决这一问题，即定义了一系列支持不同国家和地区所制定的字符集，被称为 Windows 代码页或 ANSI 代码页，然而代码页一般与其所对应的字符集之间并非完全相同，有时候会对字符集有所扩展，可以理解为一张字符-字节序列映射表，通过查表实现编码解码功能。操作系统中不同 Locale 设置默认使用不同的代码页。</p>
-<p><strong>Locale</strong>：是指特定于某个国家或地区的一组设定，包括代码页，以及数字、货币、时间和日期的格式等。在 Windows 内部，有两个 Locale 设置：系统 Locale 和用户 Locale。系统 Locale 决定代码页，用户 Locale 决定数字、货币、时间和日期的格式。</p>
-<h2 id="乱码产生原因"><a href="#乱码产生原因" class="headerlink" title="乱码产生原因"></a>乱码产生原因</h2><p>乱码产生的根源一般情况下可以归结为三方面即：编码引起的乱码、解码引起的乱码以及缺少某种字体库引起的乱码（这种情况需要用户安装对应的字体库），其中大部分乱码问题是由不合适的解码方式造成的，如图 3 所示的鱼骨图。</p>
-<p>图 3. 乱码产生原因</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image003.jpg" alt="乱码产生原因"></p>
-<h3 id="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"><a href="#从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法" class="headerlink" title="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"></a>从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法</h3><p>图 5. 编码方式引起的乱码剖析</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image005.jpg" alt="图 5. 编码方式引起的乱码剖析"></p>
-<p>图 6. 不正确的解码方式引起的乱码</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image006.png" alt="图 6. 不正确的解码方式引起的乱码"></p>
-<figure class="highlight 1c"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">乱码有很多形式。</span><br><span class="line"><span class="string">"??"</span>通常是由于编码引起的乱码，出现?说明原始字符的信息已经丢失，这种情况下形成的乱码是不可逆的，也就是说无论用什么解码方式都不能正确显示字符。</span><br><span class="line"><span class="string">"ÄãºÃ£¬ÖÐ¹ú"</span>一般由解码方式不对引起的，乱码可逆，即可以通过乱码恢复获取原始的字符信息。</span><br></pre></td></tr></table></figure>
-
-<h3 id="从编程角度分析出现乱码的场景和解决办法"><a href="#从编程角度分析出现乱码的场景和解决办法" class="headerlink" title="从编程角度分析出现乱码的场景和解决办法"></a>从编程角度分析出现乱码的场景和解决办法</h3><p>从编程角度来看，出现乱码的场景主要是有文本处理的时候，比如文件的新建和读取、复制和粘贴，导入和导出，打开和保存，数据存储和检索，显示，打印，分词处理，字符转换，规范化，搜索，整理和发送数据等，文本数据的示例包括平面文件，流文件，数据区域，目录名称，资源名称，用户标识等。图 9 是出现乱码的一个常见场景分类。</p>
-<p>图 9. 出现乱码的场景</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image009.jpg" alt="出现乱码的场景"></p>
-<p><strong>Web 程序中出现的乱码情况</strong></p>
-<p>在 web 应用程序中，存在用户输入以及输出显示的地方都有可能存在编码解码，图 12 简要概括了 HTTP web 请求响应环节。</p>
-<p>图 12. Web 请求响应环节中的编码解码</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image012.jpg" alt="请求响应环节中的编码解码"></p>
-<p><strong>数据库操作过程中的乱码</strong></p>
-<p>在实际应用中，和数据库操作相关的乱码可能出现在数据的导入和导出操作中，在整个过程中涉及到的字符集有服务器端数据库字符集、客户端操作系统字符集、客户端环境变量 nls_lang(lang_territory.charset)，这三个参数的工作流程如图 15 所示。如果这三个参数设置一样，整个数据库操作中就不会出现乱码问题，但是实际应用中客户端的情况复杂多样，很难保持三者一致，涉及到双字节字符就需要服务器端进行转码操作，而转码的桥梁就是 Unicode 字符集，这就要求数据库本身支持 UTF-8 编码方式。为了编码数据库操作过程中的乱码问题，在创建数据库的时候使用 UTF-8 编码方式，如果仅在某些列中使用多语言数据，则可以使用 SQL NCHAR 数据类型（NCHAR，NVARCHAR2 和 NCLOB）以 UTF-16 或 UTF-8 编码形式存储 Unicode 数据，避免存储空间的浪费。</p>
-<p>图 15. Oracle 数据库字符集</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image015.jpg" alt="Oracle 数据库字符集"></p>
-<h1 id="修改Windows的默认编码"><a href="#修改Windows的默认编码" class="headerlink" title="修改Windows的默认编码"></a>修改Windows的默认编码</h1><p>在Windows设置-时间与语言-语言-管理语言设置-更改系统区域设置中进行修改。</p>
-<p>联想到一个现象：通过执行startup.bat文件开启tomcat服务器时，打印的启动日志出现乱码。</p>
-<p>通过查询cmd的编码格式，并修改为utf-8编码格式，理论上能够解决上述乱码问题。实际上，执行chcp 65001，只是将当前cmd窗口的编码设置为utf-8。执行startup.bat时，会另外启动一个cmd进程，所以打印服务器启动日志的那个cmd窗口还是会有乱码。（除非从操作系统层面更改编码格式）</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//查看当前cmd的编码格式</span></span><br><span class="line"><span class="comment">//character code page</span></span><br><span class="line">chcp</span><br><span class="line"></span><br><span class="line"><span class="comment">//换成utf-8代码页</span></span><br><span class="line">chcp <span class="number">65001</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//换成默认的gbk</span></span><br><span class="line">chcp <span class="number">936</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>现在回过头来想背景中的问题。??的出现有可能是字符的编码方式不对，导致通过任何解码方式都读不出正确的字符。那么在哪个环节出现了这个问题呢？通过测试，表单数据提交到服务端，服务端获取数据并打印，显示正常。说明在浏览器到web服务端的编码解码方式是OK的。那么再来，就是java程序代码中将正常的字符数据存入数据库时发生了问题，导致数据库中数据显示为??。于是考虑中文存入数据库的编码方式出了问题。事实也应该就是这样的。</p>
-<p>【问题解决】java连接数据库的代码中，DBURL设置为<code>jdbc:mysql://localhost:3306/XXX?useUnicode=true&amp;characterEncoding=UTF-8</code>。重点就是后边的characterEncoding参数。</p>
-<p>字符数据在二进制与可识读形式之间来回切换跳转，编码解码的步骤都是循环重复的。博大精深的中国汉字，到底在代码的世界里也很独特。</p>
-<p>尽管问题解决，原因大概分析了，但真实的情形又是怎样的呢？谁又真正的可知？如果能够化身数据流，以数据本身的角度来看浏览器到数据库的往返之路，这该是很奇妙的想象与体验吧。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/hacker.png" alt="hacker"></p>
-]]></content>
-      <categories>
-        <category>常识</category>
-      </categories>
-      <tags>
-        <tag>乱码</tag>
-        <tag>编码</tag>
-        <tag>解码</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hexo与GitHub Pages搭建独立博客</title>
-    <url>/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>博客其实在很久之前按照教程已经搭建完成，现在才回头来写教程步骤。有时候会想是否多此一举，毕竟网上现成的优秀的教程比比皆是。所以权且不说这是搭建基于Hexo的博客教程，只是一个简单的记录。</p>
-<p>写一点东西，像擦肩而过的风。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/7.jpg" alt="起飞"></p>
-<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2><p><code>GitHub Pages</code> 是一项<strong>静态站点托管服务</strong>，它直接从<code>GitHub</code> 上的仓库获取<code>HTML</code>、<code>CSS</code>和<code>JavaScript</code>文件，（可选）通过构建过程运行文件，然后发布网站。</p>
-<p>有三种类型的 <code>GitHub Pages</code> 站点：项目、用户和组织。 项目站点连接到 <code>GitHub</code> 上托管的特定项目，用户和组织站点连接到特定的 <code>GitHub</code> 帐户。只能为每个 <code>GitHub</code>账户创建一个用户或组织站点。项目站点（无论是组织还是用户帐户拥有）没有限制。除非使用自定义域，否则用户和组织站点位于<code>http(s)://&lt;username&gt;.github.io</code> 或 <code>http(s)://&lt;organization&gt;.github.io</code>。</p>
-<p>基于<code>GitHub Pages</code>搭建个人独立博客，即属于用户或组织站点。</p>
-<p><code>GitHub Pages</code> 站点的发布来源是存储站点源文件的分支或文件夹。 所有站点都有默认的发布来源，项目站点还有其他可用的发布来源。用户和组织站点的默认发布来源是<code>master</code>分支。如果用户和组织站点的仓库是<code>master</code> 分支，您的站点将从该分支自动发布。无法为用户或组织站点选择不同的发布来源。</p>
-<p><code>GitHub Pages</code> 站点受到以下使用限制的约束：</p>
-<ul>
-<li><code>GitHub Pages</code> 源仓库建议的限制为1GB。</li>
-<li>发布的 <code>GitHub Pages</code> 站点不得超过 1 GB。</li>
-<li><code>GitHub Pages</code> 站点的软带宽限制为每月 100GB。</li>
-<li><code>GitHub Pages</code> 站点的软限制为每小时 10 次构建。</li>
-</ul>
-<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p><code>Hexo</code>是基于<code>Node.js</code>的快速、简洁且高效的博客框架。<code>Hexo</code> 使用 <code>Markdown</code>（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
-<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul>
-<li>安装<code>Node.js</code></li>
-<li>安装<code>Git</code></li>
-<li>安装<code>Hexo</code><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//进入自己的博客文件夹(如/biggfish/blog)</span></span><br><span class="line">npm install hexo-cli -g </span><br><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><ul>
-<li><p>初始化配置</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 在Hexo安装目录下新建hexo文件夹，如 /biggfish/blog/hexo</span></span><br><span class="line">hexo inint</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>本地生成与部署</p>
-<figure class="highlight verilog"><table><tr><td class="code"><pre><span class="line"><span class="comment">//在hexo文件目录下执行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件</span></span><br><span class="line">hexo <span class="keyword">generate</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地部署</span></span><br><span class="line">hexo server </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地测试</span></span><br><span class="line">http:<span class="comment">//localhost:4000/</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>配置<code>Hexo</code>与远程<code>GitHub</code>仓库关联</p>
-<figure class="highlight dts"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建`GitHub Pages`的站点发布来源，即username.github.io仓库</span></span><br><span class="line"><span class="comment">//配置远程连接的SSH密钥与公钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//将本地Hexo文件（静态网页）更新到GitHub 的username.github.io仓库</span></span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 复制Github仓库的ssh地址</span><br><span class="line"><span class="number">2.</span> 选择hexo文件夹下_config.yml文件，修改deploy相关信息</span><br><span class="line"><span class="symbol">  deploy:</span></span><br><span class="line"><span class="symbol">    type:</span> git</span><br><span class="line"><span class="symbol">    repository:</span> 刚复制的仓库ssh地址</span><br><span class="line"><span class="symbol">    branch:</span> master</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>本地博客推送到远程仓库，<code>GitHub Pages</code>自动发布</p>
-<figure class="highlight stata"><table><tr><td class="code"><pre><span class="line"><span class="comment">//g-&gt;generate  d-&gt;deploy</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件，然后部署</span></span><br><span class="line">hexo <span class="keyword">g</span></span><br><span class="line">hexo <span class="built_in">d</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者联合执行</span></span><br><span class="line">hexo <span class="keyword">g</span> -<span class="built_in">d</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>访问博客 <a href="https://biggfish3147.github.io" target="_blank" rel="noopener">我的博客</a></p>
-</li>
-</ul>
-<h1 id="发表文章"><a href="#发表文章" class="headerlink" title="发表文章"></a>发表文章</h1><p>注意用<code>markdown</code>语法编写文章。</p>
-<ul>
-<li><p><code>Front-matter</code>配置</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">博客伊始</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2019</span><span class="bullet">-09</span><span class="bullet">-20</span> <span class="number">23</span><span class="string">:29:47</span></span><br><span class="line"><span class="attr">comments:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">tags:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">君不见，黄河之水天上来，奔流到海不复回</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 文章正文</span></span><br><span class="line"></span><br><span class="line"><span class="string">注:</span> <span class="string">Front-matter配置支持的变量，其值因主题不同而存在差异</span></span><br><span class="line"><span class="string">/**</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">layout:</span> <span class="string">页面布局（配合主题文档使用）</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章名称</span></span><br><span class="line"><span class="attr">date:</span> <span class="string">文章日期</span></span><br><span class="line"><span class="attr">comments:</span> <span class="string">文章是否开启评论</span></span><br><span class="line"><span class="attr">photos:</span> <span class="string">文章封面图（仅部分主题支持）</span></span><br><span class="line"><span class="attr">tags:</span> </span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签一</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签二</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">文章分类</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">文章描述，即要在首页显示的摘要（仅部分主题支持）</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">*/</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>推送文章</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//.md文章保存在/biggfish/blog/hexo/source/_posts中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者新建文章 默认放置在hexo/source/_posts中</span></span><br><span class="line">hexo <span class="keyword">new</span> <span class="string">"test"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//Next主题新建页面</span></span><br><span class="line">hexo <span class="keyword">new</span> page <span class="string">"分类"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//照样在hexo文件夹下执行</span></span><br><span class="line"></span><br><span class="line">hexo d -g</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
-<li><a href="https://help.github.com/cn/github/working-with-github-pages/about-github-pages" target="_blank" rel="noopener">GitHub Pages官方说明文档</a></li>
-<li><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">Hexo官方文档</a></li>
-<li><a href="https://blog.csdn.net/qq_36759224/article/details/82121420#font_colorFF000_font_12" target="_blank" rel="noopener">使用 GitHub Pages和Hexo搭建自己的独立博客</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>教程</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>GitHub Pages</tag>
       </tags>
   </entry>
   <entry>
@@ -557,6 +481,249 @@
         <tag>概念</tag>
         <tag>图像</tag>
         <tag>常识</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>常见乱码问题及分析</title>
+    <url>/2020/07/03/%E5%B8%B8%E8%A7%81%E4%B9%B1%E7%A0%81%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>有一个现成的古老的web项目，技术栈包括<code>JSP</code> <code>JAVA</code> <code>MYSQL</code>，<code>MyEclipse 10.5</code>作为开发工具，开发环境<code>JDK1.7</code> <code>Tomcat7</code> <code>Mysql5.5</code>。</p>
+<p>现在项目能够部署成功，正常访问。</p>
+<p>但是当提交的表单数据中包含中文时，数据库存储的相关数据显示为???。</p>
+<p>因为这个<code>BUG</code>，诞生这篇小结。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/pk0001.png" alt="朋克风"></p>
+<h1 id="常见乱码问题分析和总结"><a href="#常见乱码问题分析和总结" class="headerlink" title="常见乱码问题分析和总结"></a>常见乱码问题分析和总结</h1><p>本节内容选自<a href="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/index.html" target="_blank" rel="noopener">IBM Developer : 常见乱码问题分析和总结 </a></p>
+<h2 id="编码与解码"><a href="#编码与解码" class="headerlink" title="编码与解码"></a>编码与解码</h2><p>计算机不能直接存储字母，数字，图片，符号等，计算机能处理和工作的唯一单位是”比特位（bit）”，一个比特位通常只有 0 和 1，是（yes）和否（no），真（true）或者假（false）等等我们喜欢的称呼。利用比特位序列来代表字母，数字，图片，符号等，我们就需要一个存储规则，不同的比特序列代表不同的字符，这就是所谓的”编码”。反之，将存储在计算机中的比特位序列（或者叫二进制序列）解析显示出来成对应的字母，数字，图片和符号，称为”解码”，如同密码学中的加密和解密，下面将详细解释编码解码过程中涉及到的一些术语：</p>
+<p><strong>字符集合（Character set）</strong>：是各种文字和符号的总称，包括各国家文字、标点符号、图形符号、数字等，简单理解就是一个字库，与计算机以及编码无关。</p>
+<p><strong>字符编码集（Coded character set）</strong>：是一组字符对应的编码（即数字），为字符集合中的每一个字符给予一个数字，如 Unicode 为每一个字符分配一个唯一的码点与之一一对应。</p>
+<p><strong>字符编码（Character Encoding）</strong>：简单理解就是一个映射关系，将字符集对应的码点映射为一个个二进制序列，从而使得计算机可以存储和处理。常见的编码方式有 ASCII 编码、ISO-8859-1(不支持中文)、GBK、GB2312（中国编码，支持中文）、UTF-8 等等,详情见表 1。</p>
+<p><strong>字符集（Charset）</strong>：包括编码字符集合和字符编码，如 ASCII 字符集、ISO-8859-X、GB2312 字符集（简中）、BIG5 字符集（繁中）、GB18030 字符集、Shift-JIS 等，即下文中提到的字符集。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">这里提到的字符集合与字符集是不同的概念，后者包含前者。</span><br><span class="line">一般乱码现象都是因为中文数据导致的，汉字占用双字节，所以支持中文的编码方式（GBK、UTF<span class="number">-8</span>等）也就是可以支持对双字节汉字进行编码。</span><br></pre></td></tr></table></figure>
+
+<p><strong>字符解码（Character Decoding）</strong>: 根据一定规则，将二进制序列映射成对应的正确字符串，即二进制序列–&gt;字符串，个人将其理解为”翻译”。</p>
+<p><strong>Code Point</strong>：称作码点或码位，是组成编码空间（或代码页）的数值。例如，ASCII 码包含 128 个码点，范围是 0 到 7F（16 进制）；ISO-8859-1 包含 256 个码点，范围是 0 到 FF；而 Unicode 包含 1,114,112 个码点，范围是 0 到 10FFFF。Unicode 码空间划分为 17 个 Unicode 字符平面（基本多文种平面，16 个辅助平面），每个平面有 65,536（= 216）个码点。因此 Unicode 码空间总计是 17 x 65,536 = 1,114,112。</p>
+<p><strong>Code Page</strong>：代码页或者内码表，是 IBM 早期称呼计算机的 BIOS 所支持的字符集编码（也称作 OEM 代码页）。Windows 系统在没有使用 UTF-16 之前，为了解决由于不同国家和地区采用的字符集不一致，很可能出现无法正常显示所有字符的问题，使用了代码页（Codepage）转换表的技术来过渡性的部分解决这一问题，即定义了一系列支持不同国家和地区所制定的字符集，被称为 Windows 代码页或 ANSI 代码页，然而代码页一般与其所对应的字符集之间并非完全相同，有时候会对字符集有所扩展，可以理解为一张字符-字节序列映射表，通过查表实现编码解码功能。操作系统中不同 Locale 设置默认使用不同的代码页。</p>
+<p><strong>Locale</strong>：是指特定于某个国家或地区的一组设定，包括代码页，以及数字、货币、时间和日期的格式等。在 Windows 内部，有两个 Locale 设置：系统 Locale 和用户 Locale。系统 Locale 决定代码页，用户 Locale 决定数字、货币、时间和日期的格式。</p>
+<h2 id="乱码产生原因"><a href="#乱码产生原因" class="headerlink" title="乱码产生原因"></a>乱码产生原因</h2><p>乱码产生的根源一般情况下可以归结为三方面即：编码引起的乱码、解码引起的乱码以及缺少某种字体库引起的乱码（这种情况需要用户安装对应的字体库），其中大部分乱码问题是由不合适的解码方式造成的，如图 3 所示的鱼骨图。</p>
+<p>图 3. 乱码产生原因</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image003.jpg" alt="乱码产生原因"></p>
+<h3 id="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"><a href="#从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法" class="headerlink" title="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"></a>从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法</h3><p>图 5. 编码方式引起的乱码剖析</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image005.jpg" alt="图 5. 编码方式引起的乱码剖析"></p>
+<p>图 6. 不正确的解码方式引起的乱码</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image006.png" alt="图 6. 不正确的解码方式引起的乱码"></p>
+<figure class="highlight 1c"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">乱码有很多形式。</span><br><span class="line"><span class="string">"??"</span>通常是由于编码引起的乱码，出现?说明原始字符的信息已经丢失，这种情况下形成的乱码是不可逆的，也就是说无论用什么解码方式都不能正确显示字符。</span><br><span class="line"><span class="string">"ÄãºÃ£¬ÖÐ¹ú"</span>一般由解码方式不对引起的，乱码可逆，即可以通过乱码恢复获取原始的字符信息。</span><br></pre></td></tr></table></figure>
+
+<h3 id="从编程角度分析出现乱码的场景和解决办法"><a href="#从编程角度分析出现乱码的场景和解决办法" class="headerlink" title="从编程角度分析出现乱码的场景和解决办法"></a>从编程角度分析出现乱码的场景和解决办法</h3><p>从编程角度来看，出现乱码的场景主要是有文本处理的时候，比如文件的新建和读取、复制和粘贴，导入和导出，打开和保存，数据存储和检索，显示，打印，分词处理，字符转换，规范化，搜索，整理和发送数据等，文本数据的示例包括平面文件，流文件，数据区域，目录名称，资源名称，用户标识等。图 9 是出现乱码的一个常见场景分类。</p>
+<p>图 9. 出现乱码的场景</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image009.jpg" alt="出现乱码的场景"></p>
+<p><strong>Web 程序中出现的乱码情况</strong></p>
+<p>在 web 应用程序中，存在用户输入以及输出显示的地方都有可能存在编码解码，图 12 简要概括了 HTTP web 请求响应环节。</p>
+<p>图 12. Web 请求响应环节中的编码解码</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image012.jpg" alt="请求响应环节中的编码解码"></p>
+<p><strong>数据库操作过程中的乱码</strong></p>
+<p>在实际应用中，和数据库操作相关的乱码可能出现在数据的导入和导出操作中，在整个过程中涉及到的字符集有服务器端数据库字符集、客户端操作系统字符集、客户端环境变量 nls_lang(lang_territory.charset)，这三个参数的工作流程如图 15 所示。如果这三个参数设置一样，整个数据库操作中就不会出现乱码问题，但是实际应用中客户端的情况复杂多样，很难保持三者一致，涉及到双字节字符就需要服务器端进行转码操作，而转码的桥梁就是 Unicode 字符集，这就要求数据库本身支持 UTF-8 编码方式。为了编码数据库操作过程中的乱码问题，在创建数据库的时候使用 UTF-8 编码方式，如果仅在某些列中使用多语言数据，则可以使用 SQL NCHAR 数据类型（NCHAR，NVARCHAR2 和 NCLOB）以 UTF-16 或 UTF-8 编码形式存储 Unicode 数据，避免存储空间的浪费。</p>
+<p>图 15. Oracle 数据库字符集</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image015.jpg" alt="Oracle 数据库字符集"></p>
+<h1 id="修改Windows的默认编码"><a href="#修改Windows的默认编码" class="headerlink" title="修改Windows的默认编码"></a>修改Windows的默认编码</h1><p>在Windows设置-时间与语言-语言-管理语言设置-更改系统区域设置中进行修改。</p>
+<p>联想到一个现象：通过执行startup.bat文件开启tomcat服务器时，打印的启动日志出现乱码。</p>
+<p>通过查询cmd的编码格式，并修改为utf-8编码格式，理论上能够解决上述乱码问题。实际上，执行chcp 65001，只是将当前cmd窗口的编码设置为utf-8。执行startup.bat时，会另外启动一个cmd进程，所以打印服务器启动日志的那个cmd窗口还是会有乱码。（除非从操作系统层面更改编码格式）</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//查看当前cmd的编码格式</span></span><br><span class="line"><span class="comment">//character code page</span></span><br><span class="line">chcp</span><br><span class="line"></span><br><span class="line"><span class="comment">//换成utf-8代码页</span></span><br><span class="line">chcp <span class="number">65001</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//换成默认的gbk</span></span><br><span class="line">chcp <span class="number">936</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>现在回过头来想背景中的问题。??的出现有可能是字符的编码方式不对，导致通过任何解码方式都读不出正确的字符。那么在哪个环节出现了这个问题呢？通过测试，表单数据提交到服务端，服务端获取数据并打印，显示正常。说明在浏览器到web服务端的编码解码方式是OK的。那么再来，就是java程序代码中将正常的字符数据存入数据库时发生了问题，导致数据库中数据显示为??。于是考虑中文存入数据库的编码方式出了问题。事实也应该就是这样的。</p>
+<p>【问题解决】java连接数据库的代码中，DBURL设置为<code>jdbc:mysql://localhost:3306/XXX?useUnicode=true&amp;characterEncoding=UTF-8</code>。重点就是后边的characterEncoding参数。</p>
+<p>字符数据在二进制与可识读形式之间来回切换跳转，编码解码的步骤都是循环重复的。博大精深的中国汉字，到底在代码的世界里也很独特。</p>
+<p>尽管问题解决，原因大概分析了，但真实的情形又是怎样的呢？谁又真正的可知？如果能够化身数据流，以数据本身的角度来看浏览器到数据库的往返之路，这该是很奇妙的想象与体验吧。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/hacker.png" alt="hacker"></p>
+]]></content>
+      <categories>
+        <category>常识</category>
+      </categories>
+      <tags>
+        <tag>乱码</tag>
+        <tag>编码</tag>
+        <tag>解码</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>面向对象设计原则</title>
+    <url>/2020/09/19/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/</url>
+    <content><![CDATA[<p>软件开发设计模式，不见得都会用到，但不得不知道。</p>
+<p>设计模式是经验总结的成果，说里边蕴藏着多妙的思想也好，说已经成为开发的规范也罢，无非就是提升<strong>系统稳定性与可维护性</strong>的手段。</p>
+<p>它们是设计方法，但也不是全能的。</p>
+<p>现在编程世界里出现众多框架，约定规范，日趋完善的IDE，归根结底就是为了效益。<strong>低成本，高效率，是最终目的。</strong></p>
+<p>java中有23种设计模式，都是围绕六大设计原则的具体运用。</p>
+<p>六大设计原则看起来容易理解，实际实现起来也偶有冲突，取舍适当即可。</p>
+<p>那就开始知道，皮毛也是毛，蚂蚁肉也是肉！</p>
+<h1 id="开闭原则"><a href="#开闭原则" class="headerlink" title="开闭原则"></a>开闭原则</h1><p><font color="red"><strong>软件实体应当对扩展开放，对修改关闭</strong>。软件开发的终极目标。</font></p>
+<p>当应用的需求改变时，在不修改软件实体的源代码或者二进制代码的前提下，可以扩展模块的功能，使其满足新的需求。</p>
+<p>软件实体包括：项目划分的模块，类/接口，方法。</p>
+<p>实现方法： </p>
+<p><strong>“抽象约束、封装变化”</strong>。通过接口或者抽象类为软件实体定义一个相对稳定的抽象层，而将相同的可变因素封装在相同的具体实现类中。</p>
+<p>好处：  </p>
+<ul>
+<li>软件测试可以只测扩展的代码，不必重复测试基础代码</li>
+<li>提升可复用性</li>
+<li>提高软件的可维护性</li>
+</ul>
+<h1 id="里氏替换原则"><a href="#里氏替换原则" class="headerlink" title="里氏替换原则"></a>里氏替换原则</h1><p><font color="red"><strong>更愿意称之为继承原则</strong>。继承必须确保超类所拥有的性质在子类中仍然成立。</font></p>
+<p>通俗来讲，<strong>子类可以扩展父类的功能，但不能改变父类原有的功能</strong>。子类继承父类时，除添加新的方法完成新增功能外，尽量不要重写父类的方法。</p>
+<p>实现方法：</p>
+<p>使用继承时，遵循里氏替换原则。类T2继承类T1时，除添加新的方法完成新增功能P2外，尽量不要重写父类T1的方法，也尽量不要重载父类T1的方法。</p>
+<p>例外：当父类存在缺省实现的方法时；需要实现多态时要求重写/重载；部分子类继承父类（类方法体为空）时，必须要求重写。  </p>
+<p>好处：</p>
+<p>继承原则实际上保证父类的可复用性，是继承复用的基础。</p>
+<h1 id="依赖倒置原则"><a href="#依赖倒置原则" class="headerlink" title="依赖倒置原则"></a>依赖倒置原则</h1><p><font color="red"><strong>核心要义是面向接口编程，不要面向实现编程</strong>。高层模块不应该依赖低层模块，两者都应该依赖其抽象；抽象不应该依赖细节，细节应该依赖抽象。</font></p>
+<p>在软件设计中，细节具有多变性，而抽象层则相对稳定，因此<strong>以抽象为基础搭建起来的架构要比以细节为基础搭建起来的架构要稳定得多</strong>。这里的抽象指接口或抽象类，细节指具体实现类。</p>
+<p>使用接口或者抽象类的目的是制定好规范和契约。</p>
+<p>实现方法：</p>
+<ul>
+<li>每个类尽量提供接口或抽象类，或者两者都具备</li>
+<li>变量的声明类型尽量是接口或者是抽象类</li>
+<li>任何类都不应该从具体类派生</li>
+<li>使用继承时尽量遵循里氏替换原则</li>
+</ul>
+<p>好处：</p>
+<ul>
+<li>降低类之间的耦合性</li>
+<li>提高系统稳定性</li>
+<li>减少并行开发引起的风险</li>
+<li>提高代码的可读性与可维护性</li>
+</ul>
+<h1 id="单一职责原则"><a href="#单一职责原则" class="headerlink" title="单一职责原则"></a>单一职责原则</h1><p><font color="red"><strong>就是说每个类的功能相对独立</strong>。单一职责原则规定一个类应该有且仅有一个引起它变化的原因，否则类应该被拆分。</font></p>
+<p>若一个类T有职责A、B，当需要变更职责A时，更改类T可能会影响职责B的正常应用</p>
+<p>实现方法：  </p>
+<p>看似简单实则不易，只是需要优秀设计。需要设计人员<strong>发现类的不同职责并将其分离</strong>，再封装到不同的类或模块中。考验分析设计能力和重构经验。</p>
+<p>好处：</p>
+<ul>
+<li>降低类的复杂度</li>
+<li>提高类的可读性</li>
+<li>提高系统的可维护性</li>
+<li>变更引起的风险降低</li>
+</ul>
+<h1 id="接口隔离原则"><a href="#接口隔离原则" class="headerlink" title="接口隔离原则"></a>接口隔离原则</h1><p><font color="red"><strong>一个类对另一个类的依赖应该建立在最小的接口上</strong>。客户端不应该被迫依赖于它不使用的方法。程序员需要尽量将臃肿庞大的接口拆分成更小的和更具体的接口，让接口中只包含客户感兴趣的方法。</font></p>
+<p>要为各个类建立它们需要的专用接口，而不要试图去建立一个很庞大的接口供所有依赖它的类去调用。</p>
+<p>接口隔离原则和单一职责都是为了<strong>提高类的内聚性、降低它们之间的耦合性</strong>，体现了封装的思想。</p>
+<p>但单一职责原则注重的是职责，而接口隔离原则注重的是对接口依赖的隔离。</p>
+<p>且单一职责原则主要是约束类，它针对的是程序中的实现和细节；接口隔离原则主要约束接口，主要针对抽象和程序整体框架的构建。</p>
+<p>实现方法：</p>
+<ul>
+<li>接口尽量小，但是要有限度</li>
+<li>为依赖接口的类定制服务</li>
+<li>接口拆分的标准需要深入了解业务逻辑</li>
+<li>使接口用最少的方法去完成最多的事情</li>
+</ul>
+<p>好处：</p>
+<ul>
+<li>粒度小的接口，可以预防外来变更的扩散，提高系统的灵活性和可维护性</li>
+<li>高了系统的内聚性，降低了系统的耦合性</li>
+<li>能减少项目工程中的代码冗余（过大的大接口里面通常放置许多不用的方法，这些方法可能被冗余实现）</li>
+</ul>
+<p>注意接口的粒度。如果定义过小，则会造成接口数量过多，使设计复杂化；如果定义太大，灵活性降低，无法提供定制服务，给整体项目带来无法预料的风险。</p>
+<h1 id="迪米特原则"><a href="#迪米特原则" class="headerlink" title="迪米特原则"></a>迪米特原则</h1><p><font color="red"><strong>只与你的直接朋友交谈，不跟“陌生人”说话。最少知识原则，只知道朋友</strong>。如果两个软件实体无须直接通信，那么就不应当发生直接的相互调用，可以通过第三方转发该调用。</font></p>
+<p>这里的朋友是指：<strong>当前对象本身、当前对象的成员对象、当前对象所创建的对象、当前对象的方法参数</strong>等，这些对象同当前对象存在关联、聚合或组合关系，可以直接访问这些对象的方法。</p>
+<p>目的就是降低类之间的耦合度，提高模块的相对独立性。</p>
+<p>实现方法：<br>从依赖者的角度来说，只依赖应该依赖的对象。从被依赖者的角度说，只暴露应该暴露的方法。</p>
+<ul>
+<li>在类的结构设计上，尽量降低类成员的访问权限</li>
+<li>在类的设计上，优先考虑将一个类设置成不变类</li>
+<li>在对其他类的引用上，将引用其他对象的次数降到最低。</li>
+<li>不暴露类的属性成员，而应该提供相应的访问器（set 和 get 方法）</li>
+<li>谨慎使用序列化（Serializable）功能</li>
+</ul>
+<p>好处：</p>
+<ul>
+<li>降低了类之间的耦合度，提高了模块的相对独立性</li>
+<li>由于亲合度降低，从而提高了类的可复用率和系统的扩展性</li>
+</ul>
+<p>过度使用迪米特法则会使系统产生大量的中介类，从而增加系统的复杂性，使模块之间的通信效率降低。</p>
+<h1 id="合成复用原则"><a href="#合成复用原则" class="headerlink" title="合成复用原则"></a>合成复用原则</h1><p><font color="red"><strong>组合/聚合复用原则。在软件复用时，要尽量先使用组合或者聚合等关联关系来实现，其次才考虑使用继承关系来实现</strong>。合成复用原则同里氏替换原则相辅相成的，两者都是开闭原则的具体实现规范。</font></p>
+<p>通常类的复用分为继承复用和合成复用两种。</p>
+<p>继承复用也叫“白箱”复用，简单易实现。但</p>
+<ul>
+<li>子类与父类的耦合度高</li>
+<li>继承会将父类的实现细节暴露给子类（父类透明）</li>
+<li>从父类继承而来的实现是静态的，在编译时已经定义，所以在运行时不可能发生变化</li>
+</ul>
+<p>组合或聚合复用，将已有对象纳入新对象中，使之成为新对象的一部分，新对象可以调用已有对象。这样</p>
+<ul>
+<li>它维持了类的封装性。因为成分对象的内部细节是新对象看不见的，所以这种复用又称为“黑箱”复用</li>
+<li>新旧类之间的耦合度低。这种复用所需的依赖较少，新对象存取成分对象的唯一方法是通过成分对象的接口</li>
+<li>复用的灵活性高。这种复用可以在运行时动态进行，新对象可以动态地引用与成分对象类型相同的对象</li>
+</ul>
+<p>实现方法：<br>合成复用原则是通过将已有的对象纳入新对象中，作为新对象的成员对象来实现的，新对象可以调用已有对象的功能，从而达到复用。就是<strong>需要某类里边的方法，不用去继承该类，直接以其对象作为本类的成员，再进行调用</strong>。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://c.biancheng.net/design_pattern/" target="_blank" rel="noopener">C语言中文网：Java设计模式</a></p>
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>概念</tag>
+        <tag>设计原则</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo与GitHub Pages搭建独立博客</title>
+    <url>/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>博客其实在很久之前按照教程已经搭建完成，现在才回头来写教程步骤。有时候会想是否多此一举，毕竟网上现成的优秀的教程比比皆是。所以权且不说这是搭建基于Hexo的博客教程，只是一个简单的记录。</p>
+<p>写一点东西，像擦肩而过的风。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/7.jpg" alt="起飞"></p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2><p><code>GitHub Pages</code> 是一项<strong>静态站点托管服务</strong>，它直接从<code>GitHub</code> 上的仓库获取<code>HTML</code>、<code>CSS</code>和<code>JavaScript</code>文件，（可选）通过构建过程运行文件，然后发布网站。</p>
+<p>有三种类型的 <code>GitHub Pages</code> 站点：项目、用户和组织。 项目站点连接到 <code>GitHub</code> 上托管的特定项目，用户和组织站点连接到特定的 <code>GitHub</code> 帐户。只能为每个 <code>GitHub</code>账户创建一个用户或组织站点。项目站点（无论是组织还是用户帐户拥有）没有限制。除非使用自定义域，否则用户和组织站点位于<code>http(s)://&lt;username&gt;.github.io</code> 或 <code>http(s)://&lt;organization&gt;.github.io</code>。</p>
+<p>基于<code>GitHub Pages</code>搭建个人独立博客，即属于用户或组织站点。</p>
+<p><code>GitHub Pages</code> 站点的发布来源是存储站点源文件的分支或文件夹。 所有站点都有默认的发布来源，项目站点还有其他可用的发布来源。用户和组织站点的默认发布来源是<code>master</code>分支。如果用户和组织站点的仓库是<code>master</code> 分支，您的站点将从该分支自动发布。无法为用户或组织站点选择不同的发布来源。</p>
+<p><code>GitHub Pages</code> 站点受到以下使用限制的约束：</p>
+<ul>
+<li><code>GitHub Pages</code> 源仓库建议的限制为1GB。</li>
+<li>发布的 <code>GitHub Pages</code> 站点不得超过 1 GB。</li>
+<li><code>GitHub Pages</code> 站点的软带宽限制为每月 100GB。</li>
+<li><code>GitHub Pages</code> 站点的软限制为每小时 10 次构建。</li>
+</ul>
+<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p><code>Hexo</code>是基于<code>Node.js</code>的快速、简洁且高效的博客框架。<code>Hexo</code> 使用 <code>Markdown</code>（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
+<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul>
+<li>安装<code>Node.js</code></li>
+<li>安装<code>Git</code></li>
+<li>安装<code>Hexo</code><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//进入自己的博客文件夹(如/biggfish/blog)</span></span><br><span class="line">npm install hexo-cli -g </span><br><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><ul>
+<li><p>初始化配置</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 在Hexo安装目录下新建hexo文件夹，如 /biggfish/blog/hexo</span></span><br><span class="line">hexo inint</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>本地生成与部署</p>
+<figure class="highlight verilog"><table><tr><td class="code"><pre><span class="line"><span class="comment">//在hexo文件目录下执行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件</span></span><br><span class="line">hexo <span class="keyword">generate</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地部署</span></span><br><span class="line">hexo server </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地测试</span></span><br><span class="line">http:<span class="comment">//localhost:4000/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置<code>Hexo</code>与远程<code>GitHub</code>仓库关联</p>
+<figure class="highlight dts"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建`GitHub Pages`的站点发布来源，即username.github.io仓库</span></span><br><span class="line"><span class="comment">//配置远程连接的SSH密钥与公钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//将本地Hexo文件（静态网页）更新到GitHub 的username.github.io仓库</span></span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 复制Github仓库的ssh地址</span><br><span class="line"><span class="number">2.</span> 选择hexo文件夹下_config.yml文件，修改deploy相关信息</span><br><span class="line"><span class="symbol">  deploy:</span></span><br><span class="line"><span class="symbol">    type:</span> git</span><br><span class="line"><span class="symbol">    repository:</span> 刚复制的仓库ssh地址</span><br><span class="line"><span class="symbol">    branch:</span> master</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>本地博客推送到远程仓库，<code>GitHub Pages</code>自动发布</p>
+<figure class="highlight stata"><table><tr><td class="code"><pre><span class="line"><span class="comment">//g-&gt;generate  d-&gt;deploy</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件，然后部署</span></span><br><span class="line">hexo <span class="keyword">g</span></span><br><span class="line">hexo <span class="built_in">d</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者联合执行</span></span><br><span class="line">hexo <span class="keyword">g</span> -<span class="built_in">d</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>访问博客 <a href="https://biggfish3147.github.io" target="_blank" rel="noopener">我的博客</a></p>
+</li>
+</ul>
+<h1 id="发表文章"><a href="#发表文章" class="headerlink" title="发表文章"></a>发表文章</h1><p>注意用<code>markdown</code>语法编写文章。</p>
+<ul>
+<li><p><code>Front-matter</code>配置</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">博客伊始</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2019</span><span class="bullet">-09</span><span class="bullet">-20</span> <span class="number">23</span><span class="string">:29:47</span></span><br><span class="line"><span class="attr">comments:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">tags:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">君不见，黄河之水天上来，奔流到海不复回</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 文章正文</span></span><br><span class="line"></span><br><span class="line"><span class="string">注:</span> <span class="string">Front-matter配置支持的变量，其值因主题不同而存在差异</span></span><br><span class="line"><span class="string">/**</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">layout:</span> <span class="string">页面布局（配合主题文档使用）</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章名称</span></span><br><span class="line"><span class="attr">date:</span> <span class="string">文章日期</span></span><br><span class="line"><span class="attr">comments:</span> <span class="string">文章是否开启评论</span></span><br><span class="line"><span class="attr">photos:</span> <span class="string">文章封面图（仅部分主题支持）</span></span><br><span class="line"><span class="attr">tags:</span> </span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签一</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签二</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">文章分类</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">文章描述，即要在首页显示的摘要（仅部分主题支持）</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">*/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>推送文章</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//.md文章保存在/biggfish/blog/hexo/source/_posts中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者新建文章 默认放置在hexo/source/_posts中</span></span><br><span class="line">hexo <span class="keyword">new</span> <span class="string">"test"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//Next主题新建页面</span></span><br><span class="line">hexo <span class="keyword">new</span> page <span class="string">"分类"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//照样在hexo文件夹下执行</span></span><br><span class="line"></span><br><span class="line">hexo d -g</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://help.github.com/cn/github/working-with-github-pages/about-github-pages" target="_blank" rel="noopener">GitHub Pages官方说明文档</a></li>
+<li><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">Hexo官方文档</a></li>
+<li><a href="https://blog.csdn.net/qq_36759224/article/details/82121420#font_colorFF000_font_12" target="_blank" rel="noopener">使用 GitHub Pages和Hexo搭建自己的独立博客</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>教程</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>GitHub Pages</tag>
       </tags>
   </entry>
   <entry>
@@ -676,124 +843,6 @@
       <tags>
         <tag>概念</tag>
         <tag>JSP</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>面向对象设计原则</title>
-    <url>/2020/09/19/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/</url>
-    <content><![CDATA[<p>软件开发设计模式，不见得都会用到，但不得不知道。</p>
-<p>设计模式是经验总结的成果，说里边蕴藏着多妙的思想也好，说已经成为开发的规范也罢，无非就是提升<strong>系统稳定性与可维护性</strong>的手段。</p>
-<p>它们是设计方法，但也不是全能的。</p>
-<p>现在编程世界里出现众多框架，约定规范，日趋完善的IDE，归根结底就是为了效益。<strong>低成本，高效率，是最终目的。</strong></p>
-<p>java中有23种设计模式，都是围绕六大设计原则的具体运用。</p>
-<p>六大设计原则看起来容易理解，实际实现起来也偶有冲突，取舍适当即可。</p>
-<p>那就开始知道，皮毛也是毛，蚂蚁肉也是肉！</p>
-<h1 id="开闭原则"><a href="#开闭原则" class="headerlink" title="开闭原则"></a>开闭原则</h1><p><font color="red"><strong>软件实体应当对扩展开放，对修改关闭</strong>。软件开发的终极目标。</font></p>
-<p>当应用的需求改变时，在不修改软件实体的源代码或者二进制代码的前提下，可以扩展模块的功能，使其满足新的需求。</p>
-<p>软件实体包括：项目划分的模块，类/接口，方法。</p>
-<p>实现方法： </p>
-<p><strong>“抽象约束、封装变化”</strong>。通过接口或者抽象类为软件实体定义一个相对稳定的抽象层，而将相同的可变因素封装在相同的具体实现类中。</p>
-<p>好处：  </p>
-<ul>
-<li>软件测试可以只测扩展的代码，不必重复测试基础代码</li>
-<li>提升可复用性</li>
-<li>提高软件的可维护性</li>
-</ul>
-<h1 id="里氏替换原则"><a href="#里氏替换原则" class="headerlink" title="里氏替换原则"></a>里氏替换原则</h1><p><font color="red"><strong>更愿意称之为继承原则</strong>。继承必须确保超类所拥有的性质在子类中仍然成立。</font></p>
-<p>通俗来讲，<strong>子类可以扩展父类的功能，但不能改变父类原有的功能</strong>。子类继承父类时，除添加新的方法完成新增功能外，尽量不要重写父类的方法。</p>
-<p>实现方法：</p>
-<p>使用继承时，遵循里氏替换原则。类T2继承类T1时，除添加新的方法完成新增功能P2外，尽量不要重写父类T1的方法，也尽量不要重载父类T1的方法。</p>
-<p>例外：当父类存在缺省实现的方法时；需要实现多态时要求重写/重载；部分子类继承父类（类方法体为空）时，必须要求重写。  </p>
-<p>好处：</p>
-<p>继承原则实际上保证父类的可复用性，是继承复用的基础。</p>
-<h1 id="依赖倒置原则"><a href="#依赖倒置原则" class="headerlink" title="依赖倒置原则"></a>依赖倒置原则</h1><p><font color="red"><strong>核心要义是面向接口编程，不要面向实现编程</strong>。高层模块不应该依赖低层模块，两者都应该依赖其抽象；抽象不应该依赖细节，细节应该依赖抽象。</font></p>
-<p>在软件设计中，细节具有多变性，而抽象层则相对稳定，因此<strong>以抽象为基础搭建起来的架构要比以细节为基础搭建起来的架构要稳定得多</strong>。这里的抽象指接口或抽象类，细节指具体实现类。</p>
-<p>使用接口或者抽象类的目的是制定好规范和契约。</p>
-<p>实现方法：</p>
-<ul>
-<li>每个类尽量提供接口或抽象类，或者两者都具备</li>
-<li>变量的声明类型尽量是接口或者是抽象类</li>
-<li>任何类都不应该从具体类派生</li>
-<li>使用继承时尽量遵循里氏替换原则</li>
-</ul>
-<p>好处：</p>
-<ul>
-<li>降低类之间的耦合性</li>
-<li>提高系统稳定性</li>
-<li>减少并行开发引起的风险</li>
-<li>提高代码的可读性与可维护性</li>
-</ul>
-<h1 id="单一职责原则"><a href="#单一职责原则" class="headerlink" title="单一职责原则"></a>单一职责原则</h1><p><font color="red"><strong>就是说每个类的功能相对独立</strong>。单一职责原则规定一个类应该有且仅有一个引起它变化的原因，否则类应该被拆分。</font></p>
-<p>若一个类T有职责A、B，当需要变更职责A时，更改类T可能会影响职责B的正常应用</p>
-<p>实现方法：  </p>
-<p>看似简单实则不易，只是需要优秀设计。需要设计人员<strong>发现类的不同职责并将其分离</strong>，再封装到不同的类或模块中。考验分析设计能力和重构经验。</p>
-<p>好处：</p>
-<ul>
-<li>降低类的复杂度</li>
-<li>提高类的可读性</li>
-<li>提高系统的可维护性</li>
-<li>变更引起的风险降低</li>
-</ul>
-<h1 id="接口隔离原则"><a href="#接口隔离原则" class="headerlink" title="接口隔离原则"></a>接口隔离原则</h1><p><font color="red"><strong>一个类对另一个类的依赖应该建立在最小的接口上</strong>。客户端不应该被迫依赖于它不使用的方法。程序员需要尽量将臃肿庞大的接口拆分成更小的和更具体的接口，让接口中只包含客户感兴趣的方法。</font></p>
-<p>要为各个类建立它们需要的专用接口，而不要试图去建立一个很庞大的接口供所有依赖它的类去调用。</p>
-<p>接口隔离原则和单一职责都是为了<strong>提高类的内聚性、降低它们之间的耦合性</strong>，体现了封装的思想。</p>
-<p>但单一职责原则注重的是职责，而接口隔离原则注重的是对接口依赖的隔离。</p>
-<p>且单一职责原则主要是约束类，它针对的是程序中的实现和细节；接口隔离原则主要约束接口，主要针对抽象和程序整体框架的构建。</p>
-<p>实现方法：</p>
-<ul>
-<li>接口尽量小，但是要有限度</li>
-<li>为依赖接口的类定制服务</li>
-<li>接口拆分的标准需要深入了解业务逻辑</li>
-<li>使接口用最少的方法去完成最多的事情</li>
-</ul>
-<p>好处：</p>
-<ul>
-<li>粒度小的接口，可以预防外来变更的扩散，提高系统的灵活性和可维护性</li>
-<li>高了系统的内聚性，降低了系统的耦合性</li>
-<li>能减少项目工程中的代码冗余（过大的大接口里面通常放置许多不用的方法，这些方法可能被冗余实现）</li>
-</ul>
-<p>注意接口的粒度。如果定义过小，则会造成接口数量过多，使设计复杂化；如果定义太大，灵活性降低，无法提供定制服务，给整体项目带来无法预料的风险。</p>
-<h1 id="迪米特原则"><a href="#迪米特原则" class="headerlink" title="迪米特原则"></a>迪米特原则</h1><p><font color="red"><strong>只与你的直接朋友交谈，不跟“陌生人”说话。最少知识原则，只知道朋友</strong>。如果两个软件实体无须直接通信，那么就不应当发生直接的相互调用，可以通过第三方转发该调用。</font></p>
-<p>这里的朋友是指：<strong>当前对象本身、当前对象的成员对象、当前对象所创建的对象、当前对象的方法参数</strong>等，这些对象同当前对象存在关联、聚合或组合关系，可以直接访问这些对象的方法。</p>
-<p>目的就是降低类之间的耦合度，提高模块的相对独立性。</p>
-<p>实现方法：<br>从依赖者的角度来说，只依赖应该依赖的对象。从被依赖者的角度说，只暴露应该暴露的方法。</p>
-<ul>
-<li>在类的结构设计上，尽量降低类成员的访问权限</li>
-<li>在类的设计上，优先考虑将一个类设置成不变类</li>
-<li>在对其他类的引用上，将引用其他对象的次数降到最低。</li>
-<li>不暴露类的属性成员，而应该提供相应的访问器（set 和 get 方法）</li>
-<li>谨慎使用序列化（Serializable）功能</li>
-</ul>
-<p>好处：</p>
-<ul>
-<li>降低了类之间的耦合度，提高了模块的相对独立性</li>
-<li>由于亲合度降低，从而提高了类的可复用率和系统的扩展性</li>
-</ul>
-<p>过度使用迪米特法则会使系统产生大量的中介类，从而增加系统的复杂性，使模块之间的通信效率降低。</p>
-<h1 id="合成复用原则"><a href="#合成复用原则" class="headerlink" title="合成复用原则"></a>合成复用原则</h1><p><font color="red"><strong>组合/聚合复用原则。在软件复用时，要尽量先使用组合或者聚合等关联关系来实现，其次才考虑使用继承关系来实现</strong>。合成复用原则同里氏替换原则相辅相成的，两者都是开闭原则的具体实现规范。</font></p>
-<p>通常类的复用分为继承复用和合成复用两种。</p>
-<p>继承复用也叫“白箱”复用，简单易实现。但</p>
-<ul>
-<li>子类与父类的耦合度高</li>
-<li>继承会将父类的实现细节暴露给子类（父类透明）</li>
-<li>从父类继承而来的实现是静态的，在编译时已经定义，所以在运行时不可能发生变化</li>
-</ul>
-<p>组合或聚合复用，将已有对象纳入新对象中，使之成为新对象的一部分，新对象可以调用已有对象。这样</p>
-<ul>
-<li>它维持了类的封装性。因为成分对象的内部细节是新对象看不见的，所以这种复用又称为“黑箱”复用</li>
-<li>新旧类之间的耦合度低。这种复用所需的依赖较少，新对象存取成分对象的唯一方法是通过成分对象的接口</li>
-<li>复用的灵活性高。这种复用可以在运行时动态进行，新对象可以动态地引用与成分对象类型相同的对象</li>
-</ul>
-<p>实现方法：<br>合成复用原则是通过将已有的对象纳入新对象中，作为新对象的成员对象来实现的，新对象可以调用已有对象的功能，从而达到复用。就是<strong>需要某类里边的方法，不用去继承该类，直接以其对象作为本类的成员，再进行调用</strong>。</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://c.biancheng.net/design_pattern/" target="_blank" rel="noopener">C语言中文网：Java设计模式</a></p>
-]]></content>
-      <categories>
-        <category>java</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-        <tag>概念</tag>
-        <tag>设计原则</tag>
       </tags>
   </entry>
 </search>
