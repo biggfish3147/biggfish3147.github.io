@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2020-10-30T13:35:59.706Z</updated>
+  <updated>2020-11-10T03:15:55.077Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用Comparator比较器</title>
+    <link href="http://yoursite.com/2020/11/10/%E4%BD%BF%E7%94%A8Comparator%E6%AF%94%E8%BE%83%E5%99%A8/"/>
+    <id>http://yoursite.com/2020/11/10/%E4%BD%BF%E7%94%A8Comparator%E6%AF%94%E8%BE%83%E5%99%A8/</id>
+    <published>2020-11-10T03:02:19.000Z</published>
+    <updated>2020-11-10T03:15:55.077Z</updated>
+    
+    <content type="html"><![CDATA[<p>数组的排序方式有很多。</p><p>排序，必须选择一个排序标准，可以按照元素的值（整型数组），或者元素的某个属性值（元素为对象时）。</p><p><strong>Arrays工具类，位于java.util包，提供了sort方法。支持自定义比较器，实现升序、降序排列等。</strong></p><p>多维数组，可以看作元素是数组的集合。同样的思想，按照元素的某一个属性，比如元素的某一列值（二维数组）排序。</p><figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.Comparator;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="symbol">ComparatorOrder</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> static <span class="built_in">void</span> main(String[] args) &#123;</span><br><span class="line">        Integer[] nums = new Integer[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line">        Arrays.sort(nums, (o1, o2) -&gt; o2-o1);</span><br><span class="line">        <span class="comment">//降序，输出：[6,4,3,2,2,1]</span></span><br><span class="line">        System.<span class="keyword">out</span>.println(Arrays.toString(nums));</span><br><span class="line"></span><br><span class="line">        <span class="built_in">int</span>[][] nums2=new <span class="built_in">int</span>[][]&#123;&#123;<span class="number">7</span>,<span class="number">0</span>&#125;,&#123;<span class="number">4</span>,<span class="number">1</span>&#125;,&#123;<span class="number">5</span>,<span class="number">2</span>&#125;,&#123;<span class="number">6</span>,<span class="number">3</span>&#125;,&#123;<span class="number">8</span>,<span class="number">6</span>&#125;&#125;;</span><br><span class="line"><span class="comment">//        Arrays.sort(nums2, new Comparator&lt;int[]&gt;() &#123;</span></span><br><span class="line"><span class="comment">//            @Override</span></span><br><span class="line"><span class="comment">//            public int compare(int[] o1, int[] o2) &#123;</span></span><br><span class="line"><span class="comment">//                return o1[1]-o2[1];</span></span><br><span class="line"><span class="comment">//            &#125;</span></span><br><span class="line"><span class="comment">//        &#125;);</span></span><br><span class="line">        Arrays.sort(nums2,((o1, o2) -&gt; o1[<span class="number">1</span>]-o2[<span class="number">1</span>]));</span><br><span class="line"></span><br><span class="line">        <span class="comment">//二维数组，按第二列升序</span></span><br><span class="line">        <span class="comment">//输出：</span></span><br><span class="line">        <span class="comment">//[7,0]</span></span><br><span class="line">        <span class="comment">//[4,1]</span></span><br><span class="line">        <span class="comment">//[5,2]</span></span><br><span class="line">        <span class="comment">//[6,3]</span></span><br><span class="line">        <span class="comment">//[8,6]</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span>[] n:nums2)&#123;</span><br><span class="line">            System.<span class="keyword">out</span>.println(Arrays.toString(n));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>写这个是因为，对compare方法的参数顺序有点懵。所以写下来，理一理。</p><p>o1与o2只是参数名称。</p><p><strong>（o1,o2）-&gt; o1-o2 ，这种形式，代表升序。</strong></p><p>o1代表当前元素，o2是前一个元素。返回o1-o2，默认为正值，表示o1大于o2，即当前元素大于前一个元素。是对数组进行升序排列。</p><p>测试过程中，发现对int[ ] 类型的一维数组，不能使用传入自定义的比较器来进行降序排列。</p><figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="built_in">int</span>[] nums = new <span class="built_in">int</span>[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line">Arrays.sort(nums, (o1, o2) -&gt; o2-o1);</span><br></pre></td></tr></table></figure><p>上述的写法会报错（可检查）。<code>操作符-不能被应用到T</code>，即说明自定义比较器中<strong>两个用于比较的元素必须是对象，或者说是引用类型。</strong></p><p>改为如下写法，则编译运行正常。</p><figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line"><span class="type">Integer</span>[] nums = <span class="built_in">new</span> <span class="type">Integer</span>[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line"> </span><br><span class="line">Arrays.sort(nums, <span class="built_in">new</span> Comparator&lt;<span class="type">Integer</span>&gt;()&#123;</span><br><span class="line">    @Override</span><br><span class="line">    <span class="built_in">public</span> <span class="type">int</span> compare(<span class="type">Integer</span> o1, <span class="type">Integer</span> o2) &#123;</span><br><span class="line">        <span class="keyword">return</span> o1-o2;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      重写compare方法，怎么实现升序与降序？
+    
+    </summary>
+    
+    
+      <category term="java" scheme="http://yoursite.com/categories/java/"/>
+    
+    
+      <category term="java" scheme="http://yoursite.com/tags/java/"/>
+    
+      <category term="排序" scheme="http://yoursite.com/tags/%E6%8E%92%E5%BA%8F/"/>
+    
+  </entry>
   
   <entry>
     <title>阿里云宝塔面板部署java项目</title>
@@ -185,9 +210,9 @@
       <category term="docker" scheme="http://yoursite.com/categories/docker/"/>
     
     
-      <category term="教程" scheme="http://yoursite.com/tags/%E6%95%99%E7%A8%8B/"/>
-    
       <category term="docker" scheme="http://yoursite.com/tags/docker/"/>
+    
+      <category term="教程" scheme="http://yoursite.com/tags/%E6%95%99%E7%A8%8B/"/>
     
       <category term="nginx" scheme="http://yoursite.com/tags/nginx/"/>
     
@@ -314,11 +339,11 @@
       <category term="java" scheme="http://yoursite.com/categories/java/"/>
     
     
-      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
-    
       <category term="Json" scheme="http://yoursite.com/tags/Json/"/>
     
       <category term="数据传输" scheme="http://yoursite.com/tags/%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93/"/>
+    
+      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
     
   </entry>
   
