@@ -75,7 +75,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="数据库,锁,">
 
 
 
@@ -88,16 +88,18 @@
 
 
 
-<meta name="description" content="给时光以生命，给岁月以文明">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Biggfish">
-<meta property="og:url" content="http://yoursite.com/tags/命令/index.html">
+<meta name="description" content="共享锁，排他锁，更新锁，意向锁...锁的诞生，只是为了保证数据一致性。">
+<meta name="keywords" content="数据库,锁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库的锁">
+<meta property="og:url" content="http://yoursite.com/2020/11/12/数据库的锁/index.html">
 <meta property="og:site_name" content="Biggfish">
-<meta property="og:description" content="给时光以生命，给岁月以文明">
+<meta property="og:description" content="共享锁，排他锁，更新锁，意向锁...锁的诞生，只是为了保证数据一致性。">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-11-12T13:46:38.379Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Biggfish">
-<meta name="twitter:description" content="给时光以生命，给岁月以文明">
+<meta name="twitter:title" content="数据库的锁">
+<meta name="twitter:description" content="共享锁，排他锁，更新锁，意向锁...锁的诞生，只是为了保证数据一致性。">
 
 
 
@@ -127,13 +129,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/tags/命令/">
+  <link rel="canonical" href="http://yoursite.com/2020/11/12/数据库的锁/">
 
 
 
 
 
-  <title>标签: 命令 | Biggfish</title>
+  <title>数据库的锁 | Biggfish</title>
   
 
 
@@ -162,7 +164,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -308,52 +310,283 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>命令<small>标签</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/12/数据库的锁/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Dongjie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/cyber_avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Biggfish">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2020/09/18/docker常用指令/" itemprop="url">
-              
-                <span itemprop="name">docker常用指令</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">数据库的锁</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2020-09-18T14:08:59+08:00" content="2020-09-18">
-          09-18
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-11-12T21:42:10+08:00">
+                2020-11-12
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MySQL/" itemprop="url" rel="index">
+                    <span itemprop="name">MySQL</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/11/12/数据库的锁/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/11/12/数据库的锁/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-eye"></i> 浏览
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.4k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  4 分钟
+                </span>
+              
+            </div>
+          
+
+          
+              <div class="post-description">
+                  共享锁，排他锁，更新锁，意向锁...锁的诞生，只是为了保证数据一致性。
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h1><p>锁是网络数据库中的一个非常重要的概念，当多个用户同时对数据库并发操作时，会带来数据不一致的问题，所以，锁主要用于多用户环境下保证数据库完整性和一致性。</p>
+<p>在数据库中加锁时，除了<strong>可以对不同的资源加锁，还可以使用不同程度的加锁方式</strong>，即锁有多种模式。</p>
+<h1 id="2-乐观锁与悲观锁"><a href="#2-乐观锁与悲观锁" class="headerlink" title="2. 乐观锁与悲观锁"></a>2. 乐观锁与悲观锁</h1><p>从程序员的角度看，分为乐观锁和悲观锁。</p>
+<p><strong>悲观锁</strong>（Pessimistic Lock），顾名思义，就是很悲观，每次去拿数据的时候都认为别人会修改，所以，每次在拿数据的时候都会上锁，这样别人想拿这个数据就会block（阻塞），直到它拿到锁。传统的关系型数据库里边就用到了很多这种锁机制，比如行锁、表锁、读锁和写锁等，都是在做操作之前先上锁。</p>
+<p><strong>乐观锁</strong>（Optimistic Lock），顾名思义，就是很乐观，每次去拿数据的时候都认为别人不会修改，所以，不会上锁，但是在更新的时候会判断一下在此期间别人有没有去更新这个数据，可以使用<strong>版本号、时间戳</strong>等机制。乐观锁适用于多读的应用类型，这样可以提高吞吐量，如果数据库提供类似于write_condition机制，其实都是提供的乐观锁。</p>
+<blockquote>
+<p>链接：<a href="https://www.nowcoder.com/questionTerminal/97c7972a55f6459a900a664ee687536f" target="_blank" rel="noopener">https://www.nowcoder.com/questionTerminal/97c7972a55f6459a900a664ee687536f</a>    来源：牛客网</p>
+</blockquote>
+<h1 id="3-具体的锁"><a href="#3-具体的锁" class="headerlink" title="3. 具体的锁"></a>3. 具体的锁</h1><p>表级锁：共享、排他、意向锁</p>
+<p>行级锁：共享、排他、更新锁</p>
+<h2 id="3-1-共享锁"><a href="#3-1-共享锁" class="headerlink" title="3.1 共享锁"></a>3.1 共享锁</h2><p><strong>共享锁也称为S（Share Lock）锁，用于所有的只读数据操作。</strong></p>
+<p>共享锁是非独占的，允许多个并发事务读取其锁定的资源。</p>
+<p>它具有以下性质：<strong>多个事务可封锁一个共享页；任何事务都不能修改该页；通常是该页被读取完毕，S锁立即被释放。</strong></p>
+<p>在SQL Server中，默认情况下，数据被读取后，立即释放共享锁。例如，执行查询语句“SELECT * FROM my_table”时，首先锁定第一页，读取之后，释放对第一页的锁定，然后锁定第二页。这样，就允许在读操作过程中，修改未被锁定的第一页。</p>
+<p>但是，事务隔离级别连接选项设置和SELECT语句中的锁定设置都可以改变SQL Server的这种默认设置。<br>例如，语句“SELECT * FROM my_table HOLDLOCK”就要求在整个查询过程中，保持对表的锁定，直到查询完成才释放锁定。</p>
+<h2 id="3-2-排他锁"><a href="#3-2-排他锁" class="headerlink" title="3.2 排他锁"></a>3.2 排他锁</h2><p><strong>排他锁（Exclusive Lock，也叫X锁）也叫写锁（X）。表示对数据进行写操作。如果一个事务对对象加了排他锁，其他事务就不能再给它加任何锁了。</strong></p>
+<p>排他锁具有以下几点性质：仅允许一个事务封锁此页；其他任何事务必须等到X锁被释放才能对该页进行访问；X锁一直到事务结束才能被释放。</p>
+<p>产生排他锁的SQL语句如下所示：select * from ad_plan for update;</p>
+<h2 id="3-3-更新锁"><a href="#3-3-更新锁" class="headerlink" title="3.3 更新锁"></a>3.3 更新锁</h2><p><strong>更新锁（也叫U锁）在修改操作的初始化阶段用来锁定可能要被修改的资源，这样可以避免使用共享锁造成的死锁现象。</strong></p>
+<p>因为，当使用共享锁时，修改数据的操作分为两步，首先获得一个共享锁，读取数据，然后将共享锁升级为排他锁，然后再执行修改操作。这样，如果有两个或多个事务同时对一个事务申请了共享锁，在修改数据的时候，这些事务都要将共享锁升级为排他锁。这时，这些事务都不会释放共享锁而是一直等待对方释放，这样就造成了死锁。</p>
+<p>如果一个数据在修改前直接申请更新锁，在数据修改的时候再升级为排他锁，就可以避免死锁。</p>
+<p><strong>更新锁</strong>具有以下性质：<strong>用来预定要对此页施加X锁，它允许其他事务读，但不允许再施加U锁或X锁；当被读取的页将要被更新时，则升级为X锁；U锁一直到事务结束时才能被释放。</strong></p>
+<h2 id="3-4-意向锁"><a href="#3-4-意向锁" class="headerlink" title="3.4 意向锁"></a>3.4 意向锁</h2><p><strong>申请意向锁的动作是数据库完成的，就是说，事务A申请一行的行锁的时候，数据库会自动先开始申请表的意向锁，不需要我们程序员使用代码来申请。</strong></p>
+<p>意向锁说明SQL Server有在资源的低层获得共享锁或独占锁的意向。</p>
+<p>例如，表级的共享意向锁说明事务意图将独占锁释放到表中的页或者行。</p>
+<p>意向锁又可以分为共享意向锁、 独占意向锁和共享式独占意向锁。</p>
+<p>共享意向锁说明事务意图在共享意向锁所锁定的低层资源上放置共享锁来读取数据。</p>
+<p>独占意向锁说明事务意图在共享意向锁所锁定 的低层资源上放置独占锁来修改数据。</p>
+<p>共享式独占锁说明事务允许其他事务使用共享锁来读取顶层资源，并意图在该资源低层上放置独占锁。 </p>
+<blockquote>
+<p>参考来源：<a href="https://blog.csdn.net/C_J33/article/details/79487941" target="_blank" rel="noopener">数据库的锁机制及原理</a></p>
+</blockquote>
 
       
     </div>
+    
+    
+    
 
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="Dongjie 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="Dongjie 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/数据库/" rel="tag"><i class="fa fa-tag"></i> 数据库</a>
+          
+            <a href="/tags/锁/" rel="tag"><i class="fa fa-tag"></i> 锁</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/11/12/MVCC与Next-key-Locks/" rel="next" title="MVCC与Next-key Locks">
+                <i class="fa fa-chevron-left"></i> MVCC与Next-key Locks
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -361,6 +594,13 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
 
         </div>
         
@@ -381,8 +621,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -461,6 +710,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-简介"><span class="nav-text">1. 简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-乐观锁与悲观锁"><span class="nav-text">2. 乐观锁与悲观锁</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-具体的锁"><span class="nav-text">3. 具体的锁</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-共享锁"><span class="nav-text">3.1 共享锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-排他锁"><span class="nav-text">3.2 排他锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-更新锁"><span class="nav-text">3.3 更新锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-意向锁"><span class="nav-text">3.4 意向锁</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -625,6 +890,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
