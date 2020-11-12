@@ -1,6 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>MVCC与Next-key Locks</title>
+    <url>/2020/11/12/MVCC%E4%B8%8ENext-key-Locks/</url>
+    <content><![CDATA[<p>MYSQL数据库中，事务主要有4种<strong>隔离级别</strong>，分别是<strong>未提交读，提交读，可重复读，可串行化</strong>。</p>
+<p>多版本并发控制（Muti-Version Concurrency Control,MVCC）是MYSQL的InnoDB引擎实现隔离级别的一种具体方式。主要用来解决提交读和可重复读。</p>
+<p>但是单纯的MVCC还不能解决幻读的问题，于是在MVCC基础上加上Next-key Locks，达到可串行化的效果。</p>
+<p>这里只谈简单的理解。</p>
+<h1 id="1-MVCC"><a href="#1-MVCC" class="headerlink" title="1. MVCC"></a>1. MVCC</h1><p>顾名思义，通过<strong>多版本</strong>来实现并发控制。<strong>同一条记录在系统中可以存在多个版本</strong>。</p>
+<p>谈到并发控制，无非就是加锁实现。但加锁过程也会影响性能，这就是一致性与高可用的矛盾。MVCC免去读操作的加锁（非阻塞的读），使开销更低。<strong>写操作必须加锁</strong>。</p>
+<p>MVCC就是想办法少加点锁，通过其他方式保证数据一致性。<strong>MVCC是通过保存数据在某一个时间点快照来实现的。也就是说不管实现时间多长，每个事务看到的数据都是一致的。</strong></p>
+<p>于是不得不提到版本号、快照读与当前读。</p>
+<p>版本号，包括系统版本号与事务版本号。系统版本号是递增的数字，每开始一个新的事务，系统版本号自动增加。<strong>事务版本号就是事务开始时的系统版本号。</strong></p>
+<p>MVCC机制虽然能够让数据可重复读，但读取的数据可能是历史数据。<strong>读取历史数据的方式，称为快照读，而读取数据库最新版本的数据，称为当前读。</strong></p>
+<p>快照读实现了可重复读。自然的也解决了幻读问题（历史数据未变更）。</p>
+<p>对数据修改的操作(update、insert、delete)都是采用当前读的模式。在执行这几个操作时会读取最新的记录，即使是别的事务提交的数据也可以查询到。读取的是最新的数据，需要加锁。<strong>当前读不能解决幻读问题，需要加锁，使用Next-key Lock。</strong></p>
+<h1 id="1-1-隐藏列"><a href="#1-1-隐藏列" class="headerlink" title="1.1 隐藏列"></a>1.1 隐藏列</h1><p>MVCC工作时，在每行记录后边保存两个隐藏列。分别是数据行的创建时间，数据行的删除时间。这里的时间只是一种说法，不代表具体的时间，而是当时的系统版本号。</p>
+<blockquote>
+<p>注：这里表述的删除时间（版本号）不易理解，恰当的说法应该是回滚版本号（回滚指针）。通过该版本号在回滚日志中查询历史数据。</p>
+</blockquote>
+<p><strong>当开始一个新事务时，该事务的版本号肯定会大于当前所有数据行快照的创建版本号。</strong></p>
+<p>隐藏列对客户端来说是不可见的。</p>
+<h1 id="1-2-回滚日志（undo-log）"><a href="#1-2-回滚日志（undo-log）" class="headerlink" title="1.2 回滚日志（undo log）"></a>1.2 回滚日志（undo log）</h1><p><strong>当事务对数据行进行一次更新操作时，会把旧数据行记录在一个叫做undo log的记录中。</strong></p>
+<p>在undo log中除了记录数据行，还会记录下该行数据的对应的创建版本号。并将原来数据行中的回滚指针指向undo log 记录的这行数据。然后再在原来数据表中进行一次更新操作，如果这次更新操作回滚了，那么就可以根据回滚指针去undo log中查找之前的数据进行复原。</p>
+<p>如果后续还有更新操作的话，就会在undo log中和之前的数据行形成一条链表，链表头就是最新的数据，这条链表就叫做<strong>版本链</strong>。</p>
+<p><strong>事务的可见性都是基于undo log来实现的。</strong></p>
+<h1 id="1-3-事务快照（ReadView-可读视图）"><a href="#1-3-事务快照（ReadView-可读视图）" class="headerlink" title="1.3 事务快照（ReadView/可读视图）"></a>1.3 事务快照（ReadView/可读视图）</h1><p>当进行查询操作时，事务会生成一个ReadView，ReadView是一个事务快照，准确来说是当前时间点系统内活跃的事务列表，也就是说<strong>系统内所有未提交的事务，都会记录在这个Readview内</strong>，事务就根据它来判断哪些数据是可见的，哪些是不可见的。</p>
+<p>查询一条数据时，事务会拿到这个ReadView，去到undo log中进行判断。若查询到某一条数据：</p>
+<ul>
+<li>先去查看undo log中的最新数据行，如果数据行的版本号小于ReadView记录的事务版本号最小值，就说明这条数据对当前数据库是可见的，可以直接作为结果集返回</li>
+<li>若数据行版本号大于ReadView记录最大值，说明这条数据是由一个新的事务修改的，对当前事务不可见，那么就顺着版本链继续往下寻找第一条满足条件的</li>
+<li>若数据行版本号在ReadView最小值和最大值之间，那么就需要进行遍历了整个ReadView了，如果数据行版本号等于ReadView的某个值，则说明该行数据仍然处于活跃状态，那么对当前事务不可见</li>
+</ul>
+<h1 id="1-4-提交读与可重复读的实现"><a href="#1-4-提交读与可重复读的实现" class="headerlink" title="1.4 提交读与可重复读的实现"></a>1.4 提交读与可重复读的实现</h1><p><strong>关键在于生成ReadView的时机不同。</strong></p>
+<p><strong>对提交读来说，事务中的每次读操作都会生成一个新的ReadView</strong>，也就是说，如果这期间某个事务提交了，那么它就会从ReadView中移除。这样确保事务每次读操作都能读到相对比较新的数据。</p>
+<p>而<strong>对可重复读来说，事务只有在第一次进行读操作时才会生成一个ReadView</strong>，后续的读操作都会重复使用这个ReadView。也就是说，如果在此期间有其他事务提交了，那么对于可重复读来说也是不可见的，因为对它来说，事务活跃状态在第一次进行读操作时就已经确定下来，后面不会修改了。</p>
+<h1 id="1-5-理解增删改查"><a href="#1-5-理解增删改查" class="headerlink" title="1.5 理解增删改查"></a>1.5 理解增删改查</h1><p><strong>SELECT</strong> </p>
+<p>在SELECT过程中，InnoDB<strong>只查找版本早于当前事务版本的数据行</strong>，这样可以确保事务读取的行要么是在开始事务之前已经存在要么是事务自身插入或者修改过的，在事务开始之后才插入的行，事务不会看到。<br>行的删除版本号要么未定义，要么大于当前事务版本号，这样可以确保事务读取到的行在事务开始之前未被删除，在事务开始之前就已经过期的数据行，该事务也不会看到。</p>
+<p><strong>INSERT</strong></p>
+<p>将当前系统版本号作为数据行快照的创建版本号。</p>
+<p><strong>DELETE</strong>  </p>
+<p>将当前系统版本号作为数据行快照的删除版本号。</p>
+<p><strong>UPDATE</strong></p>
+<p>将当前系统版本号作为更新前的数据行快照的删除版本号，并将当前系统版本号作为更新后的数据行快照的创建版本号。可以理解为先执行 DELETE 后执行 INSERT。</p>
+<h1 id="2-Next-key-Locks"><a href="#2-Next-key-Locks" class="headerlink" title="2. Next-key Locks"></a>2. Next-key Locks</h1><p><strong>Next-key Locks由record locks(记录锁) 和 gap locks(间隙锁)组合而成</strong>，每次锁住的不光是需要使用的数据，还会锁住这些数据附近的数据。</p>
+<p>InnoDB的三种行锁算法：</p>
+<ul>
+<li>Record Lock：单个行记录上的锁。</li>
+<li>Gap Lock：间隙锁，锁定一个范围，但不包括记录本身。GAP锁的目的，是为了防止同一事务的两次当前读，出现幻读的情况。</li>
+<li>Next-Key Lock：1+2，锁定一个范围，并且锁定记录本身。对于行的查询，都是采用该方法，主要目的是解决幻读的问题。</li>
+</ul>
+<h2 id="2-1-Record-Locks"><a href="#2-1-Record-Locks" class="headerlink" title="2.1 Record Locks"></a>2.1 Record Locks</h2><p>锁定一个记录上的索引，而不是记录本身。</p>
+<h2 id="2-2"><a href="#2-2" class="headerlink" title="2.2"></a>2.2</h2><p>锁定索引之间的间隙，但是不包含索引本身。</p>
+<h2 id="2-3"><a href="#2-3" class="headerlink" title="2.3"></a>2.3</h2><p>Next-Key Locks 是 MySQL 的 InnoDB 存储引擎的一种锁实现。</p>
+<p>当查询的索引含有唯一属性的时候，Next-Key Lock 会进行优化，将其降级为Record Lock，即仅锁住索引本身，不是范围。</p>
+<p>它是 Record Locks 和 Gap Locks 的结合，不仅锁定一个记录上的索引，也锁定索引之间的间隙。</p>
+<h1 id="3-参考"><a href="#3-参考" class="headerlink" title="3. 参考"></a>3. 参考</h1><p><a href="https://juejin.im/post/6844903842505555981#heading-13" target="_blank" rel="noopener">聊聊MVCC和Next-key Locks</a></p>
+<p><a href="https://blog.csdn.net/SCUTJAY/article/details/104653599" target="_blank" rel="noopener">MVCC如何实现数据库读已提交和可重复读这两种隔离级别？</a></p>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+        <tag>MVCC</tag>
+        <tag>Next-key Lock</tag>
+        <tag>隔离级别</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>POJO与JavaBean的区别</title>
+    <url>/2020/09/19/POJO%E4%B8%8EJavaBean%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<p>本文转载自 <a href="https://www.jianshu.com/p/224489dfdec8" target="_blank" rel="noopener">简书 (匠丶): java对象 POJO和JavaBean的区别</a></p>
+<p>POJO与JavaBean的区别，其实就是两个概念的区别。</p>
+<p>至于对实际编程有没有太大的影响，倒也没啥。</p>
+<p>只是同行说起来时，大概知道是个啥，谁还不知道这两玩意儿都是类呢！</p>
+<h1 id="POJO"><a href="#POJO" class="headerlink" title="POJO"></a>POJO</h1><p>“Plain Ordinary Java Object”，简单普通的java对象。主要用来指代那些没有遵循特定的java对象模型，约定或者框架的对象。</p>
+<p>POJO的内在含义是指那些:<br>有一些private的参数作为对象的属性，然后针对每一个参数定义get和set方法访问的接口。<br><strong>没有从任何类继承、也没有实现任何接口，更没有被其它框架侵入的java对象。</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BasicInfoVo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> String orderId;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> Integer uid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getOrderId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderId</span><span class="params">(String orderId)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.orderId = orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> Integer <span class="title">getUid</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> uid;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUid</span><span class="params">(Integer uid)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.uid = uid;</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="JavaBean"><a href="#JavaBean" class="headerlink" title="JavaBean"></a>JavaBean</h1><p>JavaBean 是<strong>一种JAVA语言写成的可重用组件</strong>。JavaBean符合一定规范编写的Java类，不是一种技术，而是一种规范。大家针对这种规范，总结了很多开发技巧、工具函数。符合这种规范的类，可以被其它的程序员或者框架使用。它的方法命名，构造及行为必须符合特定的约定：</p>
+<ul>
+<li><p><strong>所有属性为private</strong>。</p>
+</li>
+<li><p>这个类必须有一个公共的缺省构造函数。即是<strong>提供无参数的构造器</strong>。</p>
+</li>
+<li><p>这个类的<strong>属性使用getter和setter来访问</strong>，其他方法遵从标准命名规范。</p>
+</li>
+<li><p>这个类应是可序列化的。<strong>实现serializable接口</strong>。</p>
+</li>
+</ul>
+<p>因为这些要求主要是靠约定而不是靠实现接口，所以<strong>许多开发者把JavaBean看作遵从特定命名约定的POJO</strong>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserInfo</span> <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span></span>&#123;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//实现serializable接口。  </span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">private</span> String name;  </span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> age;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//无参构造器  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">UserInfo</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">      </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.name = name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.age = age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">//javabean当中可以有其它的方法  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">userInfoPrint</span><span class="params">()</span></span>&#123;  </span><br><span class="line">    System.out.println(<span class="string">""</span>);  </span><br><span class="line">&#125;  &#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="两者有什么区别"><a href="#两者有什么区别" class="headerlink" title="两者有什么区别"></a>两者有什么区别</h1><p>POJO其实是比javabean更纯净的简单类或接口。POJO严格地遵守简单对象的概念，而一些JavaBean中往往会封装一些简单逻辑。</p>
+<p>POJO主要用于数据的临时传递，它只能装载数据， 作为数据存储的载体，而不具有业务逻辑处理的能力。</p>
+<p>Javabean虽然数据的获取与POJO一样，但是javabean当中可以有其它的方法。</p>
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>概念</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java浅拷贝和深拷贝</title>
     <url>/2020/10/17/Java%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/</url>
     <content><![CDATA[<p>本文转载自简书（安静的蓝孩子）<a href="https://www.jianshu.com/p/94dbef2de298" target="_blank" rel="noopener">Java浅拷贝和深拷贝</a></p>
@@ -66,6 +171,20 @@
       <tags>
         <tag>java</tag>
         <tag>拷贝</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>docker常用指令</title>
+    <url>/2020/09/18/docker%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/</url>
+    <content><![CDATA[<figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 进入容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//（run方式）运行容器时在使用 -d 参数时，容器启动后会进入后台</span></span><br><span class="line"><span class="comment">// -it参数：命令提示符效果（i：交互式 t：伪终端）</span></span><br><span class="line"><span class="comment">// /bin/bash 参数表明进入容器后执行的cmd命令（使用shell指令）</span></span><br><span class="line"></span><br><span class="line">docker exec -it 容器id /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment">//退出当前容器（exec进入，exit退出时不停止容器；attach进入，停止）</span></span><br><span class="line"></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta"># 拉取镜像（从docker hub镜像仓库）</span></span><br><span class="line">docker pull nginx(镜像名称)</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看镜像 </span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta"># 创建镜像（提前写好Dockerfile） </span></span><br><span class="line"><span class="comment">// -t 指定构建的镜像名称（target）</span></span><br><span class="line">docker image build -t diyimage:<span class="number">0.0</span><span class="number">.1</span> .</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除镜像 </span></span><br><span class="line"><span class="comment">// -f参数：force</span></span><br><span class="line">docker image rm 镜像id</span><br><span class="line">docker rmi [-f] 镜像id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 通过镜像生成容器 </span></span><br><span class="line">docker container run -p <span class="number">8000</span>:<span class="number">3000</span> -itd --name 容器名称 image01:<span class="number">0.0</span><span class="number">.1</span> /bin/bash</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">注：</span></span><br><span class="line"><span class="comment">每次run都会新增容器</span></span><br><span class="line"><span class="comment">-p参数：容器的 3000 端口映射到本机的 8000 端口。</span></span><br><span class="line"><span class="comment">-it参数：容器的 Shell 映射到当前的 Shell，然后你在本机窗口输入的命令，就会传入容器。</span></span><br><span class="line"><span class="comment">-d参数：容器生成后，后台运行</span></span><br><span class="line"><span class="comment">--name参数：指定容器的名称（不指定系统随机命名）</span></span><br><span class="line"><span class="comment">image01:0.0.1：image 文件的名字（如果有标签，还需要提供标签，默认是 latest 标签）</span></span><br><span class="line"><span class="comment">/bin/bash：容器启动以后，内部第一个执行的命令。这里是启动 Bash，保证用户可以使用 Shell。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">又注：如果镜像是基于nginx的，则不要写/bin/bash，否则映射出去的端口失效(无法访问)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 停止/启动容器 </span></span><br><span class="line">docker container kill/stop/start [containID]</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除容器 </span></span><br><span class="line">docker container rm 容器id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看容器 </span></span><br><span class="line">docker container ls</span><br><span class="line">docker container ls -all</span><br><span class="line"></span><br><span class="line">docker ps</span><br><span class="line">docker ps -a</span><br><span class="line"></span><br><span class="line"><span class="meta"># 保存镜像（eg：viewer-镜像名） </span></span><br><span class="line"></span><br><span class="line">docker save viewers-images  -o  /home/ldj/viewers-image.tar</span><br><span class="line"></span><br><span class="line"><span class="meta"># 载入本地镜像 </span></span><br><span class="line"></span><br><span class="line">docker load -i viewers-image.tar</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>docker</category>
+      </categories>
+      <tags>
+        <tag>docker</tag>
+        <tag>命令</tag>
       </tags>
   </entry>
   <entry>
@@ -145,52 +264,24 @@
         <category>java</category>
       </categories>
       <tags>
+        <tag>概念</tag>
         <tag>Json</tag>
         <tag>数据传输</tag>
-        <tag>概念</tag>
       </tags>
   </entry>
   <entry>
-    <title>POJO与JavaBean的区别</title>
-    <url>/2020/09/19/POJO%E4%B8%8EJavaBean%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
-    <content><![CDATA[<p>本文转载自 <a href="https://www.jianshu.com/p/224489dfdec8" target="_blank" rel="noopener">简书 (匠丶): java对象 POJO和JavaBean的区别</a></p>
-<p>POJO与JavaBean的区别，其实就是两个概念的区别。</p>
-<p>至于对实际编程有没有太大的影响，倒也没啥。</p>
-<p>只是同行说起来时，大概知道是个啥，谁还不知道这两玩意儿都是类呢！</p>
-<h1 id="POJO"><a href="#POJO" class="headerlink" title="POJO"></a>POJO</h1><p>“Plain Ordinary Java Object”，简单普通的java对象。主要用来指代那些没有遵循特定的java对象模型，约定或者框架的对象。</p>
-<p>POJO的内在含义是指那些:<br>有一些private的参数作为对象的属性，然后针对每一个参数定义get和set方法访问的接口。<br><strong>没有从任何类继承、也没有实现任何接口，更没有被其它框架侵入的java对象。</strong></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BasicInfoVo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> String orderId;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> Integer uid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getOrderId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderId</span><span class="params">(String orderId)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.orderId = orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> Integer <span class="title">getUid</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> uid;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUid</span><span class="params">(Integer uid)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.uid = uid;</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+    <title>docker通过nginx镜像部署静态文件</title>
+    <url>/2020/09/18/docker%E9%80%9A%E8%BF%87nginx%E9%95%9C%E5%83%8F%E9%83%A8%E7%BD%B2%E9%9D%99%E6%80%81%E6%96%87%E4%BB%B6/</url>
+    <content><![CDATA[<p>docker通过nginx镜像部署项目的实质，就是<strong>将（项目）静态文件和及其依赖（nginx）制作成镜像(image)，然后通过镜像生成容器</strong>的过程。这样，通过运行容器就能运行服务，而且image可以方便分享。</p>
+<p>准备工作包括：需要部署的静态文件，自定义的nginx配置文件，<strong>Dockerfile文件</strong>（制作镜像）。</p>
+<h2 id="1-获得打包后的静态文件"><a href="#1-获得打包后的静态文件" class="headerlink" title="1. 获得打包后的静态文件"></a>1. 获得打包后的静态文件</h2><p>vue项目与react项目的打包方式不一样，基本上执行<code>yarn build</code>类似的指令就可以构建打包，获得<code>dist/</code>目录（内部保存的就是静态文件）。一般而言，开发环境中<code>node_module</code>依赖包特别多，打包过程只有用到的依赖进入了静态文件。所以开发环境中项目可能几个GB，但打包完成的静态文件只占几十MB。</p>
+<h2 id="2-准备default-conf文件"><a href="#2-准备default-conf文件" class="headerlink" title="2. 准备default.conf文件"></a>2. 准备default.conf文件</h2><figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="string">===</span> <span class="string">default.conf文件（替换nginx镜像中默认的配置文件）</span> <span class="string">===</span></span><br><span class="line"></span><br><span class="line"><span class="string">server</span> <span class="string">&#123;</span></span><br><span class="line">    <span class="string">listen</span>       <span class="number">3000</span><span class="string">;</span> <span class="string">//项目中的端口号(真实使用#注释)</span></span><br><span class="line">    <span class="string">server_name</span>  <span class="string">localhost;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#charset koi8-r;</span></span><br><span class="line">    <span class="comment">#access_log  /var/log/nginx/log/host.access.log  main;</span></span><br><span class="line"></span><br><span class="line">    <span class="string">location</span> <span class="string">/</span> <span class="string">&#123;</span></span><br><span class="line">        <span class="string">root</span>   <span class="string">/usr/share/nginx/html;</span>   <span class="string">//配置url映射的真实位置</span></span><br><span class="line">        <span class="string">index</span>  <span class="string">index.html</span> <span class="string">index.htm;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#error_page  404              /404.html;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># redirect server error pages to the static page /50x.html</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    <span class="string">error_page</span>   <span class="number">500</span> <span class="number">502</span> <span class="number">503</span> <span class="number">504</span>  <span class="string">/50x.html;</span></span><br><span class="line">    <span class="string">location</span> <span class="string">=</span> <span class="string">/50x.html</span> <span class="string">&#123;</span></span><br><span class="line">        <span class="string">root</span>   <span class="string">html;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
 
-<h1 id="JavaBean"><a href="#JavaBean" class="headerlink" title="JavaBean"></a>JavaBean</h1><p>JavaBean 是<strong>一种JAVA语言写成的可重用组件</strong>。JavaBean符合一定规范编写的Java类，不是一种技术，而是一种规范。大家针对这种规范，总结了很多开发技巧、工具函数。符合这种规范的类，可以被其它的程序员或者框架使用。它的方法命名，构造及行为必须符合特定的约定：</p>
-<ul>
-<li><p><strong>所有属性为private</strong>。</p>
-</li>
-<li><p>这个类必须有一个公共的缺省构造函数。即是<strong>提供无参数的构造器</strong>。</p>
-</li>
-<li><p>这个类的<strong>属性使用getter和setter来访问</strong>，其他方法遵从标准命名规范。</p>
-</li>
-<li><p>这个类应是可序列化的。<strong>实现serializable接口</strong>。</p>
-</li>
-</ul>
-<p>因为这些要求主要是靠约定而不是靠实现接口，所以<strong>许多开发者把JavaBean看作遵从特定命名约定的POJO</strong>。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserInfo</span> <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span></span>&#123;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//实现serializable接口。  </span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">private</span> String name;  </span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> age;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//无参构造器  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">UserInfo</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">      </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.name = name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.age = age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">//javabean当中可以有其它的方法  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">userInfoPrint</span><span class="params">()</span></span>&#123;  </span><br><span class="line">    System.out.println(<span class="string">""</span>);  </span><br><span class="line">&#125;  &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-编写Dockerfile文件"><a href="#3-编写Dockerfile文件" class="headerlink" title="3. 编写Dockerfile文件"></a>3. 编写Dockerfile文件</h2><figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="string">===</span> <span class="string">Dockerfile文件</span> <span class="string">===</span></span><br><span class="line"></span><br><span class="line"><span class="string">FROM</span> <span class="attr">nginx:1.14.0</span> <span class="string">//使用Nginx作为基础镜像（从镜像仓库拉取）</span></span><br><span class="line"></span><br><span class="line"><span class="string">MAINTAINER</span> <span class="string">ldj</span> <span class="string">//作者</span></span><br><span class="line"></span><br><span class="line"><span class="string">RUN</span> <span class="string">rm</span> <span class="string">/etc/nginx/conf.d/default.conf</span> <span class="string">//删除nginx</span> <span class="string">默认配置(后边路径说明nginx镜像以linux系统作为基础镜像)</span></span><br><span class="line"></span><br><span class="line"><span class="string">ADD</span> <span class="string">default.conf</span> <span class="string">/etc/nginx/conf.d/</span> <span class="string">//添加我们自己的配置</span> <span class="string">default.conf</span> <span class="string">在下面</span></span><br><span class="line"></span><br><span class="line"><span class="string">COPY</span> <span class="string">dist/</span>  <span class="string">/usr/share/nginx/html/</span>  <span class="string">//把刚才生成dist文件夹下的文件copy到nginx下面去</span></span><br></pre></td></tr></table></figure>
 
-<h1 id="两者有什么区别"><a href="#两者有什么区别" class="headerlink" title="两者有什么区别"></a>两者有什么区别</h1><p>POJO其实是比javabean更纯净的简单类或接口。POJO严格地遵守简单对象的概念，而一些JavaBean中往往会封装一些简单逻辑。</p>
-<p>POJO主要用于数据的临时传递，它只能装载数据， 作为数据存储的载体，而不具有业务逻辑处理的能力。</p>
-<p>Javabean虽然数据的获取与POJO一样，但是javabean当中可以有其它的方法。</p>
-]]></content>
-      <categories>
-        <category>java</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-        <tag>概念</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>docker常用指令</title>
-    <url>/2020/09/18/docker%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/</url>
-    <content><![CDATA[<figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 进入容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//（run方式）运行容器时在使用 -d 参数时，容器启动后会进入后台</span></span><br><span class="line"><span class="comment">// -it参数：命令提示符效果（i：交互式 t：伪终端）</span></span><br><span class="line"><span class="comment">// /bin/bash 参数表明进入容器后执行的cmd命令（使用shell指令）</span></span><br><span class="line"></span><br><span class="line">docker exec -it 容器id /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment">//退出当前容器（exec进入，exit退出时不停止容器；attach进入，停止）</span></span><br><span class="line"></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta"># 拉取镜像（从docker hub镜像仓库）</span></span><br><span class="line">docker pull nginx(镜像名称)</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看镜像 </span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta"># 创建镜像（提前写好Dockerfile） </span></span><br><span class="line"><span class="comment">// -t 指定构建的镜像名称（target）</span></span><br><span class="line">docker image build -t diyimage:<span class="number">0.0</span><span class="number">.1</span> .</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除镜像 </span></span><br><span class="line"><span class="comment">// -f参数：force</span></span><br><span class="line">docker image rm 镜像id</span><br><span class="line">docker rmi [-f] 镜像id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 通过镜像生成容器 </span></span><br><span class="line">docker container run -p <span class="number">8000</span>:<span class="number">3000</span> -itd --name 容器名称 image01:<span class="number">0.0</span><span class="number">.1</span> /bin/bash</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">注：</span></span><br><span class="line"><span class="comment">每次run都会新增容器</span></span><br><span class="line"><span class="comment">-p参数：容器的 3000 端口映射到本机的 8000 端口。</span></span><br><span class="line"><span class="comment">-it参数：容器的 Shell 映射到当前的 Shell，然后你在本机窗口输入的命令，就会传入容器。</span></span><br><span class="line"><span class="comment">-d参数：容器生成后，后台运行</span></span><br><span class="line"><span class="comment">--name参数：指定容器的名称（不指定系统随机命名）</span></span><br><span class="line"><span class="comment">image01:0.0.1：image 文件的名字（如果有标签，还需要提供标签，默认是 latest 标签）</span></span><br><span class="line"><span class="comment">/bin/bash：容器启动以后，内部第一个执行的命令。这里是启动 Bash，保证用户可以使用 Shell。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">又注：如果镜像是基于nginx的，则不要写/bin/bash，否则映射出去的端口失效(无法访问)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 停止/启动容器 </span></span><br><span class="line">docker container kill/stop/start [containID]</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除容器 </span></span><br><span class="line">docker container rm 容器id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看容器 </span></span><br><span class="line">docker container ls</span><br><span class="line">docker container ls -all</span><br><span class="line"></span><br><span class="line">docker ps</span><br><span class="line">docker ps -a</span><br><span class="line"></span><br><span class="line"><span class="meta"># 保存镜像（eg：viewer-镜像名） </span></span><br><span class="line"></span><br><span class="line">docker save viewers-images  -o  /home/ldj/viewers-image.tar</span><br><span class="line"></span><br><span class="line"><span class="meta"># 载入本地镜像 </span></span><br><span class="line"></span><br><span class="line">docker load -i viewers-image.tar</span><br></pre></td></tr></table></figure>
+<h2 id="4-创建镜像"><a href="#4-创建镜像" class="headerlink" title="4. 创建镜像"></a>4. 创建镜像</h2><figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 当前文件结构</span></span><br><span class="line"></span><br><span class="line">├── <span class="keyword">default</span>.conf</span><br><span class="line">├── dist</span><br><span class="line">└── Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="meta"># docker打包</span></span><br><span class="line"><span class="meta"># -t指定镜像名称:版本号（tag）</span></span><br><span class="line">docker image build -t biggfish:<span class="number">1.0</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 生成容器</span></span><br><span class="line"><span class="meta"># 末尾千万不要加 /bin/bash 否则端口不能正常映射</span></span><br><span class="line">docker container run -p <span class="number">3000</span>:<span class="number">3000</span> -itd --name biggfishContainer biggfish:<span class="number">1.0</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="5-访问测试"><a href="#5-访问测试" class="headerlink" title="5. 访问测试"></a>5. 访问测试</h2><figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">通过 本机ip:<span class="number">3000</span> 访问</span><br><span class="line"></span><br><span class="line">如果能看到项目首页：成功</span><br></pre></td></tr></table></figure>
 
 ]]></content>
       <categories>
@@ -198,7 +289,8 @@
       </categories>
       <tags>
         <tag>docker</tag>
-        <tag>命令</tag>
+        <tag>教程</tag>
+        <tag>nginx</tag>
       </tags>
   </entry>
   <entry>
@@ -257,27 +349,32 @@
       </tags>
   </entry>
   <entry>
-    <title>docker通过nginx镜像部署静态文件</title>
-    <url>/2020/09/18/docker%E9%80%9A%E8%BF%87nginx%E9%95%9C%E5%83%8F%E9%83%A8%E7%BD%B2%E9%9D%99%E6%80%81%E6%96%87%E4%BB%B6/</url>
-    <content><![CDATA[<p>docker通过nginx镜像部署项目的实质，就是<strong>将（项目）静态文件和及其依赖（nginx）制作成镜像(image)，然后通过镜像生成容器</strong>的过程。这样，通过运行容器就能运行服务，而且image可以方便分享。</p>
-<p>准备工作包括：需要部署的静态文件，自定义的nginx配置文件，<strong>Dockerfile文件</strong>（制作镜像）。</p>
-<h2 id="1-获得打包后的静态文件"><a href="#1-获得打包后的静态文件" class="headerlink" title="1. 获得打包后的静态文件"></a>1. 获得打包后的静态文件</h2><p>vue项目与react项目的打包方式不一样，基本上执行<code>yarn build</code>类似的指令就可以构建打包，获得<code>dist/</code>目录（内部保存的就是静态文件）。一般而言，开发环境中<code>node_module</code>依赖包特别多，打包过程只有用到的依赖进入了静态文件。所以开发环境中项目可能几个GB，但打包完成的静态文件只占几十MB。</p>
-<h2 id="2-准备default-conf文件"><a href="#2-准备default-conf文件" class="headerlink" title="2. 准备default.conf文件"></a>2. 准备default.conf文件</h2><figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="string">===</span> <span class="string">default.conf文件（替换nginx镜像中默认的配置文件）</span> <span class="string">===</span></span><br><span class="line"></span><br><span class="line"><span class="string">server</span> <span class="string">&#123;</span></span><br><span class="line">    <span class="string">listen</span>       <span class="number">3000</span><span class="string">;</span> <span class="string">//项目中的端口号(真实使用#注释)</span></span><br><span class="line">    <span class="string">server_name</span>  <span class="string">localhost;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#charset koi8-r;</span></span><br><span class="line">    <span class="comment">#access_log  /var/log/nginx/log/host.access.log  main;</span></span><br><span class="line"></span><br><span class="line">    <span class="string">location</span> <span class="string">/</span> <span class="string">&#123;</span></span><br><span class="line">        <span class="string">root</span>   <span class="string">/usr/share/nginx/html;</span>   <span class="string">//配置url映射的真实位置</span></span><br><span class="line">        <span class="string">index</span>  <span class="string">index.html</span> <span class="string">index.htm;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#error_page  404              /404.html;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># redirect server error pages to the static page /50x.html</span></span><br><span class="line">    <span class="comment">#</span></span><br><span class="line">    <span class="string">error_page</span>   <span class="number">500</span> <span class="number">502</span> <span class="number">503</span> <span class="number">504</span>  <span class="string">/50x.html;</span></span><br><span class="line">    <span class="string">location</span> <span class="string">=</span> <span class="string">/50x.html</span> <span class="string">&#123;</span></span><br><span class="line">        <span class="string">root</span>   <span class="string">html;</span></span><br><span class="line">    <span class="string">&#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+    <title>使用Comparator比较器</title>
+    <url>/2020/11/10/%E4%BD%BF%E7%94%A8Comparator%E6%AF%94%E8%BE%83%E5%99%A8/</url>
+    <content><![CDATA[<p>数组的排序方式有很多。</p>
+<p>排序，必须选择一个排序标准，可以按照元素的值（整型数组），或者元素的某个属性值（元素为对象时）。</p>
+<p><strong>Arrays工具类，位于java.util包，提供了sort方法。支持自定义比较器，实现升序、降序排列等。</strong></p>
+<p>多维数组，可以看作元素是数组的集合。同样的思想，按照元素的某一个属性，比如元素的某一列值（二维数组）排序。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.Comparator;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="symbol">ComparatorOrder</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> static <span class="built_in">void</span> main(String[] args) &#123;</span><br><span class="line">        Integer[] nums = new Integer[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line">        Arrays.sort(nums, (o1, o2) -&gt; o2-o1);</span><br><span class="line">        <span class="comment">//降序，输出：[6,4,3,2,2,1]</span></span><br><span class="line">        System.<span class="keyword">out</span>.println(Arrays.toString(nums));</span><br><span class="line"></span><br><span class="line">        <span class="built_in">int</span>[][] nums2=new <span class="built_in">int</span>[][]&#123;&#123;<span class="number">7</span>,<span class="number">0</span>&#125;,&#123;<span class="number">4</span>,<span class="number">1</span>&#125;,&#123;<span class="number">5</span>,<span class="number">2</span>&#125;,&#123;<span class="number">6</span>,<span class="number">3</span>&#125;,&#123;<span class="number">8</span>,<span class="number">6</span>&#125;&#125;;</span><br><span class="line"><span class="comment">//        Arrays.sort(nums2, new Comparator&lt;int[]&gt;() &#123;</span></span><br><span class="line"><span class="comment">//            @Override</span></span><br><span class="line"><span class="comment">//            public int compare(int[] o1, int[] o2) &#123;</span></span><br><span class="line"><span class="comment">//                return o1[1]-o2[1];</span></span><br><span class="line"><span class="comment">//            &#125;</span></span><br><span class="line"><span class="comment">//        &#125;);</span></span><br><span class="line">        Arrays.sort(nums2,((o1, o2) -&gt; o1[<span class="number">1</span>]-o2[<span class="number">1</span>]));</span><br><span class="line"></span><br><span class="line">        <span class="comment">//二维数组，按第二列升序</span></span><br><span class="line">        <span class="comment">//输出：</span></span><br><span class="line">        <span class="comment">//[7,0]</span></span><br><span class="line">        <span class="comment">//[4,1]</span></span><br><span class="line">        <span class="comment">//[5,2]</span></span><br><span class="line">        <span class="comment">//[6,3]</span></span><br><span class="line">        <span class="comment">//[8,6]</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span>[] n:nums2)&#123;</span><br><span class="line">            System.<span class="keyword">out</span>.println(Arrays.toString(n));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="3-编写Dockerfile文件"><a href="#3-编写Dockerfile文件" class="headerlink" title="3. 编写Dockerfile文件"></a>3. 编写Dockerfile文件</h2><figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="string">===</span> <span class="string">Dockerfile文件</span> <span class="string">===</span></span><br><span class="line"></span><br><span class="line"><span class="string">FROM</span> <span class="attr">nginx:1.14.0</span> <span class="string">//使用Nginx作为基础镜像（从镜像仓库拉取）</span></span><br><span class="line"></span><br><span class="line"><span class="string">MAINTAINER</span> <span class="string">ldj</span> <span class="string">//作者</span></span><br><span class="line"></span><br><span class="line"><span class="string">RUN</span> <span class="string">rm</span> <span class="string">/etc/nginx/conf.d/default.conf</span> <span class="string">//删除nginx</span> <span class="string">默认配置(后边路径说明nginx镜像以linux系统作为基础镜像)</span></span><br><span class="line"></span><br><span class="line"><span class="string">ADD</span> <span class="string">default.conf</span> <span class="string">/etc/nginx/conf.d/</span> <span class="string">//添加我们自己的配置</span> <span class="string">default.conf</span> <span class="string">在下面</span></span><br><span class="line"></span><br><span class="line"><span class="string">COPY</span> <span class="string">dist/</span>  <span class="string">/usr/share/nginx/html/</span>  <span class="string">//把刚才生成dist文件夹下的文件copy到nginx下面去</span></span><br></pre></td></tr></table></figure>
+<p>写这个是因为，对compare方法的参数顺序有点懵。所以写下来，理一理。</p>
+<p>o1与o2只是参数名称。</p>
+<p><strong>（o1,o2）-&gt; o1-o2 ，这种形式，代表升序。</strong></p>
+<p>o1代表当前元素，o2是前一个元素。返回o1-o2，默认为正值，表示o1大于o2，即当前元素大于前一个元素。是对数组进行升序排列。</p>
+<p>测试过程中，发现对int[ ] 类型的一维数组，不能使用传入自定义的比较器来进行降序排列。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="built_in">int</span>[] nums = new <span class="built_in">int</span>[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line">Arrays.sort(nums, (o1, o2) -&gt; o2-o1);</span><br></pre></td></tr></table></figure>
 
-<h2 id="4-创建镜像"><a href="#4-创建镜像" class="headerlink" title="4. 创建镜像"></a>4. 创建镜像</h2><figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 当前文件结构</span></span><br><span class="line"></span><br><span class="line">├── <span class="keyword">default</span>.conf</span><br><span class="line">├── dist</span><br><span class="line">└── Dockerfile</span><br><span class="line"></span><br><span class="line"><span class="meta"># docker打包</span></span><br><span class="line"><span class="meta"># -t指定镜像名称:版本号（tag）</span></span><br><span class="line">docker image build -t biggfish:<span class="number">1.0</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 生成容器</span></span><br><span class="line"><span class="meta"># 末尾千万不要加 /bin/bash 否则端口不能正常映射</span></span><br><span class="line">docker container run -p <span class="number">3000</span>:<span class="number">3000</span> -itd --name biggfishContainer biggfish:<span class="number">1.0</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="5-访问测试"><a href="#5-访问测试" class="headerlink" title="5. 访问测试"></a>5. 访问测试</h2><figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">通过 本机ip:<span class="number">3000</span> 访问</span><br><span class="line"></span><br><span class="line">如果能看到项目首页：成功</span><br></pre></td></tr></table></figure>
+<p>上述的写法会报错（可检查）。<code>操作符-不能被应用到T</code>，即说明自定义比较器中<strong>两个用于比较的元素必须是对象，或者说是引用类型。</strong></p>
+<p>改为如下写法，则编译运行正常。</p>
+<figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line"><span class="type">Integer</span>[] nums = <span class="built_in">new</span> <span class="type">Integer</span>[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line"> </span><br><span class="line">Arrays.sort(nums, <span class="built_in">new</span> Comparator&lt;<span class="type">Integer</span>&gt;()&#123;</span><br><span class="line">    @Override</span><br><span class="line">    <span class="built_in">public</span> <span class="type">int</span> compare(<span class="type">Integer</span> o1, <span class="type">Integer</span> o2) &#123;</span><br><span class="line">        <span class="keyword">return</span> o1-o2;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
 ]]></content>
       <categories>
-        <category>docker</category>
+        <category>java</category>
       </categories>
       <tags>
-        <tag>docker</tag>
-        <tag>教程</tag>
-        <tag>nginx</tag>
+        <tag>java</tag>
+        <tag>排序</tag>
       </tags>
   </entry>
   <entry>
@@ -361,92 +458,37 @@
       </tags>
   </entry>
   <entry>
-    <title>使用Comparator比较器</title>
-    <url>/2020/11/10/%E4%BD%BF%E7%94%A8Comparator%E6%AF%94%E8%BE%83%E5%99%A8/</url>
-    <content><![CDATA[<p>数组的排序方式有很多。</p>
-<p>排序，必须选择一个排序标准，可以按照元素的值（整型数组），或者元素的某个属性值（元素为对象时）。</p>
-<p><strong>Arrays工具类，位于java.util包，提供了sort方法。支持自定义比较器，实现升序、降序排列等。</strong></p>
-<p>多维数组，可以看作元素是数组的集合。同样的思想，按照元素的某一个属性，比如元素的某一列值（二维数组）排序。</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.Comparator;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="symbol">ComparatorOrder</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> static <span class="built_in">void</span> main(String[] args) &#123;</span><br><span class="line">        Integer[] nums = new Integer[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line">        Arrays.sort(nums, (o1, o2) -&gt; o2-o1);</span><br><span class="line">        <span class="comment">//降序，输出：[6,4,3,2,2,1]</span></span><br><span class="line">        System.<span class="keyword">out</span>.println(Arrays.toString(nums));</span><br><span class="line"></span><br><span class="line">        <span class="built_in">int</span>[][] nums2=new <span class="built_in">int</span>[][]&#123;&#123;<span class="number">7</span>,<span class="number">0</span>&#125;,&#123;<span class="number">4</span>,<span class="number">1</span>&#125;,&#123;<span class="number">5</span>,<span class="number">2</span>&#125;,&#123;<span class="number">6</span>,<span class="number">3</span>&#125;,&#123;<span class="number">8</span>,<span class="number">6</span>&#125;&#125;;</span><br><span class="line"><span class="comment">//        Arrays.sort(nums2, new Comparator&lt;int[]&gt;() &#123;</span></span><br><span class="line"><span class="comment">//            @Override</span></span><br><span class="line"><span class="comment">//            public int compare(int[] o1, int[] o2) &#123;</span></span><br><span class="line"><span class="comment">//                return o1[1]-o2[1];</span></span><br><span class="line"><span class="comment">//            &#125;</span></span><br><span class="line"><span class="comment">//        &#125;);</span></span><br><span class="line">        Arrays.sort(nums2,((o1, o2) -&gt; o1[<span class="number">1</span>]-o2[<span class="number">1</span>]));</span><br><span class="line"></span><br><span class="line">        <span class="comment">//二维数组，按第二列升序</span></span><br><span class="line">        <span class="comment">//输出：</span></span><br><span class="line">        <span class="comment">//[7,0]</span></span><br><span class="line">        <span class="comment">//[4,1]</span></span><br><span class="line">        <span class="comment">//[5,2]</span></span><br><span class="line">        <span class="comment">//[6,3]</span></span><br><span class="line">        <span class="comment">//[8,6]</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span>[] n:nums2)&#123;</span><br><span class="line">            System.<span class="keyword">out</span>.println(Arrays.toString(n));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    <title>对象的序列化：Serializable接口</title>
+    <url>/2020/10/12/%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9ASerializable%E6%8E%A5%E5%8F%A3/</url>
+    <content><![CDATA[<p>一般而言，定义实体类时会实现 <code>Serializable</code>接口，同时还要显示指定<code>serialVersionUID</code>的值。</p>
+<p>为什么要有这些操作呢？这里就试图简单理解。</p>
+<h1 id="1-序列化与反序列化"><a href="#1-序列化与反序列化" class="headerlink" title="1. 序列化与反序列化"></a>1. 序列化与反序列化</h1><p><font color="red">序列化</font>：把对象转换为字节序列的过程称为对象的序列化。</p>
+<p><font color="red">反序列化</font>：把字节序列恢复为对象的过程称为对象的反序列化。</p>
+<p>从概念上看，<strong>序列化操作只是针对于对象层面的</strong>，包含对象的成员变量和成员方法。那么被static修饰的成员变量呢？结论是被static修饰的属性不会被序列化。</p>
+<p>但这并不意味着static修饰的变量会缺失。这个变量不管被什么修饰词修饰，始终还算对象里边的成员变量。只是可能存在变量值不一致的情况，因为无法序列化代表对象的该变量的值无法硬性写入字节序列（有点饶，描述serialVersionUID进一步阐述）</p>
+<h1 id="2-Serializable接口"><a href="#2-Serializable接口" class="headerlink" title="2. Serializable接口"></a>2. Serializable接口</h1><p>一个对象序列化的接口，<strong>一个类只有实现了Serializable接口，它的对象才能被序列化</strong>。</p>
+<p>日常接触的String类，其底层也实现了Serializable接口，所以JSON字符串才能在前后端自由传输。</p>
+<p>但观察Serializable接口就会发现，接口内部啥也没有，就是说，它是一个空接口。<font color="red">其实，可以将它理解为一个标识接口。实现这个接口，就是给JVM看的，JVM会帮助当前类实现序列化（或反序列化）的具体操作。</font></p>
+<p>Serializable接口就是<font color="red">Java提供用来进行高效率的异地共享实例对象的机制</font>，实现这个接口即可。</p>
+<h1 id="3-serialversionUID变量"><a href="#3-serialversionUID变量" class="headerlink" title="3. serialversionUID变量"></a>3. serialversionUID变量</h1><p>通常的写法是：</p>
+<figure class="highlight aspectj"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">12356</span>L;</span><br></pre></td></tr></table></figure>
 
-<p>写这个是因为，对compare方法的参数顺序有点懵。所以写下来，理一理。</p>
-<p>o1与o2只是参数名称。</p>
-<p><strong>（o1,o2）-&gt; o1-o2 ，这种形式，代表升序。</strong></p>
-<p>o1代表当前元素，o2是前一个元素。返回o1-o2，默认为正值，表示o1大于o2，即当前元素大于前一个元素。是对数组进行升序排列。</p>
-<p>测试过程中，发现对int[ ] 类型的一维数组，不能使用传入自定义的比较器来进行降序排列。</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="built_in">int</span>[] nums = new <span class="built_in">int</span>[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line">Arrays.sort(nums, (o1, o2) -&gt; o2-o1);</span><br></pre></td></tr></table></figure>
-
-<p>上述的写法会报错（可检查）。<code>操作符-不能被应用到T</code>，即说明自定义比较器中<strong>两个用于比较的元素必须是对象，或者说是引用类型。</strong></p>
-<p>改为如下写法，则编译运行正常。</p>
-<figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line"><span class="type">Integer</span>[] nums = <span class="built_in">new</span> <span class="type">Integer</span>[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line"> </span><br><span class="line">Arrays.sort(nums, <span class="built_in">new</span> Comparator&lt;<span class="type">Integer</span>&gt;()&#123;</span><br><span class="line">    @Override</span><br><span class="line">    <span class="built_in">public</span> <span class="type">int</span> compare(<span class="type">Integer</span> o1, <span class="type">Integer</span> o2) &#123;</span><br><span class="line">        <span class="keyword">return</span> o1-o2;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
+<p>显示声明这个变量并赋予字面量的作用是啥？保证类的一致性。如果类发生变化，依然能够对旧类的对象（已经序列化）执行反序列化操作。</p>
+<p>很多时候我们未显示声明该变量，程序照常运行。<font color="red">实际上，是JVM在序列化时根据属性自动生成一个serialVersionUID，然后与属性一起序列化。在反序列化时，JVM会再根据属性自动生成一个新版serialVersionUID，然后将新serialVersionUID与旧serialVersionUID比较，如果一致，则反序列化成功，否则报错。</font></p>
+<p>类发生变化（旧类与新类），JVM自动生成的serialVersionUID值就不一致，所以就可能出现问题。</p>
+<h1 id="4-serialversionUID变量也被static修饰"><a href="#4-serialversionUID变量也被static修饰" class="headerlink" title="4. serialversionUID变量也被static修饰"></a>4. serialversionUID变量也被static修饰</h1><p>前面提到，被static修饰的属性不会被序列化，但serialversionUID变量也被static修饰确可以被序列化，这不是打脸吗？</p>
+<p>答案是，你用static修饰的那个变量并没有被序列化，只不过是工具变量拿来传值的。JVM 在序列化对象时会自动生成一个 serialVersionUID, 然后将我们显示指定的 serialVersionUID 属性值赋给自动生成的 serialVersionUID。</p>
+<p>至于其他的static修饰的属性，这些属性是跟着类走的。一种合理的解释是，<font color="red">序列化是针对对象而言的, 而 static 属性优先于对象存在, 随着类的加载而加载, 所以不会被序列化。</font></p>
+<h1 id="5-什么时候需要序列化和反序列化"><a href="#5-什么时候需要序列化和反序列化" class="headerlink" title="5. 什么时候需要序列化和反序列化"></a>5. 什么时候需要序列化和反序列化</h1><p>答案是：<font color="red">对内存中的对象进行数据（指对象的状态信息）传输（通信）与数据存储（持久化）。</font>很多时候我们可能并不是将整个对象存储或者传输，而是其中的字段信息，比如说将数据保存在数据库。这个过程每个字段的变量类型都应该是可序列化的，也即实现了Serializable接口。</p>
+<p>我们经常这么用，但不一定想到原来它们都默默实现了Serializable接口。</p>
+<h1 id="6-参考资料"><a href="#6-参考资料" class="headerlink" title="6. 参考资料"></a>6. 参考资料</h1><p><a href="https://blog.csdn.net/litianxiang_kaola/article/details/100097019" target="_blank" rel="noopener">Java序列化和反序列化为什么要实现Serializable接口</a></p>
 ]]></content>
       <categories>
         <category>java</category>
       </categories>
       <tags>
         <tag>java</tag>
-        <tag>排序</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>常见乱码问题及分析</title>
-    <url>/2020/07/03/%E5%B8%B8%E8%A7%81%E4%B9%B1%E7%A0%81%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/</url>
-    <content><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>有一个现成的古老的web项目，技术栈包括<code>JSP</code> <code>JAVA</code> <code>MYSQL</code>，<code>MyEclipse 10.5</code>作为开发工具，开发环境<code>JDK1.7</code> <code>Tomcat7</code> <code>Mysql5.5</code>。</p>
-<p>现在项目能够部署成功，正常访问。</p>
-<p>但是当提交的表单数据中包含中文时，数据库存储的相关数据显示为???。</p>
-<p>因为这个<code>BUG</code>，诞生这篇小结。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/pk0001.png" alt="朋克风"></p>
-<h1 id="常见乱码问题分析和总结"><a href="#常见乱码问题分析和总结" class="headerlink" title="常见乱码问题分析和总结"></a>常见乱码问题分析和总结</h1><p>本节内容选自<a href="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/index.html" target="_blank" rel="noopener">IBM Developer : 常见乱码问题分析和总结 </a></p>
-<h2 id="编码与解码"><a href="#编码与解码" class="headerlink" title="编码与解码"></a>编码与解码</h2><p>计算机不能直接存储字母，数字，图片，符号等，计算机能处理和工作的唯一单位是”比特位（bit）”，一个比特位通常只有 0 和 1，是（yes）和否（no），真（true）或者假（false）等等我们喜欢的称呼。利用比特位序列来代表字母，数字，图片，符号等，我们就需要一个存储规则，不同的比特序列代表不同的字符，这就是所谓的”编码”。反之，将存储在计算机中的比特位序列（或者叫二进制序列）解析显示出来成对应的字母，数字，图片和符号，称为”解码”，如同密码学中的加密和解密，下面将详细解释编码解码过程中涉及到的一些术语：</p>
-<p><strong>字符集合（Character set）</strong>：是各种文字和符号的总称，包括各国家文字、标点符号、图形符号、数字等，简单理解就是一个字库，与计算机以及编码无关。</p>
-<p><strong>字符编码集（Coded character set）</strong>：是一组字符对应的编码（即数字），为字符集合中的每一个字符给予一个数字，如 Unicode 为每一个字符分配一个唯一的码点与之一一对应。</p>
-<p><strong>字符编码（Character Encoding）</strong>：简单理解就是一个映射关系，将字符集对应的码点映射为一个个二进制序列，从而使得计算机可以存储和处理。常见的编码方式有 ASCII 编码、ISO-8859-1(不支持中文)、GBK、GB2312（中国编码，支持中文）、UTF-8 等等,详情见表 1。</p>
-<p><strong>字符集（Charset）</strong>：包括编码字符集合和字符编码，如 ASCII 字符集、ISO-8859-X、GB2312 字符集（简中）、BIG5 字符集（繁中）、GB18030 字符集、Shift-JIS 等，即下文中提到的字符集。</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">这里提到的字符集合与字符集是不同的概念，后者包含前者。</span><br><span class="line">一般乱码现象都是因为中文数据导致的，汉字占用双字节，所以支持中文的编码方式（GBK、UTF<span class="number">-8</span>等）也就是可以支持对双字节汉字进行编码。</span><br></pre></td></tr></table></figure>
-
-<p><strong>字符解码（Character Decoding）</strong>: 根据一定规则，将二进制序列映射成对应的正确字符串，即二进制序列–&gt;字符串，个人将其理解为”翻译”。</p>
-<p><strong>Code Point</strong>：称作码点或码位，是组成编码空间（或代码页）的数值。例如，ASCII 码包含 128 个码点，范围是 0 到 7F（16 进制）；ISO-8859-1 包含 256 个码点，范围是 0 到 FF；而 Unicode 包含 1,114,112 个码点，范围是 0 到 10FFFF。Unicode 码空间划分为 17 个 Unicode 字符平面（基本多文种平面，16 个辅助平面），每个平面有 65,536（= 216）个码点。因此 Unicode 码空间总计是 17 x 65,536 = 1,114,112。</p>
-<p><strong>Code Page</strong>：代码页或者内码表，是 IBM 早期称呼计算机的 BIOS 所支持的字符集编码（也称作 OEM 代码页）。Windows 系统在没有使用 UTF-16 之前，为了解决由于不同国家和地区采用的字符集不一致，很可能出现无法正常显示所有字符的问题，使用了代码页（Codepage）转换表的技术来过渡性的部分解决这一问题，即定义了一系列支持不同国家和地区所制定的字符集，被称为 Windows 代码页或 ANSI 代码页，然而代码页一般与其所对应的字符集之间并非完全相同，有时候会对字符集有所扩展，可以理解为一张字符-字节序列映射表，通过查表实现编码解码功能。操作系统中不同 Locale 设置默认使用不同的代码页。</p>
-<p><strong>Locale</strong>：是指特定于某个国家或地区的一组设定，包括代码页，以及数字、货币、时间和日期的格式等。在 Windows 内部，有两个 Locale 设置：系统 Locale 和用户 Locale。系统 Locale 决定代码页，用户 Locale 决定数字、货币、时间和日期的格式。</p>
-<h2 id="乱码产生原因"><a href="#乱码产生原因" class="headerlink" title="乱码产生原因"></a>乱码产生原因</h2><p>乱码产生的根源一般情况下可以归结为三方面即：编码引起的乱码、解码引起的乱码以及缺少某种字体库引起的乱码（这种情况需要用户安装对应的字体库），其中大部分乱码问题是由不合适的解码方式造成的，如图 3 所示的鱼骨图。</p>
-<p>图 3. 乱码产生原因</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image003.jpg" alt="乱码产生原因"></p>
-<h3 id="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"><a href="#从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法" class="headerlink" title="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"></a>从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法</h3><p>图 5. 编码方式引起的乱码剖析</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image005.jpg" alt="图 5. 编码方式引起的乱码剖析"></p>
-<p>图 6. 不正确的解码方式引起的乱码</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image006.png" alt="图 6. 不正确的解码方式引起的乱码"></p>
-<figure class="highlight 1c"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">乱码有很多形式。</span><br><span class="line"><span class="string">"??"</span>通常是由于编码引起的乱码，出现?说明原始字符的信息已经丢失，这种情况下形成的乱码是不可逆的，也就是说无论用什么解码方式都不能正确显示字符。</span><br><span class="line"><span class="string">"ÄãºÃ£¬ÖÐ¹ú"</span>一般由解码方式不对引起的，乱码可逆，即可以通过乱码恢复获取原始的字符信息。</span><br></pre></td></tr></table></figure>
-
-<h3 id="从编程角度分析出现乱码的场景和解决办法"><a href="#从编程角度分析出现乱码的场景和解决办法" class="headerlink" title="从编程角度分析出现乱码的场景和解决办法"></a>从编程角度分析出现乱码的场景和解决办法</h3><p>从编程角度来看，出现乱码的场景主要是有文本处理的时候，比如文件的新建和读取、复制和粘贴，导入和导出，打开和保存，数据存储和检索，显示，打印，分词处理，字符转换，规范化，搜索，整理和发送数据等，文本数据的示例包括平面文件，流文件，数据区域，目录名称，资源名称，用户标识等。图 9 是出现乱码的一个常见场景分类。</p>
-<p>图 9. 出现乱码的场景</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image009.jpg" alt="出现乱码的场景"></p>
-<p><strong>Web 程序中出现的乱码情况</strong></p>
-<p>在 web 应用程序中，存在用户输入以及输出显示的地方都有可能存在编码解码，图 12 简要概括了 HTTP web 请求响应环节。</p>
-<p>图 12. Web 请求响应环节中的编码解码</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image012.jpg" alt="请求响应环节中的编码解码"></p>
-<p><strong>数据库操作过程中的乱码</strong></p>
-<p>在实际应用中，和数据库操作相关的乱码可能出现在数据的导入和导出操作中，在整个过程中涉及到的字符集有服务器端数据库字符集、客户端操作系统字符集、客户端环境变量 nls_lang(lang_territory.charset)，这三个参数的工作流程如图 15 所示。如果这三个参数设置一样，整个数据库操作中就不会出现乱码问题，但是实际应用中客户端的情况复杂多样，很难保持三者一致，涉及到双字节字符就需要服务器端进行转码操作，而转码的桥梁就是 Unicode 字符集，这就要求数据库本身支持 UTF-8 编码方式。为了编码数据库操作过程中的乱码问题，在创建数据库的时候使用 UTF-8 编码方式，如果仅在某些列中使用多语言数据，则可以使用 SQL NCHAR 数据类型（NCHAR，NVARCHAR2 和 NCLOB）以 UTF-16 或 UTF-8 编码形式存储 Unicode 数据，避免存储空间的浪费。</p>
-<p>图 15. Oracle 数据库字符集</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image015.jpg" alt="Oracle 数据库字符集"></p>
-<h1 id="修改Windows的默认编码"><a href="#修改Windows的默认编码" class="headerlink" title="修改Windows的默认编码"></a>修改Windows的默认编码</h1><p>在Windows设置-时间与语言-语言-管理语言设置-更改系统区域设置中进行修改。</p>
-<p>联想到一个现象：通过执行startup.bat文件开启tomcat服务器时，打印的启动日志出现乱码。</p>
-<p>通过查询cmd的编码格式，并修改为utf-8编码格式，理论上能够解决上述乱码问题。实际上，执行chcp 65001，只是将当前cmd窗口的编码设置为utf-8。执行startup.bat时，会另外启动一个cmd进程，所以打印服务器启动日志的那个cmd窗口还是会有乱码。（除非从操作系统层面更改编码格式）</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//查看当前cmd的编码格式</span></span><br><span class="line"><span class="comment">//character code page</span></span><br><span class="line">chcp</span><br><span class="line"></span><br><span class="line"><span class="comment">//换成utf-8代码页</span></span><br><span class="line">chcp <span class="number">65001</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//换成默认的gbk</span></span><br><span class="line">chcp <span class="number">936</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>现在回过头来想背景中的问题。??的出现有可能是字符的编码方式不对，导致通过任何解码方式都读不出正确的字符。那么在哪个环节出现了这个问题呢？通过测试，表单数据提交到服务端，服务端获取数据并打印，显示正常。说明在浏览器到web服务端的编码解码方式是OK的。那么再来，就是java程序代码中将正常的字符数据存入数据库时发生了问题，导致数据库中数据显示为??。于是考虑中文存入数据库的编码方式出了问题。事实也应该就是这样的。</p>
-<p>【问题解决】java连接数据库的代码中，DBURL设置为<code>jdbc:mysql://localhost:3306/XXX?useUnicode=true&amp;characterEncoding=UTF-8</code>。重点就是后边的characterEncoding参数。</p>
-<p>字符数据在二进制与可识读形式之间来回切换跳转，编码解码的步骤都是循环重复的。博大精深的中国汉字，到底在代码的世界里也很独特。</p>
-<p>尽管问题解决，原因大概分析了，但真实的情形又是怎样的呢？谁又真正的可知？如果能够化身数据流，以数据本身的角度来看浏览器到数据库的往返之路，这该是很奇妙的想象与体验吧。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/hacker.png" alt="hacker"></p>
-]]></content>
-      <categories>
-        <category>常识</category>
-      </categories>
-      <tags>
-        <tag>乱码</tag>
-        <tag>编码</tag>
-        <tag>解码</tag>
+        <tag>Serializable接口</tag>
       </tags>
   </entry>
   <entry>
@@ -512,40 +554,6 @@
       <tags>
         <tag>Hexo</tag>
         <tag>GitHub Pages</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>对象的序列化：Serializable接口</title>
-    <url>/2020/10/12/%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9ASerializable%E6%8E%A5%E5%8F%A3/</url>
-    <content><![CDATA[<p>一般而言，定义实体类时会实现 <code>Serializable</code>接口，同时还要显示指定<code>serialVersionUID</code>的值。</p>
-<p>为什么要有这些操作呢？这里就试图简单理解。</p>
-<h1 id="1-序列化与反序列化"><a href="#1-序列化与反序列化" class="headerlink" title="1. 序列化与反序列化"></a>1. 序列化与反序列化</h1><p><font color="red">序列化</font>：把对象转换为字节序列的过程称为对象的序列化。</p>
-<p><font color="red">反序列化</font>：把字节序列恢复为对象的过程称为对象的反序列化。</p>
-<p>从概念上看，<strong>序列化操作只是针对于对象层面的</strong>，包含对象的成员变量和成员方法。那么被static修饰的成员变量呢？结论是被static修饰的属性不会被序列化。</p>
-<p>但这并不意味着static修饰的变量会缺失。这个变量不管被什么修饰词修饰，始终还算对象里边的成员变量。只是可能存在变量值不一致的情况，因为无法序列化代表对象的该变量的值无法硬性写入字节序列（有点饶，描述serialVersionUID进一步阐述）</p>
-<h1 id="2-Serializable接口"><a href="#2-Serializable接口" class="headerlink" title="2. Serializable接口"></a>2. Serializable接口</h1><p>一个对象序列化的接口，<strong>一个类只有实现了Serializable接口，它的对象才能被序列化</strong>。</p>
-<p>日常接触的String类，其底层也实现了Serializable接口，所以JSON字符串才能在前后端自由传输。</p>
-<p>但观察Serializable接口就会发现，接口内部啥也没有，就是说，它是一个空接口。<font color="red">其实，可以将它理解为一个标识接口。实现这个接口，就是给JVM看的，JVM会帮助当前类实现序列化（或反序列化）的具体操作。</font></p>
-<p>Serializable接口就是<font color="red">Java提供用来进行高效率的异地共享实例对象的机制</font>，实现这个接口即可。</p>
-<h1 id="3-serialversionUID变量"><a href="#3-serialversionUID变量" class="headerlink" title="3. serialversionUID变量"></a>3. serialversionUID变量</h1><p>通常的写法是：</p>
-<figure class="highlight aspectj"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">12356</span>L;</span><br></pre></td></tr></table></figure>
-
-<p>显示声明这个变量并赋予字面量的作用是啥？保证类的一致性。如果类发生变化，依然能够对旧类的对象（已经序列化）执行反序列化操作。</p>
-<p>很多时候我们未显示声明该变量，程序照常运行。<font color="red">实际上，是JVM在序列化时根据属性自动生成一个serialVersionUID，然后与属性一起序列化。在反序列化时，JVM会再根据属性自动生成一个新版serialVersionUID，然后将新serialVersionUID与旧serialVersionUID比较，如果一致，则反序列化成功，否则报错。</font></p>
-<p>类发生变化（旧类与新类），JVM自动生成的serialVersionUID值就不一致，所以就可能出现问题。</p>
-<h1 id="4-serialversionUID变量也被static修饰"><a href="#4-serialversionUID变量也被static修饰" class="headerlink" title="4. serialversionUID变量也被static修饰"></a>4. serialversionUID变量也被static修饰</h1><p>前面提到，被static修饰的属性不会被序列化，但serialversionUID变量也被static修饰确可以被序列化，这不是打脸吗？</p>
-<p>答案是，你用static修饰的那个变量并没有被序列化，只不过是工具变量拿来传值的。JVM 在序列化对象时会自动生成一个 serialVersionUID, 然后将我们显示指定的 serialVersionUID 属性值赋给自动生成的 serialVersionUID。</p>
-<p>至于其他的static修饰的属性，这些属性是跟着类走的。一种合理的解释是，<font color="red">序列化是针对对象而言的, 而 static 属性优先于对象存在, 随着类的加载而加载, 所以不会被序列化。</font></p>
-<h1 id="5-什么时候需要序列化和反序列化"><a href="#5-什么时候需要序列化和反序列化" class="headerlink" title="5. 什么时候需要序列化和反序列化"></a>5. 什么时候需要序列化和反序列化</h1><p>答案是：<font color="red">对内存中的对象进行数据（指对象的状态信息）传输（通信）与数据存储（持久化）。</font>很多时候我们可能并不是将整个对象存储或者传输，而是其中的字段信息，比如说将数据保存在数据库。这个过程每个字段的变量类型都应该是可序列化的，也即实现了Serializable接口。</p>
-<p>我们经常这么用，但不一定想到原来它们都默默实现了Serializable接口。</p>
-<h1 id="6-参考资料"><a href="#6-参考资料" class="headerlink" title="6. 参考资料"></a>6. 参考资料</h1><p><a href="https://blog.csdn.net/litianxiang_kaola/article/details/100097019" target="_blank" rel="noopener">Java序列化和反序列化为什么要实现Serializable接口</a></p>
-]]></content>
-      <categories>
-        <category>java</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-        <tag>Serializable接口</tag>
       </tags>
   </entry>
   <entry>
@@ -635,6 +643,53 @@
         <tag>概念</tag>
         <tag>图像</tag>
         <tag>常识</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>阿里云宝塔面板部署java项目</title>
+    <url>/2020/10/30/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E9%83%A8%E7%BD%B2java%E9%A1%B9%E7%9B%AE/</url>
+    <content><![CDATA[<p>背景故事是这样的。</p>
+<p>一个老项目，“上级”指示需要再次启用。</p>
+<p>阿里云实例一周前过期的，如果续费的话，后端代码不用改，前端的请求ip也不用改。原有的java环境就能支持老项目跑起来。</p>
+<p>不要问为什么代码里边不用域名表示主机（映射关系）。如果用域名的话，只需要改一下域名与ip的映射记录就行。这个法儿我是现在才想到的。</p>
+<p>然后就是需要重新租用一个云服务器，配置java运行环境，再把项目扔上去跑（用的是war包）。</p>
+<p>9.5块钱/月的阿里云学生机，选择的是轻量应用服务器，宝塔面板应用镜像。</p>
+<p>宝塔面板一键配置环境真的是“傻瓜”操作，真香。</p>
+<h1 id="1-镜像的理解"><a href="#1-镜像的理解" class="headerlink" title="1. 镜像的理解"></a>1. 镜像的理解</h1><p>任何镜像都是基于系统镜像制作的。</p>
+<p>宝塔面板应用镜像就是在系统镜像的基础上，配置好宝塔面板，然后生成的镜像。</p>
+<p>镜像流行的原因，其中一个原因就是简化配置。特别是运行环境的配置。</p>
+<p>纯净的操作系统镜像，还需要我们自己部署java web运行环境，比如下载tomcat、jdk、mysql等。如果是java运行环境镜像，其内已经装好了相关软件，我们只要知道如何使用即可。</p>
+<p>宝塔面板，顾名思义，就是一个面板控制工具。通过Web页面，即可控制远端服务器的服务开闭、端口开放、项目部署等。</p>
+<h1 id="2-云服务器宝塔面板"><a href="#2-云服务器宝塔面板" class="headerlink" title="2. 云服务器宝塔面板"></a>2. 云服务器宝塔面板</h1><p>一般而言，选购云服务器时需要配置基本参数，其中一项就是<strong>镜像</strong>。</p>
+<p>可以选择纯净的系统镜像，也可以去镜像市场选择免费的定制化镜像使用。</p>
+<p>如果选择宝塔控制面板，即镜像内已经安装并配置好了宝塔面板，那么由该镜像最后生成的实例，就可以直接使用宝塔面板了。</p>
+<p>相当于，别人配好环境，我拿到后开箱即用。</p>
+<h1 id="3-云服务器控制台"><a href="#3-云服务器控制台" class="headerlink" title="3. 云服务器控制台"></a>3. 云服务器控制台</h1><p>宝塔面板是一个控制中心，云服务器（或者轻量应用服务器）也是一个控制中心。云服务器作为上游控制中心，除了对服务器实例的必要运维监控外，还决定着服务器对外开放的端口。</p>
+<p>当然，如果云服务器安装有宝塔面板的话，需要开放TCP 8888端口供外部连接。而且，要进入宝塔面板，需要的账户与密码，也可以在云服务器的控制台进行设置。</p>
+<h1 id="4-宝塔控制面板"><a href="#4-宝塔控制面板" class="headerlink" title="4. 宝塔控制面板"></a>4. 宝塔控制面板</h1><p>如果选择宝塔面板，那么大多数与服务器的交互都变得简洁直观（可视化）。</p>
+<p>云服务器控制台的作用大多数时候就是放行端口（服务器防火墙）。</p>
+<blockquote>
+<p>宝塔控制面板也能对端口放行。但是如果云服务器不放行，在宝塔面板设置放行其实是无效的。大概就是上下游两道闸门的关系。</p>
+</blockquote>
+<p>在宝塔面板，你可以以安装软件的形式（软件商店）来配置环境。这区别于远程登录云服务器，并在终端输入shell命令。面板的操作对新人更加友好，但也相对没有技术含量，不能学到服务器内部的知识。</p>
+<h1 id="5-部署java-web项目"><a href="#5-部署java-web项目" class="headerlink" title="5. 部署java web项目"></a>5. 部署java web项目</h1><p>基本上都是与宝塔控制面板进行交互。</p>
+<ul>
+<li>配置环境</li>
+<li>导入war包</li>
+<li>放行端口</li>
+<li>启动tomcat</li>
+</ul>
+<p>虽然java环境需要jdk，但是在宝塔面板上配置tomcat时，会自动下载jdk。</p>
+<p>导入的war包直接放入到tomcat文件的webapps目录下即可，tomcat会自动解压。</p>
+<h1 id="6-参考"><a href="#6-参考" class="headerlink" title="6. 参考"></a>6. 参考</h1><p><a href="https://my.oschina.net/u/4340796/blog/4315488" target="_blank" rel="noopener">阿里云宝塔面板配置及部署Java项目</a></p>
+<p><a href="https://developer.aliyun.com/article/761633" target="_blank" rel="noopener">阿里云轻量应用服务器应用镜像和系统镜像选择详细介绍</a></p>
+]]></content>
+      <categories>
+        <category>教程</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>宝塔面板</tag>
       </tags>
   </entry>
   <entry>
@@ -757,50 +812,63 @@
       </tags>
   </entry>
   <entry>
-    <title>阿里云宝塔面板部署java项目</title>
-    <url>/2020/10/30/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E9%83%A8%E7%BD%B2java%E9%A1%B9%E7%9B%AE/</url>
-    <content><![CDATA[<p>背景故事是这样的。</p>
-<p>一个老项目，“上级”指示需要再次启用。</p>
-<p>阿里云实例一周前过期的，如果续费的话，后端代码不用改，前端的请求ip也不用改。原有的java环境就能支持老项目跑起来。</p>
-<p>不要问为什么代码里边不用域名表示主机（映射关系）。如果用域名的话，只需要改一下域名与ip的映射记录就行。这个法儿我是现在才想到的。</p>
-<p>然后就是需要重新租用一个云服务器，配置java运行环境，再把项目扔上去跑（用的是war包）。</p>
-<p>9.5块钱/月的阿里云学生机，选择的是轻量应用服务器，宝塔面板应用镜像。</p>
-<p>宝塔面板一键配置环境真的是“傻瓜”操作，真香。</p>
-<h1 id="1-镜像的理解"><a href="#1-镜像的理解" class="headerlink" title="1. 镜像的理解"></a>1. 镜像的理解</h1><p>任何镜像都是基于系统镜像制作的。</p>
-<p>宝塔面板应用镜像就是在系统镜像的基础上，配置好宝塔面板，然后生成的镜像。</p>
-<p>镜像流行的原因，其中一个原因就是简化配置。特别是运行环境的配置。</p>
-<p>纯净的操作系统镜像，还需要我们自己部署java web运行环境，比如下载tomcat、jdk、mysql等。如果是java运行环境镜像，其内已经装好了相关软件，我们只要知道如何使用即可。</p>
-<p>宝塔面板，顾名思义，就是一个面板控制工具。通过Web页面，即可控制远端服务器的服务开闭、端口开放、项目部署等。</p>
-<h1 id="2-云服务器宝塔面板"><a href="#2-云服务器宝塔面板" class="headerlink" title="2. 云服务器宝塔面板"></a>2. 云服务器宝塔面板</h1><p>一般而言，选购云服务器时需要配置基本参数，其中一项就是<strong>镜像</strong>。</p>
-<p>可以选择纯净的系统镜像，也可以去镜像市场选择免费的定制化镜像使用。</p>
-<p>如果选择宝塔控制面板，即镜像内已经安装并配置好了宝塔面板，那么由该镜像最后生成的实例，就可以直接使用宝塔面板了。</p>
-<p>相当于，别人配好环境，我拿到后开箱即用。</p>
-<h1 id="3-云服务器控制台"><a href="#3-云服务器控制台" class="headerlink" title="3. 云服务器控制台"></a>3. 云服务器控制台</h1><p>宝塔面板是一个控制中心，云服务器（或者轻量应用服务器）也是一个控制中心。云服务器作为上游控制中心，除了对服务器实例的必要运维监控外，还决定着服务器对外开放的端口。</p>
-<p>当然，如果云服务器安装有宝塔面板的话，需要开放TCP 8888端口供外部连接。而且，要进入宝塔面板，需要的账户与密码，也可以在云服务器的控制台进行设置。</p>
-<h1 id="4-宝塔控制面板"><a href="#4-宝塔控制面板" class="headerlink" title="4. 宝塔控制面板"></a>4. 宝塔控制面板</h1><p>如果选择宝塔面板，那么大多数与服务器的交互都变得简洁直观（可视化）。</p>
-<p>云服务器控制台的作用大多数时候就是放行端口（服务器防火墙）。</p>
-<blockquote>
-<p>宝塔控制面板也能对端口放行。但是如果云服务器不放行，在宝塔面板设置放行其实是无效的。大概就是上下游两道闸门的关系。</p>
-</blockquote>
-<p>在宝塔面板，你可以以安装软件的形式（软件商店）来配置环境。这区别于远程登录云服务器，并在终端输入shell命令。面板的操作对新人更加友好，但也相对没有技术含量，不能学到服务器内部的知识。</p>
-<h1 id="5-部署java-web项目"><a href="#5-部署java-web项目" class="headerlink" title="5. 部署java web项目"></a>5. 部署java web项目</h1><p>基本上都是与宝塔控制面板进行交互。</p>
-<ul>
-<li>配置环境</li>
-<li>导入war包</li>
-<li>放行端口</li>
-<li>启动tomcat</li>
-</ul>
-<p>虽然java环境需要jdk，但是在宝塔面板上配置tomcat时，会自动下载jdk。</p>
-<p>导入的war包直接放入到tomcat文件的webapps目录下即可，tomcat会自动解压。</p>
-<h1 id="6-参考"><a href="#6-参考" class="headerlink" title="6. 参考"></a>6. 参考</h1><p><a href="https://my.oschina.net/u/4340796/blog/4315488" target="_blank" rel="noopener">阿里云宝塔面板配置及部署Java项目</a></p>
-<p><a href="https://developer.aliyun.com/article/761633" target="_blank" rel="noopener">阿里云轻量应用服务器应用镜像和系统镜像选择详细介绍</a></p>
+    <title>常见乱码问题及分析</title>
+    <url>/2020/07/03/%E5%B8%B8%E8%A7%81%E4%B9%B1%E7%A0%81%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>有一个现成的古老的web项目，技术栈包括<code>JSP</code> <code>JAVA</code> <code>MYSQL</code>，<code>MyEclipse 10.5</code>作为开发工具，开发环境<code>JDK1.7</code> <code>Tomcat7</code> <code>Mysql5.5</code>。</p>
+<p>现在项目能够部署成功，正常访问。</p>
+<p>但是当提交的表单数据中包含中文时，数据库存储的相关数据显示为???。</p>
+<p>因为这个<code>BUG</code>，诞生这篇小结。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/pk0001.png" alt="朋克风"></p>
+<h1 id="常见乱码问题分析和总结"><a href="#常见乱码问题分析和总结" class="headerlink" title="常见乱码问题分析和总结"></a>常见乱码问题分析和总结</h1><p>本节内容选自<a href="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/index.html" target="_blank" rel="noopener">IBM Developer : 常见乱码问题分析和总结 </a></p>
+<h2 id="编码与解码"><a href="#编码与解码" class="headerlink" title="编码与解码"></a>编码与解码</h2><p>计算机不能直接存储字母，数字，图片，符号等，计算机能处理和工作的唯一单位是”比特位（bit）”，一个比特位通常只有 0 和 1，是（yes）和否（no），真（true）或者假（false）等等我们喜欢的称呼。利用比特位序列来代表字母，数字，图片，符号等，我们就需要一个存储规则，不同的比特序列代表不同的字符，这就是所谓的”编码”。反之，将存储在计算机中的比特位序列（或者叫二进制序列）解析显示出来成对应的字母，数字，图片和符号，称为”解码”，如同密码学中的加密和解密，下面将详细解释编码解码过程中涉及到的一些术语：</p>
+<p><strong>字符集合（Character set）</strong>：是各种文字和符号的总称，包括各国家文字、标点符号、图形符号、数字等，简单理解就是一个字库，与计算机以及编码无关。</p>
+<p><strong>字符编码集（Coded character set）</strong>：是一组字符对应的编码（即数字），为字符集合中的每一个字符给予一个数字，如 Unicode 为每一个字符分配一个唯一的码点与之一一对应。</p>
+<p><strong>字符编码（Character Encoding）</strong>：简单理解就是一个映射关系，将字符集对应的码点映射为一个个二进制序列，从而使得计算机可以存储和处理。常见的编码方式有 ASCII 编码、ISO-8859-1(不支持中文)、GBK、GB2312（中国编码，支持中文）、UTF-8 等等,详情见表 1。</p>
+<p><strong>字符集（Charset）</strong>：包括编码字符集合和字符编码，如 ASCII 字符集、ISO-8859-X、GB2312 字符集（简中）、BIG5 字符集（繁中）、GB18030 字符集、Shift-JIS 等，即下文中提到的字符集。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">这里提到的字符集合与字符集是不同的概念，后者包含前者。</span><br><span class="line">一般乱码现象都是因为中文数据导致的，汉字占用双字节，所以支持中文的编码方式（GBK、UTF<span class="number">-8</span>等）也就是可以支持对双字节汉字进行编码。</span><br></pre></td></tr></table></figure>
+
+<p><strong>字符解码（Character Decoding）</strong>: 根据一定规则，将二进制序列映射成对应的正确字符串，即二进制序列–&gt;字符串，个人将其理解为”翻译”。</p>
+<p><strong>Code Point</strong>：称作码点或码位，是组成编码空间（或代码页）的数值。例如，ASCII 码包含 128 个码点，范围是 0 到 7F（16 进制）；ISO-8859-1 包含 256 个码点，范围是 0 到 FF；而 Unicode 包含 1,114,112 个码点，范围是 0 到 10FFFF。Unicode 码空间划分为 17 个 Unicode 字符平面（基本多文种平面，16 个辅助平面），每个平面有 65,536（= 216）个码点。因此 Unicode 码空间总计是 17 x 65,536 = 1,114,112。</p>
+<p><strong>Code Page</strong>：代码页或者内码表，是 IBM 早期称呼计算机的 BIOS 所支持的字符集编码（也称作 OEM 代码页）。Windows 系统在没有使用 UTF-16 之前，为了解决由于不同国家和地区采用的字符集不一致，很可能出现无法正常显示所有字符的问题，使用了代码页（Codepage）转换表的技术来过渡性的部分解决这一问题，即定义了一系列支持不同国家和地区所制定的字符集，被称为 Windows 代码页或 ANSI 代码页，然而代码页一般与其所对应的字符集之间并非完全相同，有时候会对字符集有所扩展，可以理解为一张字符-字节序列映射表，通过查表实现编码解码功能。操作系统中不同 Locale 设置默认使用不同的代码页。</p>
+<p><strong>Locale</strong>：是指特定于某个国家或地区的一组设定，包括代码页，以及数字、货币、时间和日期的格式等。在 Windows 内部，有两个 Locale 设置：系统 Locale 和用户 Locale。系统 Locale 决定代码页，用户 Locale 决定数字、货币、时间和日期的格式。</p>
+<h2 id="乱码产生原因"><a href="#乱码产生原因" class="headerlink" title="乱码产生原因"></a>乱码产生原因</h2><p>乱码产生的根源一般情况下可以归结为三方面即：编码引起的乱码、解码引起的乱码以及缺少某种字体库引起的乱码（这种情况需要用户安装对应的字体库），其中大部分乱码问题是由不合适的解码方式造成的，如图 3 所示的鱼骨图。</p>
+<p>图 3. 乱码产生原因</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image003.jpg" alt="乱码产生原因"></p>
+<h3 id="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"><a href="#从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法" class="headerlink" title="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"></a>从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法</h3><p>图 5. 编码方式引起的乱码剖析</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image005.jpg" alt="图 5. 编码方式引起的乱码剖析"></p>
+<p>图 6. 不正确的解码方式引起的乱码</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image006.png" alt="图 6. 不正确的解码方式引起的乱码"></p>
+<figure class="highlight 1c"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">乱码有很多形式。</span><br><span class="line"><span class="string">"??"</span>通常是由于编码引起的乱码，出现?说明原始字符的信息已经丢失，这种情况下形成的乱码是不可逆的，也就是说无论用什么解码方式都不能正确显示字符。</span><br><span class="line"><span class="string">"ÄãºÃ£¬ÖÐ¹ú"</span>一般由解码方式不对引起的，乱码可逆，即可以通过乱码恢复获取原始的字符信息。</span><br></pre></td></tr></table></figure>
+
+<h3 id="从编程角度分析出现乱码的场景和解决办法"><a href="#从编程角度分析出现乱码的场景和解决办法" class="headerlink" title="从编程角度分析出现乱码的场景和解决办法"></a>从编程角度分析出现乱码的场景和解决办法</h3><p>从编程角度来看，出现乱码的场景主要是有文本处理的时候，比如文件的新建和读取、复制和粘贴，导入和导出，打开和保存，数据存储和检索，显示，打印，分词处理，字符转换，规范化，搜索，整理和发送数据等，文本数据的示例包括平面文件，流文件，数据区域，目录名称，资源名称，用户标识等。图 9 是出现乱码的一个常见场景分类。</p>
+<p>图 9. 出现乱码的场景</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image009.jpg" alt="出现乱码的场景"></p>
+<p><strong>Web 程序中出现的乱码情况</strong></p>
+<p>在 web 应用程序中，存在用户输入以及输出显示的地方都有可能存在编码解码，图 12 简要概括了 HTTP web 请求响应环节。</p>
+<p>图 12. Web 请求响应环节中的编码解码</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image012.jpg" alt="请求响应环节中的编码解码"></p>
+<p><strong>数据库操作过程中的乱码</strong></p>
+<p>在实际应用中，和数据库操作相关的乱码可能出现在数据的导入和导出操作中，在整个过程中涉及到的字符集有服务器端数据库字符集、客户端操作系统字符集、客户端环境变量 nls_lang(lang_territory.charset)，这三个参数的工作流程如图 15 所示。如果这三个参数设置一样，整个数据库操作中就不会出现乱码问题，但是实际应用中客户端的情况复杂多样，很难保持三者一致，涉及到双字节字符就需要服务器端进行转码操作，而转码的桥梁就是 Unicode 字符集，这就要求数据库本身支持 UTF-8 编码方式。为了编码数据库操作过程中的乱码问题，在创建数据库的时候使用 UTF-8 编码方式，如果仅在某些列中使用多语言数据，则可以使用 SQL NCHAR 数据类型（NCHAR，NVARCHAR2 和 NCLOB）以 UTF-16 或 UTF-8 编码形式存储 Unicode 数据，避免存储空间的浪费。</p>
+<p>图 15. Oracle 数据库字符集</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image015.jpg" alt="Oracle 数据库字符集"></p>
+<h1 id="修改Windows的默认编码"><a href="#修改Windows的默认编码" class="headerlink" title="修改Windows的默认编码"></a>修改Windows的默认编码</h1><p>在Windows设置-时间与语言-语言-管理语言设置-更改系统区域设置中进行修改。</p>
+<p>联想到一个现象：通过执行startup.bat文件开启tomcat服务器时，打印的启动日志出现乱码。</p>
+<p>通过查询cmd的编码格式，并修改为utf-8编码格式，理论上能够解决上述乱码问题。实际上，执行chcp 65001，只是将当前cmd窗口的编码设置为utf-8。执行startup.bat时，会另外启动一个cmd进程，所以打印服务器启动日志的那个cmd窗口还是会有乱码。（除非从操作系统层面更改编码格式）</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//查看当前cmd的编码格式</span></span><br><span class="line"><span class="comment">//character code page</span></span><br><span class="line">chcp</span><br><span class="line"></span><br><span class="line"><span class="comment">//换成utf-8代码页</span></span><br><span class="line">chcp <span class="number">65001</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//换成默认的gbk</span></span><br><span class="line">chcp <span class="number">936</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>现在回过头来想背景中的问题。??的出现有可能是字符的编码方式不对，导致通过任何解码方式都读不出正确的字符。那么在哪个环节出现了这个问题呢？通过测试，表单数据提交到服务端，服务端获取数据并打印，显示正常。说明在浏览器到web服务端的编码解码方式是OK的。那么再来，就是java程序代码中将正常的字符数据存入数据库时发生了问题，导致数据库中数据显示为??。于是考虑中文存入数据库的编码方式出了问题。事实也应该就是这样的。</p>
+<p>【问题解决】java连接数据库的代码中，DBURL设置为<code>jdbc:mysql://localhost:3306/XXX?useUnicode=true&amp;characterEncoding=UTF-8</code>。重点就是后边的characterEncoding参数。</p>
+<p>字符数据在二进制与可识读形式之间来回切换跳转，编码解码的步骤都是循环重复的。博大精深的中国汉字，到底在代码的世界里也很独特。</p>
+<p>尽管问题解决，原因大概分析了，但真实的情形又是怎样的呢？谁又真正的可知？如果能够化身数据流，以数据本身的角度来看浏览器到数据库的往返之路，这该是很奇妙的想象与体验吧。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/hacker.png" alt="hacker"></p>
 ]]></content>
       <categories>
-        <category>教程</category>
+        <category>常识</category>
       </categories>
       <tags>
-        <tag>java</tag>
-        <tag>宝塔面板</tag>
+        <tag>乱码</tag>
+        <tag>编码</tag>
+        <tag>解码</tag>
       </tags>
   </entry>
   <entry>

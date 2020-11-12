@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2020-11-10T03:15:55.077Z</updated>
+  <updated>2020-11-12T02:54:39.318Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>MVCC与Next-key Locks</title>
+    <link href="http://yoursite.com/2020/11/12/MVCC%E4%B8%8ENext-key-Locks/"/>
+    <id>http://yoursite.com/2020/11/12/MVCC%E4%B8%8ENext-key-Locks/</id>
+    <published>2020-11-12T02:50:25.000Z</published>
+    <updated>2020-11-12T02:54:39.318Z</updated>
+    
+    <content type="html"><![CDATA[<p>MYSQL数据库中，事务主要有4种<strong>隔离级别</strong>，分别是<strong>未提交读，提交读，可重复读，可串行化</strong>。</p><p>多版本并发控制（Muti-Version Concurrency Control,MVCC）是MYSQL的InnoDB引擎实现隔离级别的一种具体方式。主要用来解决提交读和可重复读。</p><p>但是单纯的MVCC还不能解决幻读的问题，于是在MVCC基础上加上Next-key Locks，达到可串行化的效果。</p><p>这里只谈简单的理解。</p><h1 id="1-MVCC"><a href="#1-MVCC" class="headerlink" title="1. MVCC"></a>1. MVCC</h1><p>顾名思义，通过<strong>多版本</strong>来实现并发控制。<strong>同一条记录在系统中可以存在多个版本</strong>。</p><p>谈到并发控制，无非就是加锁实现。但加锁过程也会影响性能，这就是一致性与高可用的矛盾。MVCC免去读操作的加锁（非阻塞的读），使开销更低。<strong>写操作必须加锁</strong>。</p><p>MVCC就是想办法少加点锁，通过其他方式保证数据一致性。<strong>MVCC是通过保存数据在某一个时间点快照来实现的。也就是说不管实现时间多长，每个事务看到的数据都是一致的。</strong></p><p>于是不得不提到版本号、快照读与当前读。</p><p>版本号，包括系统版本号与事务版本号。系统版本号是递增的数字，每开始一个新的事务，系统版本号自动增加。<strong>事务版本号就是事务开始时的系统版本号。</strong></p><p>MVCC机制虽然能够让数据可重复读，但读取的数据可能是历史数据。<strong>读取历史数据的方式，称为快照读，而读取数据库最新版本的数据，称为当前读。</strong></p><p>快照读实现了可重复读。自然的也解决了幻读问题（历史数据未变更）。</p><p>对数据修改的操作(update、insert、delete)都是采用当前读的模式。在执行这几个操作时会读取最新的记录，即使是别的事务提交的数据也可以查询到。读取的是最新的数据，需要加锁。<strong>当前读不能解决幻读问题，需要加锁，使用Next-key Lock。</strong></p><h1 id="1-1-隐藏列"><a href="#1-1-隐藏列" class="headerlink" title="1.1 隐藏列"></a>1.1 隐藏列</h1><p>MVCC工作时，在每行记录后边保存两个隐藏列。分别是数据行的创建时间，数据行的删除时间。这里的时间只是一种说法，不代表具体的时间，而是当时的系统版本号。</p><blockquote><p>注：这里表述的删除时间（版本号）不易理解，恰当的说法应该是回滚版本号（回滚指针）。通过该版本号在回滚日志中查询历史数据。</p></blockquote><p><strong>当开始一个新事务时，该事务的版本号肯定会大于当前所有数据行快照的创建版本号。</strong></p><p>隐藏列对客户端来说是不可见的。</p><h1 id="1-2-回滚日志（undo-log）"><a href="#1-2-回滚日志（undo-log）" class="headerlink" title="1.2 回滚日志（undo log）"></a>1.2 回滚日志（undo log）</h1><p><strong>当事务对数据行进行一次更新操作时，会把旧数据行记录在一个叫做undo log的记录中。</strong></p><p>在undo log中除了记录数据行，还会记录下该行数据的对应的创建版本号。并将原来数据行中的回滚指针指向undo log 记录的这行数据。然后再在原来数据表中进行一次更新操作，如果这次更新操作回滚了，那么就可以根据回滚指针去undo log中查找之前的数据进行复原。</p><p>如果后续还有更新操作的话，就会在undo log中和之前的数据行形成一条链表，链表头就是最新的数据，这条链表就叫做<strong>版本链</strong>。</p><p><strong>事务的可见性都是基于undo log来实现的。</strong></p><h1 id="1-3-事务快照（ReadView-可读视图）"><a href="#1-3-事务快照（ReadView-可读视图）" class="headerlink" title="1.3 事务快照（ReadView/可读视图）"></a>1.3 事务快照（ReadView/可读视图）</h1><p>当进行查询操作时，事务会生成一个ReadView，ReadView是一个事务快照，准确来说是当前时间点系统内活跃的事务列表，也就是说<strong>系统内所有未提交的事务，都会记录在这个Readview内</strong>，事务就根据它来判断哪些数据是可见的，哪些是不可见的。</p><p>查询一条数据时，事务会拿到这个ReadView，去到undo log中进行判断。若查询到某一条数据：</p><ul><li>先去查看undo log中的最新数据行，如果数据行的版本号小于ReadView记录的事务版本号最小值，就说明这条数据对当前数据库是可见的，可以直接作为结果集返回</li><li>若数据行版本号大于ReadView记录最大值，说明这条数据是由一个新的事务修改的，对当前事务不可见，那么就顺着版本链继续往下寻找第一条满足条件的</li><li>若数据行版本号在ReadView最小值和最大值之间，那么就需要进行遍历了整个ReadView了，如果数据行版本号等于ReadView的某个值，则说明该行数据仍然处于活跃状态，那么对当前事务不可见</li></ul><h1 id="1-4-提交读与可重复读的实现"><a href="#1-4-提交读与可重复读的实现" class="headerlink" title="1.4 提交读与可重复读的实现"></a>1.4 提交读与可重复读的实现</h1><p><strong>关键在于生成ReadView的时机不同。</strong></p><p><strong>对提交读来说，事务中的每次读操作都会生成一个新的ReadView</strong>，也就是说，如果这期间某个事务提交了，那么它就会从ReadView中移除。这样确保事务每次读操作都能读到相对比较新的数据。</p><p>而<strong>对可重复读来说，事务只有在第一次进行读操作时才会生成一个ReadView</strong>，后续的读操作都会重复使用这个ReadView。也就是说，如果在此期间有其他事务提交了，那么对于可重复读来说也是不可见的，因为对它来说，事务活跃状态在第一次进行读操作时就已经确定下来，后面不会修改了。</p><h1 id="1-5-理解增删改查"><a href="#1-5-理解增删改查" class="headerlink" title="1.5 理解增删改查"></a>1.5 理解增删改查</h1><p><strong>SELECT</strong> </p><p>在SELECT过程中，InnoDB<strong>只查找版本早于当前事务版本的数据行</strong>，这样可以确保事务读取的行要么是在开始事务之前已经存在要么是事务自身插入或者修改过的，在事务开始之后才插入的行，事务不会看到。<br>行的删除版本号要么未定义，要么大于当前事务版本号，这样可以确保事务读取到的行在事务开始之前未被删除，在事务开始之前就已经过期的数据行，该事务也不会看到。</p><p><strong>INSERT</strong></p><p>将当前系统版本号作为数据行快照的创建版本号。</p><p><strong>DELETE</strong>  </p><p>将当前系统版本号作为数据行快照的删除版本号。</p><p><strong>UPDATE</strong></p><p>将当前系统版本号作为更新前的数据行快照的删除版本号，并将当前系统版本号作为更新后的数据行快照的创建版本号。可以理解为先执行 DELETE 后执行 INSERT。</p><h1 id="2-Next-key-Locks"><a href="#2-Next-key-Locks" class="headerlink" title="2. Next-key Locks"></a>2. Next-key Locks</h1><p><strong>Next-key Locks由record locks(记录锁) 和 gap locks(间隙锁)组合而成</strong>，每次锁住的不光是需要使用的数据，还会锁住这些数据附近的数据。</p><p>InnoDB的三种行锁算法：</p><ul><li>Record Lock：单个行记录上的锁。</li><li>Gap Lock：间隙锁，锁定一个范围，但不包括记录本身。GAP锁的目的，是为了防止同一事务的两次当前读，出现幻读的情况。</li><li>Next-Key Lock：1+2，锁定一个范围，并且锁定记录本身。对于行的查询，都是采用该方法，主要目的是解决幻读的问题。</li></ul><h2 id="2-1-Record-Locks"><a href="#2-1-Record-Locks" class="headerlink" title="2.1 Record Locks"></a>2.1 Record Locks</h2><p>锁定一个记录上的索引，而不是记录本身。</p><h2 id="2-2"><a href="#2-2" class="headerlink" title="2.2"></a>2.2</h2><p>锁定索引之间的间隙，但是不包含索引本身。</p><h2 id="2-3"><a href="#2-3" class="headerlink" title="2.3"></a>2.3</h2><p>Next-Key Locks 是 MySQL 的 InnoDB 存储引擎的一种锁实现。</p><p>当查询的索引含有唯一属性的时候，Next-Key Lock 会进行优化，将其降级为Record Lock，即仅锁住索引本身，不是范围。</p><p>它是 Record Locks 和 Gap Locks 的结合，不仅锁定一个记录上的索引，也锁定索引之间的间隙。</p><h1 id="3-参考"><a href="#3-参考" class="headerlink" title="3. 参考"></a>3. 参考</h1><p><a href="https://juejin.im/post/6844903842505555981#heading-13" target="_blank" rel="noopener">聊聊MVCC和Next-key Locks</a></p><p><a href="https://blog.csdn.net/SCUTJAY/article/details/104653599" target="_blank" rel="noopener">MVCC如何实现数据库读已提交和可重复读这两种隔离级别？</a></p>]]></content>
+    
+    <summary type="html">
+    
+      MySQL实现提交读与可重复读隔离级别的一种方式
+    
+    </summary>
+    
+    
+      <category term="MySQL" scheme="http://yoursite.com/categories/MySQL/"/>
+    
+    
+      <category term="数据库" scheme="http://yoursite.com/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+      <category term="MVCC" scheme="http://yoursite.com/tags/MVCC/"/>
+    
+      <category term="Next-key Lock" scheme="http://yoursite.com/tags/Next-key-Lock/"/>
+    
+      <category term="隔离级别" scheme="http://yoursite.com/tags/%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/"/>
+    
+  </entry>
   
   <entry>
     <title>使用Comparator比较器</title>
@@ -339,11 +368,11 @@
       <category term="java" scheme="http://yoursite.com/categories/java/"/>
     
     
+      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
+    
       <category term="Json" scheme="http://yoursite.com/tags/Json/"/>
     
       <category term="数据传输" scheme="http://yoursite.com/tags/%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93/"/>
-    
-      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
     
   </entry>
   
