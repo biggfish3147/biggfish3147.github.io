@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2020-11-12T13:46:38.379Z</updated>
+  <updated>2020-11-24T02:32:12.783Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Array与List的转换</title>
+    <link href="http://yoursite.com/2020/11/24/Array%E4%B8%8EList%E7%9A%84%E8%BD%AC%E6%8D%A2/"/>
+    <id>http://yoursite.com/2020/11/24/Array%E4%B8%8EList%E7%9A%84%E8%BD%AC%E6%8D%A2/</id>
+    <published>2020-11-24T02:25:06.000Z</published>
+    <updated>2020-11-24T02:32:12.783Z</updated>
+    
+    <content type="html"><![CDATA[<p>List与Array之间的转换，主要是ArrayList与Array的转换，即列表与数组之间的转换。</p><h1 id="1-List转Array"><a href="#1-List转Array" class="headerlink" title="1. List转Array"></a>1. List转Array</h1><p>方法1：<br>for循环</p><p>方法2：toArray( )方法</p><figure class="highlight processing"><table><tr><td class="code"><pre><span class="line"><span class="comment">//List</span></span><br><span class="line">List&lt;<span class="keyword">String</span>&gt; testList = <span class="keyword">new</span> ArrayList&lt;<span class="keyword">String</span>&gt;()&#123;&#123;<span class="built_in">add</span>(<span class="string">"aa"</span>);<span class="built_in">add</span>(<span class="string">"bb"</span>);<span class="built_in">add</span>(<span class="string">"cc"</span>);&#125;&#125;;</span><br><span class="line"></span><br><span class="line"> <span class="comment">//使用toArray(T[] a)方法</span></span><br><span class="line"> <span class="keyword">String</span>[] array2 = testList.toArray(<span class="keyword">new</span> <span class="keyword">String</span>[testList.<span class="built_in">size</span>()]);</span><br><span class="line"></span><br><span class="line"><span class="comment">//打印该数组</span></span><br><span class="line">  <span class="keyword">for</span>(<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; array2.length; i++)&#123;</span><br><span class="line">      System.out.<span class="built_in">println</span>(array2[i]);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure><h1 id="2-Array转List"><a href="#2-Array转List" class="headerlink" title="2. Array转List"></a>2. Array转List</h1><p>方法1：for循环</p><p>方法2： asList( )方法</p><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ArrayList&lt;String&gt; arrayList = <span class="keyword">new</span> ArrayList&lt;String&gt;(Arrays.asList(arrays));</span><br></pre></td></tr></table></figure><blockquote><p>注：直接使用asList( )转换得到的列表只能用来读，当执行add（）方法时会抛出异常。本质上，asList( )方法的返回值是java.util.Arrays.ArrayList类型，即Arrays类的私有静态内部类。</p></blockquote><p>方法3：Collections.addAll( )</p><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;String&gt; list2 = <span class="keyword">new</span> ArrayList&lt;String&gt;(arrays.length);</span><br><span class="line">Collections.addAll(list2, arrays);</span><br></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      避免for循环转换，讲究优雅
+    
+    </summary>
+    
+    
+      <category term="java" scheme="http://yoursite.com/categories/java/"/>
+    
+    
+      <category term="数组" scheme="http://yoursite.com/tags/%E6%95%B0%E7%BB%84/"/>
+    
+      <category term="数据结构" scheme="http://yoursite.com/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/"/>
+    
+  </entry>
   
   <entry>
     <title>数据库的锁</title>
@@ -264,9 +289,9 @@
       <category term="docker" scheme="http://yoursite.com/categories/docker/"/>
     
     
-      <category term="docker" scheme="http://yoursite.com/tags/docker/"/>
-    
       <category term="教程" scheme="http://yoursite.com/tags/%E6%95%99%E7%A8%8B/"/>
+    
+      <category term="docker" scheme="http://yoursite.com/tags/docker/"/>
     
       <category term="nginx" scheme="http://yoursite.com/tags/nginx/"/>
     
@@ -393,11 +418,11 @@
       <category term="java" scheme="http://yoursite.com/categories/java/"/>
     
     
-      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
-    
       <category term="Json" scheme="http://yoursite.com/tags/Json/"/>
     
       <category term="数据传输" scheme="http://yoursite.com/tags/%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93/"/>
+    
+      <category term="概念" scheme="http://yoursite.com/tags/%E6%A6%82%E5%BF%B5/"/>
     
   </entry>
   

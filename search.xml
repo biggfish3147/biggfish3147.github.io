@@ -1,6 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Array与List的转换</title>
+    <url>/2020/11/24/Array%E4%B8%8EList%E7%9A%84%E8%BD%AC%E6%8D%A2/</url>
+    <content><![CDATA[<p>List与Array之间的转换，主要是ArrayList与Array的转换，即列表与数组之间的转换。</p>
+<h1 id="1-List转Array"><a href="#1-List转Array" class="headerlink" title="1. List转Array"></a>1. List转Array</h1><p>方法1：<br>for循环</p>
+<p>方法2：toArray( )方法</p>
+<figure class="highlight processing"><table><tr><td class="code"><pre><span class="line"><span class="comment">//List</span></span><br><span class="line">List&lt;<span class="keyword">String</span>&gt; testList = <span class="keyword">new</span> ArrayList&lt;<span class="keyword">String</span>&gt;()&#123;&#123;<span class="built_in">add</span>(<span class="string">"aa"</span>);<span class="built_in">add</span>(<span class="string">"bb"</span>);<span class="built_in">add</span>(<span class="string">"cc"</span>);&#125;&#125;;</span><br><span class="line"></span><br><span class="line"> <span class="comment">//使用toArray(T[] a)方法</span></span><br><span class="line"> <span class="keyword">String</span>[] array2 = testList.toArray(<span class="keyword">new</span> <span class="keyword">String</span>[testList.<span class="built_in">size</span>()]);</span><br><span class="line"></span><br><span class="line"><span class="comment">//打印该数组</span></span><br><span class="line">  <span class="keyword">for</span>(<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; array2.length; i++)&#123;</span><br><span class="line">      System.out.<span class="built_in">println</span>(array2[i]);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="2-Array转List"><a href="#2-Array转List" class="headerlink" title="2. Array转List"></a>2. Array转List</h1><p>方法1：for循环</p>
+<p>方法2： asList( )方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ArrayList&lt;String&gt; arrayList = <span class="keyword">new</span> ArrayList&lt;String&gt;(Arrays.asList(arrays));</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：直接使用asList( )转换得到的列表只能用来读，当执行add（）方法时会抛出异常。本质上，asList( )方法的返回值是java.util.Arrays.ArrayList类型，即Arrays类的私有静态内部类。</p>
+</blockquote>
+<p>方法3：Collections.addAll( )</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">List&lt;String&gt; list2 = <span class="keyword">new</span> ArrayList&lt;String&gt;(arrays.length);</span><br><span class="line">Collections.addAll(list2, arrays);</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>数组</tag>
+        <tag>数据结构</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java浅拷贝和深拷贝</title>
+    <url>/2020/10/17/Java%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/</url>
+    <content><![CDATA[<p>本文转载自简书（安静的蓝孩子）<a href="https://www.jianshu.com/p/94dbef2de298" target="_blank" rel="noopener">Java浅拷贝和深拷贝</a></p>
+<blockquote>
+<p>作者：安静的蓝孩子 链接：<a href="https://www.jianshu.com/p/94dbef2de298" target="_blank" rel="noopener">https://www.jianshu.com/p/94dbef2de298</a>  来源：简书</p>
+</blockquote>
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>开发过程中，有时会遇到把现有的一个对象的所有成员属性拷贝给另一个对象的需求。<br>比如说对象 A 和对象 B，二者都是 ClassC 的对象，具有成员变量 a 和 b，现在对对象 A 进行拷贝赋值给 B，也就是 B.a = A.a; B.b = A.b;</p>
+<p>这时再去改变 B 的属性 a 或者 b 时，可能会遇到问题：假设 a 是基础数据类型，b 是引用类型。<br>当改变 B.a 的值时，没有问题；<br>当改变 B.b 的值时，同时也会改变 A.b 的值，因为其实上面的例子中只是把 A.b 赋值给了 B.b，因为是 b 引用类型的，所以它们是指向同一个地址的。这可能就会给我们使用埋下隐患。</p>
+<blockquote>
+<p>Java 中的数据类型分为基本数据类型和引用数据类型。对于这两种数据类型，在进行赋值操作、用作方法参数或返回值时，会有值传递和引用（地址）传递的差别。</p>
+</blockquote>
+<h1 id="拷贝分类"><a href="#拷贝分类" class="headerlink" title="拷贝分类"></a>拷贝分类</h1><p>上面的问题，其实就是因为对拷贝的不熟悉导致的。</p>
+<p>根据对对象属性的拷贝程度（基本数据类和引用类型），会分为两种：</p>
+<ul>
+<li>浅拷贝 (<code>Shallow Copy</code>)</li>
+<li>深拷贝 (<code>Deep Copy</code>)</li>
+</ul>
+<h1 id="浅拷贝"><a href="#浅拷贝" class="headerlink" title="浅拷贝"></a>浅拷贝</h1><h2 id="1-浅拷贝介绍"><a href="#1-浅拷贝介绍" class="headerlink" title="1. 浅拷贝介绍"></a>1. 浅拷贝介绍</h2><p>浅拷贝是按位拷贝对象，它会创建一个新对象，这个对象有着原始对象属性值的一份精确拷贝。如果属性是基本类型，拷贝的就是基本类型的值；如果属性是内存地址（引用类型），拷贝的就是内存地址 ，因此如果其中一个对象改变了这个地址，就会影响到另一个对象。即默认拷贝构造函数只是对对象进行浅拷贝复制(逐个成员依次拷贝)，即只复制对象空间而不复制资源。</p>
+<h2 id="2-浅拷贝特点"><a href="#2-浅拷贝特点" class="headerlink" title="2. 浅拷贝特点"></a>2. 浅拷贝特点</h2><p>(1) 对于基本数据类型的成员对象，因为基础数据类型是值传递的，所以是直接将属性值赋值给新的对象。基础类型的拷贝，其中一个对象修改该值，不会影响另外一个。<br>(2) 对于引用类型，比如数组或者类对象，因为引用类型是引用传递，所以浅拷贝只是把内存地址赋值给了成员变量，它们指向了同一内存空间。改变其中一个，会对另外一个也产生影响。</p>
+<p>结构图如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/note/shallowClone.png" alt="浅拷贝"></p>
+<h2 id="3-浅拷贝的实现"><a href="#3-浅拷贝的实现" class="headerlink" title="3. 浅拷贝的实现"></a>3. 浅拷贝的实现</h2><p>实现对象拷贝的类，需要实现 <code>Cloneable</code> 接口，并覆写 <code>clone()</code> 方法。</p>
+<p>示例如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Subject</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Subject</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"[Subject: "</span> + <span class="keyword">this</span>.hashCode() + <span class="string">",name:"</span> + name + <span class="string">"]"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight aspectj"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Cloneable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//引用类型</span></span><br><span class="line">    <span class="keyword">private</span> Subject subject;</span><br><span class="line">    <span class="comment">//基础数据类型</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function">Subject <span class="title">getSubject</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> subject;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setSubject</span><span class="params">(Subject subject)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.subject = subject;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function">String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *  重写clone()方法</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function">Object <span class="title">clone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//浅拷贝</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 直接调用父类的clone()方法</span></span><br><span class="line">            <span class="function"><span class="keyword">return</span> <span class="keyword">super</span>.<span class="title">clone</span><span class="params">()</span></span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (CloneNotSupportedException e) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function">String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"[Student: "</span> + <span class="keyword">this</span>.hashCode() + <span class="string">",subject:"</span> + subject + <span class="string">",name:"</span> + name + <span class="string">",age:"</span> + age + <span class="string">"]"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">public <span class="keyword">class</span> ShallowCopy &#123;</span><br><span class="line">    public static void main(String<span class="literal">[]</span> args) &#123;</span><br><span class="line">        Subject subject = <span class="keyword">new</span> <span class="constructor">Subject(<span class="string">"yuwen"</span>)</span>;</span><br><span class="line">        Student studentA = <span class="keyword">new</span> <span class="constructor">Student()</span>;</span><br><span class="line">        studentA.set<span class="constructor">Subject(<span class="params">subject</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Name(<span class="string">"Lynn"</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Age(20)</span>;</span><br><span class="line">        Student studentB = (Student) studentA.clone<span class="literal">()</span>;</span><br><span class="line">        studentB.set<span class="constructor">Name(<span class="string">"Lily"</span>)</span>;</span><br><span class="line">        studentB.set<span class="constructor">Age(18)</span>;</span><br><span class="line">        Subject subjectB = studentB.get<span class="constructor">Subject()</span>;</span><br><span class="line">        subjectB.set<span class="constructor">Name(<span class="string">"lishi"</span>)</span>;</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentA:"</span> + studentA.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentB:"</span> + studentB.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出的结果：</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="string">studentA:</span>[<span class="string">Student:</span> <span class="number">460141958</span>,<span class="string">subject:</span>[<span class="string">Subject:</span> <span class="number">1163157884</span>,<span class="string">name:</span>lishi],<span class="string">name:</span>Lynn,<span class="string">age:</span><span class="number">20</span>]</span><br><span class="line"><span class="string">studentB:</span>[<span class="string">Student:</span> <span class="number">1956725890</span>,<span class="string">subject:</span>[<span class="string">Subject:</span> <span class="number">1163157884</span>,<span class="string">name:</span>lishi],<span class="string">name:</span>Lily,<span class="string">age:</span><span class="number">18</span>]</span><br></pre></td></tr></table></figure>
+
+<p>由输出的结果可见，通过 <code>studentA.clone()</code> 拷贝对象后得到的 <code>studentB</code>，和 <code>studentA</code> 是两个不同的对象。<code>studentA</code> 和 <code>studentB</code> 的基础数据类型的修改互不影响，而引用类型 <code>subject</code> 修改后是会有影响的。</p>
+<h2 id="浅拷贝和对象拷贝的区别："><a href="#浅拷贝和对象拷贝的区别：" class="headerlink" title="浅拷贝和对象拷贝的区别："></a>浅拷贝和对象拷贝的区别：</h2><figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">public static void main(String<span class="literal">[]</span> args) &#123;</span><br><span class="line">        Subject subject = <span class="keyword">new</span> <span class="constructor">Subject(<span class="string">"yuwen"</span>)</span>;</span><br><span class="line">        Student studentA = <span class="keyword">new</span> <span class="constructor">Student()</span>;</span><br><span class="line">        studentA.set<span class="constructor">Subject(<span class="params">subject</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Name(<span class="string">"Lynn"</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Age(20)</span>;</span><br><span class="line">        Student studentB = studentA;</span><br><span class="line">        studentB.set<span class="constructor">Name(<span class="string">"Lily"</span>)</span>;</span><br><span class="line">        studentB.set<span class="constructor">Age(18)</span>;</span><br><span class="line">        Subject subjectB = studentB.get<span class="constructor">Subject()</span>;</span><br><span class="line">        subjectB.set<span class="constructor">Name(<span class="string">"lishi"</span>)</span>;</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentA:"</span> + studentA.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentB:"</span> + studentB.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里把 <code>Student studentB = (Student) studentA.clone()</code> 换成了 <code>Student studentB = studentA</code>。<br>输出的结果：</p>
+<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="string">studentA:</span>[<span class="string">Student:</span> <span class="number">460141958</span>,<span class="string">subject:</span>[<span class="string">Subject:</span> <span class="number">1163157884</span>,<span class="string">name:</span>lishi],<span class="string">name:</span>Lily,<span class="string">age:</span><span class="number">18</span>]</span><br><span class="line"><span class="string">studentB:</span>[<span class="string">Student:</span> <span class="number">460141958</span>,<span class="string">subject:</span>[<span class="string">Subject:</span> <span class="number">1163157884</span>,<span class="string">name:</span>lishi],<span class="string">name:</span>Lily,<span class="string">age:</span><span class="number">18</span>]</span><br></pre></td></tr></table></figure>
+
+<p>可见，对象拷贝后没有生成新的对象，二者的对象地址是一样的；而浅拷贝的对象地址是不一样的。</p>
+<h1 id="深拷贝"><a href="#深拷贝" class="headerlink" title="深拷贝"></a>深拷贝</h1><h2 id="1-深拷贝介绍"><a href="#1-深拷贝介绍" class="headerlink" title="1. 深拷贝介绍"></a>1. 深拷贝介绍</h2><p>通过上面的例子可以看到，浅拷贝会带来数据安全方面的隐患，例如我们只是想修改了 studentB 的 subject，但是 studentA 的 subject 也被修改了，因为它们都是指向的同一个地址。所以，此种情况下，我们需要用到深拷贝。</p>
+<p>深拷贝，在拷贝引用类型成员变量时，为引用类型的数据成员另辟了一个独立的内存空间，实现真正内容上的拷贝。</p>
+<h2 id="2-深拷贝特点"><a href="#2-深拷贝特点" class="headerlink" title="2. 深拷贝特点"></a>2. 深拷贝特点</h2><p>(1) 对于基本数据类型的成员对象，因为基础数据类型是值传递的，所以是直接将属性值赋值给新的对象。基础类型的拷贝，其中一个对象修改该值，不会影响另外一个（和浅拷贝一样）。<br>(2) 对于引用类型，比如数组或者类对象，深拷贝会新建一个对象空间，然后拷贝里面的内容，所以它们指向了不同的内存空间。改变其中一个，不会对另外一个也产生影响。<br>(3) 对于有多层对象的，每个对象都需要实现 <code>Cloneable</code> 并重写 <code>clone()</code> 方法，进而实现了对象的串行层层拷贝。<br>(4) 深拷贝相比于浅拷贝速度较慢并且花销较大。</p>
+<p>结构图如下：<br><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/note/deepClone.png" alt="深拷贝"></p>
+<h2 id="3-深拷贝的实现"><a href="#3-深拷贝的实现" class="headerlink" title="3. 深拷贝的实现"></a>3. 深拷贝的实现</h2><p>对于 <code>Student</code> 的引用类型的成员变量 <code>Subject</code> ，需要实现 <code>Cloneable</code> 并重写 <code>clone()</code> 方法。</p>
+<figure class="highlight aspectj"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Subject</span> <span class="keyword">implements</span> <span class="title">Cloneable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Subject</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function">String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="function">Object <span class="title">clone</span><span class="params">()</span> <span class="keyword">throws</span> CloneNotSupportedException </span>&#123;</span><br><span class="line">        <span class="comment">//Subject 如果也有引用类型的成员属性，也应该和 Student 类一样实现</span></span><br><span class="line">        <span class="function"><span class="keyword">return</span> <span class="keyword">super</span>.<span class="title">clone</span><span class="params">()</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function">String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"[Subject: "</span> + <span class="keyword">this</span>.hashCode() + <span class="string">",name:"</span> + name + <span class="string">"]"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>Student</code> 的 <code>clone()</code> 方法中，需要拿到拷贝自己后产生的新的对象，然后对新的对象的引用类型再调用拷贝操作，实现对引用类型成员变量的深拷贝。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Cloneable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//引用类型</span></span><br><span class="line">    <span class="keyword">private</span> Subject subject;</span><br><span class="line">    <span class="comment">//基础数据类型</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Subject <span class="title">getSubject</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> subject;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSubject</span><span class="params">(Subject subject)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.subject = subject;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *  重写clone()方法</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">clone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//深拷贝</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 直接调用父类的clone()方法</span></span><br><span class="line">            Student student = (Student) <span class="keyword">super</span>.clone();</span><br><span class="line">            student.subject = (Subject) subject.clone();</span><br><span class="line">            <span class="keyword">return</span> student;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (CloneNotSupportedException e) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"[Student: "</span> + <span class="keyword">this</span>.hashCode() + <span class="string">",subject:"</span> + subject + <span class="string">",name:"</span> + name + <span class="string">",age:"</span> + age + <span class="string">"]"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一样的使用方式</p>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">public <span class="keyword">class</span> ShallowCopy &#123;</span><br><span class="line">    public static void main(String<span class="literal">[]</span> args) &#123;</span><br><span class="line">        Subject subject = <span class="keyword">new</span> <span class="constructor">Subject(<span class="string">"yuwen"</span>)</span>;</span><br><span class="line">        Student studentA = <span class="keyword">new</span> <span class="constructor">Student()</span>;</span><br><span class="line">        studentA.set<span class="constructor">Subject(<span class="params">subject</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Name(<span class="string">"Lynn"</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Age(20)</span>;</span><br><span class="line">        Student studentB = (Student) studentA.clone<span class="literal">()</span>;</span><br><span class="line">        studentB.set<span class="constructor">Name(<span class="string">"Lily"</span>)</span>;</span><br><span class="line">        studentB.set<span class="constructor">Age(18)</span>;</span><br><span class="line">        Subject subjectB = studentB.get<span class="constructor">Subject()</span>;</span><br><span class="line">        subjectB.set<span class="constructor">Name(<span class="string">"lishi"</span>)</span>;</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentA:"</span> + studentA.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentB:"</span> + studentB.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight less"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="attribute">studentA</span>:[<span class="attribute">Student</span>: <span class="number">460141958</span>,<span class="attribute">subject</span>:[<span class="attribute">Subject</span>: <span class="number">1163157884</span>,<span class="attribute">name</span>:yuwen],<span class="attribute">name</span>:Lynn,<span class="attribute">age</span>:<span class="number">20</span>]</span><br><span class="line"><span class="attribute">studentB</span>:[<span class="attribute">Student</span>: <span class="number">1956725890</span>,<span class="attribute">subject</span>:[<span class="attribute">Subject</span>: <span class="number">356573597</span>,<span class="attribute">name</span>:lishi],<span class="attribute">name</span>:Lily,<span class="attribute">age</span>:<span class="number">18</span>]</span><br></pre></td></tr></table></figure>
+
+<p>由输出结果可见，深拷贝后，不管是基础数据类型还是引用类型的成员变量，修改其值都不会相互造成影响。</p>
+<p>参考：</p>
+<p><a href="https://www.cnblogs.com/shakinghead/p/7651502.html" target="_blank" rel="noopener">Java 浅拷贝和深拷贝的理解和实现方式</a><br><a href="https://blog.csdn.net/u014727260/article/details/55003402" target="_blank" rel="noopener">浅拷贝和深拷贝(谈谈java中的clone)</a></p>
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>拷贝</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Json基础</title>
+    <url>/2020/05/20/Json%E5%9F%BA%E7%A1%80/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>JSON其实就是一种数据的表示格式，由于其自身的优点（XML衬托）而广泛用于前后端的<strong>文本数据交互</strong>。这里又大概能够窥见XML与JSON的暗流涌动，一如前述JSP的落寞，但不至于那么惨烈。目前XML格式的文件还广泛作为配置文件的格式存在，尽管<code>.yml</code>、<code>.properties</code>、<code>.json</code>文件也在某些地方作为配置文件的格式。</p>
+<p>细想起来，无非也就是一种数据格式。编程圈里可能有很多“取代”这一说法，我并不十分认同，每种技术点自然有其存在的环境与背景，适时的发挥作用罢了。但技术的向前发展进步，是毋庸置疑的，所以我也不会无聊地选择用XML来做文本数据传输。突然想到，HTML的标签语法，是不是也存在着标签增加网络传输流量这一说法？又或者从JSON的命名看，是否前端巨头JavaScript就捧红了JSON呢？当然这是无端的幻想，技术时时刻刻都在迭代，我们唯有跟着大浪而已。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1015.jpg" alt="地平线的余晖"></p>
+<h1 id="Json简介"><a href="#Json简介" class="headerlink" title="Json简介"></a>Json简介</h1><p>JSON 是<strong>存储和交换文本信息</strong>的语法。类似 XML。JSON 比 XML 更小、更快，更易解析。</p>
+<ul>
+<li>JSON 指的是 JavaScript 对象表示法<code>JavaScript Object Notation</code></li>
+<li>JSON 是<strong>轻量级的文本数据交换格式</strong></li>
+<li>JSON 独立于语言</li>
+<li>JSON 具有自我描述性，更易理解</li>
+</ul>
+<p>JSON 使用 <strong>JavaScript 语法</strong>来描述数据对象，但是 JSON 仍然独立于语言和平台。<strong>JSON 解析器和 JSON 库</strong>支持许多不同的编程语言（PHP、Java、Python中均可以使用JSON）。</p>
+<p>JSON 文本格式在语法上与创建 JavaScript 对象的代码相同。由于这种相似性，无需解析器，JavaScript 程序能够使用<strong>内建的 eval() 函数</strong>，用 JSON 数据来生成原生的 JavaScript 对象。</p>
+<p>注：JSON常用于<strong>前后端的数据交互</strong>（前端Ajax上传JSON数据，服务器返回JSON字符串），需要明确是<strong>文本数据</strong>，类似图片文件等不能通过JSON来传输。</p>
+<h1 id="Json数据"><a href="#Json数据" class="headerlink" title="Json数据"></a>Json数据</h1><p>通过Js语法声明并初始化JSON对象，可以是单个JSON对象，也可以是JSON数组。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> JSONObject= &#123;</span><br><span class="line">    <span class="string">"name"</span>:<span class="string">"Bill Gates"</span>,</span><br><span class="line">    <span class="string">"street"</span>:<span class="string">"Fifth Avenue New York 666"</span>,</span><br><span class="line">    <span class="string">"age"</span>:<span class="number">56</span>,</span><br><span class="line">    <span class="string">"phone"</span>:<span class="string">"555 1234567"</span>&#125;;</span><br><span class="line">    </span><br><span class="line"><span class="comment">//json数组，每个元素是一个对象    </span></span><br><span class="line"><span class="keyword">var</span> employees = [</span><br><span class="line">    &#123; <span class="string">"firstName"</span>:<span class="string">"Bill"</span> , <span class="string">"lastName"</span>:<span class="string">"Gates"</span> &#125;,</span><br><span class="line">    &#123; <span class="string">"firstName"</span>:<span class="string">"George"</span> , <span class="string">"lastName"</span>:<span class="string">"Bush"</span> &#125;,</span><br><span class="line">    &#123; <span class="string">"firstName"</span>:<span class="string">"Thomas"</span> , <span class="string">"lastName"</span>: <span class="string">"Carter"</span> &#125;</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+
+<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><ul>
+<li>数据在名称/值对中（<strong>双引号</strong>）</li>
+<li>数据由<strong>逗号</strong>分隔</li>
+<li>花括号保存对象</li>
+<li>方括号保存数组</li>
+</ul>
+<h2 id="Json数据值"><a href="#Json数据值" class="headerlink" title="Json数据值"></a>Json数据值</h2><ul>
+<li>数字（整数或浮点数）</li>
+<li>字符串（在双引号中）</li>
+<li>逻辑值（true 或 false）</li>
+<li>数组（在方括号中）</li>
+<li>对象（在花括号中）</li>
+<li>null</li>
+</ul>
+<blockquote>
+<p>注: Js的数据类型一般为6种，其中基本数据类型：字符串（String）、数字(Number)、布尔(Boolean)、空（Null）、未定义（Undefined），引用数据类型：对象(Object)，ES6中新增Symbol（独一无二的值）。可以通过 typeof 查看变量类型，数组(Array)返回object类型，函数(Function)返回function类型。</p>
+</blockquote>
+<h1 id="Json基本用法"><a href="#Json基本用法" class="headerlink" title="Json基本用法"></a>Json基本用法</h1><h2 id="把-JSON-文本转换为-JavaScript-对象"><a href="#把-JSON-文本转换为-JavaScript-对象" class="headerlink" title="把 JSON 文本转换为 JavaScript 对象"></a>把 JSON 文本转换为 JavaScript 对象</h2><p>JSON 最常见的用法之一，是<strong>从 web 服务器上读取 JSON 数据（作为文件或作为 HttpRequest），将 JSON 数据转换为 JavaScript 对象</strong>，然后在网页中使用该数据。</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>通过 JSON 字符串来创建对象<span class="tag">&lt;/<span class="name">h3</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">First Name: <span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">"fname"</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> /&gt;</span> <span class="comment">&lt;!--显示Bill--&gt;</span></span><br><span class="line">Last Name: <span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">"lname"</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> /&gt;</span> <span class="comment">&lt;!--显示Gates--&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span></span><br><span class="line"><span class="actionscript"><span class="keyword">var</span> txt = <span class="string">'&#123;"employees":['</span> +</span></span><br><span class="line"><span class="actionscript"><span class="string">'&#123;"firstName":"Bill","lastName":"Gates" &#125;,'</span> +</span></span><br><span class="line"><span class="actionscript"><span class="string">'&#123;"firstName":"George","lastName":"Bush" &#125;,'</span> +</span></span><br><span class="line"><span class="actionscript"><span class="string">'&#123;"firstName":"Thomas","lastName":"Carter" &#125;]&#125;'</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="javascript"><span class="keyword">var</span> obj = <span class="built_in">eval</span> (<span class="string">"("</span> + txt + <span class="string">")"</span>);</span></span><br><span class="line"></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"fname"</span>).innerHTML=obj.employees[<span class="number">1</span>].firstName </span></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"lname"</span>).innerHTML=obj.employees[<span class="number">1</span>].lastName </span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="JSON解析器"><a href="#JSON解析器" class="headerlink" title="JSON解析器"></a>JSON解析器</h2><p>eval() 函数可编译并执行任何 JavaScript 代码。  </p>
+<p>使用 JSON 解析器将 JSON 转换为 JavaScript 对象是更安全的做法。<strong>JSON 解析器只能识别 JSON 文本，而不会编译脚本</strong>。</p>
+<p>在浏览器中，这提供了原生的 JSON 支持，而且 JSON 解析器的速度更快。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1020.jpg" alt="行走在街头"></p>
+<h1 id="Json应用示例"><a href="#Json应用示例" class="headerlink" title="Json应用示例"></a>Json应用示例</h1><p>从<strong>前端的视角</strong>来解读JSON用法，包括如何将服务端的JSON字符串解析为JSON对象，以及如何将JSON对象转换为JSON字符串传递给服务端。</p>
+<h2 id="JSON-parse"><a href="#JSON-parse" class="headerlink" title="JSON.parse()"></a>JSON.parse()</h2><p>JSON 通常用于与服务端交换数据。前端接收服务器数据时一般是获得字符串。</p>
+<p>我们可以使用 JSON.parse() 方法将JSON字符串数据转换为 JavaScript 对象。</p>
+<p><strong>语法：JSON.parse(text, [reviver])</strong></p>
+<p>reviver:&emsp;一个转换结果的函数， 将为对象的每个成员调用此函数。</p>
+<ul>
+<li>从服务端接收json数据</li>
+<li>从服务端接收数组的json数据</li>
+<li>解析日期</li>
+<li>解析函数（将函数作为字符串存储，<strong>不建议在json中使用函数</strong>）</li>
+</ul>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>菜鸟教程(runoob.com)<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>字符串转换为 Date 对象<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span> <span class="attr">id</span>=<span class="string">"demo"</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript"><span class="comment">//案例：可选参数reviver的使用（一般为函数）</span></span></span><br><span class="line"></span><br><span class="line"><span class="actionscript"><span class="keyword">var</span> text = <span class="string">'&#123; "name":"Runoob", "initDate":"2013-12-14", "site":"www.runoob.com"&#125;'</span>;</span></span><br><span class="line"><span class="javascript"><span class="keyword">var</span> obj = <span class="built_in">JSON</span>.parse(text, <span class="function"><span class="keyword">function</span> (<span class="params">key, value</span>) </span>&#123;</span></span><br><span class="line"><span class="actionscript">	<span class="keyword">if</span> (key == <span class="string">"initDate"</span>) &#123;</span></span><br><span class="line"><span class="javascript">	    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Date</span>(value);</span></span><br><span class="line"><span class="actionscript">	&#125; <span class="keyword">else</span> &#123;</span></span><br><span class="line"><span class="actionscript">	    <span class="keyword">return</span> value;</span></span><br><span class="line">&#125;&#125;);</span><br><span class="line"></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"demo"</span>).innerHTML = obj.name + <span class="string">"创建日期："</span> + obj.initDate;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="JSON-stringify"><a href="#JSON-stringify" class="headerlink" title="JSON.stringify()"></a>JSON.stringify()</h2><p>JSON 通常用于与服务端交换数据。在<strong>向服务器发送数据时一般是字符串</strong>。</p>
+<p>我们可以使用 JSON.stringify() 方法将 JavaScript 对象转换为字符串。</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>菜鸟教程(runoob.com)<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>将 JavaScript 对象转换为 JSON 字符串<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span> <span class="attr">id</span>=<span class="string">"demo"</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="actionscript"><span class="keyword">var</span> obj = &#123; <span class="string">"name"</span>:<span class="string">"runoob"</span>, <span class="string">"alexa"</span>:<span class="number">10000</span>, <span class="string">"site"</span>:<span class="string">"www.runoob.com"</span>&#125;;</span></span><br><span class="line"><span class="javascript"><span class="keyword">var</span> myJSON = <span class="built_in">JSON</span>.stringify(obj);</span></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"demo"</span>).innerHTML = myJSON;</span></span><br><span class="line"></span><br><span class="line"><span class="actionscript"><span class="comment">//上述两句替换后测试</span></span></span><br><span class="line"><span class="actionscript"><span class="comment">//document.getElementById("demo").innerHTML = obj;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="Java中使用JSON"><a href="#Java中使用JSON" class="headerlink" title="Java中使用JSON"></a>Java中使用JSON</h1><p>Java中并没有内置JSON的解析，因此使用JSON需要借助第三方类库。常用的如Gson、FastJson、Jackson。</p>
+<p>编码：从Java变量到JSON格式的编码</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//以FastJson为例</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testJson</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    JSONObject object = <span class="keyword">new</span> JSONObject();</span><br><span class="line">    <span class="comment">//string</span></span><br><span class="line">    object.put(<span class="string">"string"</span>,<span class="string">"string"</span>);</span><br><span class="line">    <span class="comment">//int</span></span><br><span class="line">    object.put(<span class="string">"int"</span>,<span class="number">2</span>);</span><br><span class="line">    <span class="comment">//boolean</span></span><br><span class="line">    object.put(<span class="string">"boolean"</span>,<span class="keyword">true</span>);</span><br><span class="line">    <span class="comment">//array</span></span><br><span class="line">    List&lt;Integer&gt; integers = Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">    object.put(<span class="string">"list"</span>,integers);</span><br><span class="line">    <span class="comment">//null</span></span><br><span class="line">    object.put(<span class="string">"null"</span>,<span class="keyword">null</span>);</span><br><span class="line">​</span><br><span class="line">    System.out.println(object);</span><br><span class="line">    <span class="comment">//&#123;"boolean":true,"string":"string","list":[1,2,3],"int":2&#125;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>解码：从 JSON 对象到 Java 变量的解码过程</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testJson2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">​</span><br><span class="line">  JSONObject object = JSONObject</span><br><span class="line">      .parseObject(<span class="string">"&#123;\"boolean\":true,\"string\":\"string\",\"list\":[1,2,3],\"int\":2&#125;"</span>);</span><br><span class="line">  <span class="comment">//string</span></span><br><span class="line">  String s = object.getString(<span class="string">"string"</span>);</span><br><span class="line">  System.out.println(s);</span><br><span class="line">  <span class="comment">//int</span></span><br><span class="line">  <span class="keyword">int</span> i = object.getIntValue(<span class="string">"int"</span>);</span><br><span class="line">  System.out.println(i);</span><br><span class="line">  <span class="comment">//boolean</span></span><br><span class="line">  <span class="keyword">boolean</span> b = object.getBooleanValue(<span class="string">"boolean"</span>);</span><br><span class="line">  System.out.println(b);</span><br><span class="line">  <span class="comment">//list</span></span><br><span class="line">  List&lt;Integer&gt; integers = JSON.parseArray(object.getJSONArray(<span class="string">"list"</span>).toJSONString(),Integer.class);</span><br><span class="line">  integers.forEach(System.out::println);</span><br><span class="line">  <span class="comment">//null</span></span><br><span class="line">  System.out.println(object.getString(<span class="string">"null"</span>));</span><br><span class="line">​   </span><br><span class="line">  <span class="comment">//输出</span></span><br><span class="line">  <span class="comment">//string</span></span><br><span class="line">  <span class="comment">//2</span></span><br><span class="line">  <span class="comment">//true</span></span><br><span class="line">  <span class="comment">// 1</span></span><br><span class="line">  <span class="comment">// 2</span></span><br><span class="line">  <span class="comment">// 3</span></span><br><span class="line">  <span class="comment">// null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>JSON对象与字符串的相互转化</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//从字符串解析JSON对象</span></span><br><span class="line">JSONObject obj = JSON.parseObject(<span class="string">"&#123;\"runoob\":\"菜鸟教程\"&#125;"</span>);</span><br><span class="line"><span class="comment">//从字符串解析JSON数组</span></span><br><span class="line">JSONArray arr = JSON.parseArray(<span class="string">"[\"菜鸟教程\",\"RUNOOB\"]\n"</span>);</span><br><span class="line"><span class="comment">//将JSON对象转化为字符串</span></span><br><span class="line">String objStr = JSON.toJSONString(obj);</span><br><span class="line"><span class="comment">//将JSON数组转化为字符串</span></span><br><span class="line">String arrStr = JSON.toJSONString(arr);</span><br></pre></td></tr></table></figure>
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://www.runoob.com/json/json-tutorial.html" target="_blank" rel="noopener">菜鸟：JSON教程</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilR0003.jpg" alt="平凡的一天"></p>
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>Json</tag>
+        <tag>数据传输</tag>
+        <tag>概念</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>MVCC与Next-key Locks</title>
     <url>/2020/11/12/MVCC%E4%B8%8ENext-key-Locks/</url>
     <content><![CDATA[<p>MYSQL数据库中，事务主要有4种<strong>隔离级别</strong>，分别是<strong>未提交读，提交读，可重复读，可串行化</strong>。</p>
@@ -106,199 +283,6 @@
       </tags>
   </entry>
   <entry>
-    <title>docker常用指令</title>
-    <url>/2020/09/18/docker%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/</url>
-    <content><![CDATA[<figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 进入容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//（run方式）运行容器时在使用 -d 参数时，容器启动后会进入后台</span></span><br><span class="line"><span class="comment">// -it参数：命令提示符效果（i：交互式 t：伪终端）</span></span><br><span class="line"><span class="comment">// /bin/bash 参数表明进入容器后执行的cmd命令（使用shell指令）</span></span><br><span class="line"></span><br><span class="line">docker exec -it 容器id /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment">//退出当前容器（exec进入，exit退出时不停止容器；attach进入，停止）</span></span><br><span class="line"></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta"># 拉取镜像（从docker hub镜像仓库）</span></span><br><span class="line">docker pull nginx(镜像名称)</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看镜像 </span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta"># 创建镜像（提前写好Dockerfile） </span></span><br><span class="line"><span class="comment">// -t 指定构建的镜像名称（target）</span></span><br><span class="line">docker image build -t diyimage:<span class="number">0.0</span><span class="number">.1</span> .</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除镜像 </span></span><br><span class="line"><span class="comment">// -f参数：force</span></span><br><span class="line">docker image rm 镜像id</span><br><span class="line">docker rmi [-f] 镜像id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 通过镜像生成容器 </span></span><br><span class="line">docker container run -p <span class="number">8000</span>:<span class="number">3000</span> -itd --name 容器名称 image01:<span class="number">0.0</span><span class="number">.1</span> /bin/bash</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">注：</span></span><br><span class="line"><span class="comment">每次run都会新增容器</span></span><br><span class="line"><span class="comment">-p参数：容器的 3000 端口映射到本机的 8000 端口。</span></span><br><span class="line"><span class="comment">-it参数：容器的 Shell 映射到当前的 Shell，然后你在本机窗口输入的命令，就会传入容器。</span></span><br><span class="line"><span class="comment">-d参数：容器生成后，后台运行</span></span><br><span class="line"><span class="comment">--name参数：指定容器的名称（不指定系统随机命名）</span></span><br><span class="line"><span class="comment">image01:0.0.1：image 文件的名字（如果有标签，还需要提供标签，默认是 latest 标签）</span></span><br><span class="line"><span class="comment">/bin/bash：容器启动以后，内部第一个执行的命令。这里是启动 Bash，保证用户可以使用 Shell。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">又注：如果镜像是基于nginx的，则不要写/bin/bash，否则映射出去的端口失效(无法访问)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 停止/启动容器 </span></span><br><span class="line">docker container kill/stop/start [containID]</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除容器 </span></span><br><span class="line">docker container rm 容器id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看容器 </span></span><br><span class="line">docker container ls</span><br><span class="line">docker container ls -all</span><br><span class="line"></span><br><span class="line">docker ps</span><br><span class="line">docker ps -a</span><br><span class="line"></span><br><span class="line"><span class="meta"># 保存镜像（eg：viewer-镜像名） </span></span><br><span class="line"></span><br><span class="line">docker save viewers-images  -o  /home/ldj/viewers-image.tar</span><br><span class="line"></span><br><span class="line"><span class="meta"># 载入本地镜像 </span></span><br><span class="line"></span><br><span class="line">docker load -i viewers-image.tar</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>docker</category>
-      </categories>
-      <tags>
-        <tag>docker</tag>
-        <tag>命令</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Json基础</title>
-    <url>/2020/05/20/Json%E5%9F%BA%E7%A1%80/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>JSON其实就是一种数据的表示格式，由于其自身的优点（XML衬托）而广泛用于前后端的<strong>文本数据交互</strong>。这里又大概能够窥见XML与JSON的暗流涌动，一如前述JSP的落寞，但不至于那么惨烈。目前XML格式的文件还广泛作为配置文件的格式存在，尽管<code>.yml</code>、<code>.properties</code>、<code>.json</code>文件也在某些地方作为配置文件的格式。</p>
-<p>细想起来，无非也就是一种数据格式。编程圈里可能有很多“取代”这一说法，我并不十分认同，每种技术点自然有其存在的环境与背景，适时的发挥作用罢了。但技术的向前发展进步，是毋庸置疑的，所以我也不会无聊地选择用XML来做文本数据传输。突然想到，HTML的标签语法，是不是也存在着标签增加网络传输流量这一说法？又或者从JSON的命名看，是否前端巨头JavaScript就捧红了JSON呢？当然这是无端的幻想，技术时时刻刻都在迭代，我们唯有跟着大浪而已。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1015.jpg" alt="地平线的余晖"></p>
-<h1 id="Json简介"><a href="#Json简介" class="headerlink" title="Json简介"></a>Json简介</h1><p>JSON 是<strong>存储和交换文本信息</strong>的语法。类似 XML。JSON 比 XML 更小、更快，更易解析。</p>
-<ul>
-<li>JSON 指的是 JavaScript 对象表示法<code>JavaScript Object Notation</code></li>
-<li>JSON 是<strong>轻量级的文本数据交换格式</strong></li>
-<li>JSON 独立于语言</li>
-<li>JSON 具有自我描述性，更易理解</li>
-</ul>
-<p>JSON 使用 <strong>JavaScript 语法</strong>来描述数据对象，但是 JSON 仍然独立于语言和平台。<strong>JSON 解析器和 JSON 库</strong>支持许多不同的编程语言（PHP、Java、Python中均可以使用JSON）。</p>
-<p>JSON 文本格式在语法上与创建 JavaScript 对象的代码相同。由于这种相似性，无需解析器，JavaScript 程序能够使用<strong>内建的 eval() 函数</strong>，用 JSON 数据来生成原生的 JavaScript 对象。</p>
-<p>注：JSON常用于<strong>前后端的数据交互</strong>（前端Ajax上传JSON数据，服务器返回JSON字符串），需要明确是<strong>文本数据</strong>，类似图片文件等不能通过JSON来传输。</p>
-<h1 id="Json数据"><a href="#Json数据" class="headerlink" title="Json数据"></a>Json数据</h1><p>通过Js语法声明并初始化JSON对象，可以是单个JSON对象，也可以是JSON数组。</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> JSONObject= &#123;</span><br><span class="line">    <span class="string">"name"</span>:<span class="string">"Bill Gates"</span>,</span><br><span class="line">    <span class="string">"street"</span>:<span class="string">"Fifth Avenue New York 666"</span>,</span><br><span class="line">    <span class="string">"age"</span>:<span class="number">56</span>,</span><br><span class="line">    <span class="string">"phone"</span>:<span class="string">"555 1234567"</span>&#125;;</span><br><span class="line">    </span><br><span class="line"><span class="comment">//json数组，每个元素是一个对象    </span></span><br><span class="line"><span class="keyword">var</span> employees = [</span><br><span class="line">    &#123; <span class="string">"firstName"</span>:<span class="string">"Bill"</span> , <span class="string">"lastName"</span>:<span class="string">"Gates"</span> &#125;,</span><br><span class="line">    &#123; <span class="string">"firstName"</span>:<span class="string">"George"</span> , <span class="string">"lastName"</span>:<span class="string">"Bush"</span> &#125;,</span><br><span class="line">    &#123; <span class="string">"firstName"</span>:<span class="string">"Thomas"</span> , <span class="string">"lastName"</span>: <span class="string">"Carter"</span> &#125;</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
-
-<h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><ul>
-<li>数据在名称/值对中（<strong>双引号</strong>）</li>
-<li>数据由<strong>逗号</strong>分隔</li>
-<li>花括号保存对象</li>
-<li>方括号保存数组</li>
-</ul>
-<h2 id="Json数据值"><a href="#Json数据值" class="headerlink" title="Json数据值"></a>Json数据值</h2><ul>
-<li>数字（整数或浮点数）</li>
-<li>字符串（在双引号中）</li>
-<li>逻辑值（true 或 false）</li>
-<li>数组（在方括号中）</li>
-<li>对象（在花括号中）</li>
-<li>null</li>
-</ul>
-<blockquote>
-<p>注: Js的数据类型一般为6种，其中基本数据类型：字符串（String）、数字(Number)、布尔(Boolean)、空（Null）、未定义（Undefined），引用数据类型：对象(Object)，ES6中新增Symbol（独一无二的值）。可以通过 typeof 查看变量类型，数组(Array)返回object类型，函数(Function)返回function类型。</p>
-</blockquote>
-<h1 id="Json基本用法"><a href="#Json基本用法" class="headerlink" title="Json基本用法"></a>Json基本用法</h1><h2 id="把-JSON-文本转换为-JavaScript-对象"><a href="#把-JSON-文本转换为-JavaScript-对象" class="headerlink" title="把 JSON 文本转换为 JavaScript 对象"></a>把 JSON 文本转换为 JavaScript 对象</h2><p>JSON 最常见的用法之一，是<strong>从 web 服务器上读取 JSON 数据（作为文件或作为 HttpRequest），将 JSON 数据转换为 JavaScript 对象</strong>，然后在网页中使用该数据。</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>通过 JSON 字符串来创建对象<span class="tag">&lt;/<span class="name">h3</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line">First Name: <span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">"fname"</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> /&gt;</span> <span class="comment">&lt;!--显示Bill--&gt;</span></span><br><span class="line">Last Name: <span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">"lname"</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span><span class="tag">&lt;<span class="name">br</span> /&gt;</span> <span class="comment">&lt;!--显示Gates--&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">p</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span></span><br><span class="line"><span class="actionscript"><span class="keyword">var</span> txt = <span class="string">'&#123;"employees":['</span> +</span></span><br><span class="line"><span class="actionscript"><span class="string">'&#123;"firstName":"Bill","lastName":"Gates" &#125;,'</span> +</span></span><br><span class="line"><span class="actionscript"><span class="string">'&#123;"firstName":"George","lastName":"Bush" &#125;,'</span> +</span></span><br><span class="line"><span class="actionscript"><span class="string">'&#123;"firstName":"Thomas","lastName":"Carter" &#125;]&#125;'</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="javascript"><span class="keyword">var</span> obj = <span class="built_in">eval</span> (<span class="string">"("</span> + txt + <span class="string">")"</span>);</span></span><br><span class="line"></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"fname"</span>).innerHTML=obj.employees[<span class="number">1</span>].firstName </span></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"lname"</span>).innerHTML=obj.employees[<span class="number">1</span>].lastName </span></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="JSON解析器"><a href="#JSON解析器" class="headerlink" title="JSON解析器"></a>JSON解析器</h2><p>eval() 函数可编译并执行任何 JavaScript 代码。  </p>
-<p>使用 JSON 解析器将 JSON 转换为 JavaScript 对象是更安全的做法。<strong>JSON 解析器只能识别 JSON 文本，而不会编译脚本</strong>。</p>
-<p>在浏览器中，这提供了原生的 JSON 支持，而且 JSON 解析器的速度更快。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1020.jpg" alt="行走在街头"></p>
-<h1 id="Json应用示例"><a href="#Json应用示例" class="headerlink" title="Json应用示例"></a>Json应用示例</h1><p>从<strong>前端的视角</strong>来解读JSON用法，包括如何将服务端的JSON字符串解析为JSON对象，以及如何将JSON对象转换为JSON字符串传递给服务端。</p>
-<h2 id="JSON-parse"><a href="#JSON-parse" class="headerlink" title="JSON.parse()"></a>JSON.parse()</h2><p>JSON 通常用于与服务端交换数据。前端接收服务器数据时一般是获得字符串。</p>
-<p>我们可以使用 JSON.parse() 方法将JSON字符串数据转换为 JavaScript 对象。</p>
-<p><strong>语法：JSON.parse(text, [reviver])</strong></p>
-<p>reviver:&emsp;一个转换结果的函数， 将为对象的每个成员调用此函数。</p>
-<ul>
-<li>从服务端接收json数据</li>
-<li>从服务端接收数组的json数据</li>
-<li>解析日期</li>
-<li>解析函数（将函数作为字符串存储，<strong>不建议在json中使用函数</strong>）</li>
-</ul>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>菜鸟教程(runoob.com)<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>字符串转换为 Date 对象<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span> <span class="attr">id</span>=<span class="string">"demo"</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="actionscript"><span class="comment">//案例：可选参数reviver的使用（一般为函数）</span></span></span><br><span class="line"></span><br><span class="line"><span class="actionscript"><span class="keyword">var</span> text = <span class="string">'&#123; "name":"Runoob", "initDate":"2013-12-14", "site":"www.runoob.com"&#125;'</span>;</span></span><br><span class="line"><span class="javascript"><span class="keyword">var</span> obj = <span class="built_in">JSON</span>.parse(text, <span class="function"><span class="keyword">function</span> (<span class="params">key, value</span>) </span>&#123;</span></span><br><span class="line"><span class="actionscript">	<span class="keyword">if</span> (key == <span class="string">"initDate"</span>) &#123;</span></span><br><span class="line"><span class="javascript">	    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Date</span>(value);</span></span><br><span class="line"><span class="actionscript">	&#125; <span class="keyword">else</span> &#123;</span></span><br><span class="line"><span class="actionscript">	    <span class="keyword">return</span> value;</span></span><br><span class="line">&#125;&#125;);</span><br><span class="line"></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"demo"</span>).innerHTML = obj.name + <span class="string">"创建日期："</span> + obj.initDate;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h2 id="JSON-stringify"><a href="#JSON-stringify" class="headerlink" title="JSON.stringify()"></a>JSON.stringify()</h2><p>JSON 通常用于与服务端交换数据。在<strong>向服务器发送数据时一般是字符串</strong>。</p>
-<p>我们可以使用 JSON.stringify() 方法将 JavaScript 对象转换为字符串。</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>菜鸟教程(runoob.com)<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>将 JavaScript 对象转换为 JSON 字符串<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span> <span class="attr">id</span>=<span class="string">"demo"</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="actionscript"><span class="keyword">var</span> obj = &#123; <span class="string">"name"</span>:<span class="string">"runoob"</span>, <span class="string">"alexa"</span>:<span class="number">10000</span>, <span class="string">"site"</span>:<span class="string">"www.runoob.com"</span>&#125;;</span></span><br><span class="line"><span class="javascript"><span class="keyword">var</span> myJSON = <span class="built_in">JSON</span>.stringify(obj);</span></span><br><span class="line"><span class="javascript"><span class="built_in">document</span>.getElementById(<span class="string">"demo"</span>).innerHTML = myJSON;</span></span><br><span class="line"></span><br><span class="line"><span class="actionscript"><span class="comment">//上述两句替换后测试</span></span></span><br><span class="line"><span class="actionscript"><span class="comment">//document.getElementById("demo").innerHTML = obj;</span></span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="Java中使用JSON"><a href="#Java中使用JSON" class="headerlink" title="Java中使用JSON"></a>Java中使用JSON</h1><p>Java中并没有内置JSON的解析，因此使用JSON需要借助第三方类库。常用的如Gson、FastJson、Jackson。</p>
-<p>编码：从Java变量到JSON格式的编码</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//以FastJson为例</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testJson</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    JSONObject object = <span class="keyword">new</span> JSONObject();</span><br><span class="line">    <span class="comment">//string</span></span><br><span class="line">    object.put(<span class="string">"string"</span>,<span class="string">"string"</span>);</span><br><span class="line">    <span class="comment">//int</span></span><br><span class="line">    object.put(<span class="string">"int"</span>,<span class="number">2</span>);</span><br><span class="line">    <span class="comment">//boolean</span></span><br><span class="line">    object.put(<span class="string">"boolean"</span>,<span class="keyword">true</span>);</span><br><span class="line">    <span class="comment">//array</span></span><br><span class="line">    List&lt;Integer&gt; integers = Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">    object.put(<span class="string">"list"</span>,integers);</span><br><span class="line">    <span class="comment">//null</span></span><br><span class="line">    object.put(<span class="string">"null"</span>,<span class="keyword">null</span>);</span><br><span class="line">​</span><br><span class="line">    System.out.println(object);</span><br><span class="line">    <span class="comment">//&#123;"boolean":true,"string":"string","list":[1,2,3],"int":2&#125;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>解码：从 JSON 对象到 Java 变量的解码过程</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testJson2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">​</span><br><span class="line">  JSONObject object = JSONObject</span><br><span class="line">      .parseObject(<span class="string">"&#123;\"boolean\":true,\"string\":\"string\",\"list\":[1,2,3],\"int\":2&#125;"</span>);</span><br><span class="line">  <span class="comment">//string</span></span><br><span class="line">  String s = object.getString(<span class="string">"string"</span>);</span><br><span class="line">  System.out.println(s);</span><br><span class="line">  <span class="comment">//int</span></span><br><span class="line">  <span class="keyword">int</span> i = object.getIntValue(<span class="string">"int"</span>);</span><br><span class="line">  System.out.println(i);</span><br><span class="line">  <span class="comment">//boolean</span></span><br><span class="line">  <span class="keyword">boolean</span> b = object.getBooleanValue(<span class="string">"boolean"</span>);</span><br><span class="line">  System.out.println(b);</span><br><span class="line">  <span class="comment">//list</span></span><br><span class="line">  List&lt;Integer&gt; integers = JSON.parseArray(object.getJSONArray(<span class="string">"list"</span>).toJSONString(),Integer.class);</span><br><span class="line">  integers.forEach(System.out::println);</span><br><span class="line">  <span class="comment">//null</span></span><br><span class="line">  System.out.println(object.getString(<span class="string">"null"</span>));</span><br><span class="line">​   </span><br><span class="line">  <span class="comment">//输出</span></span><br><span class="line">  <span class="comment">//string</span></span><br><span class="line">  <span class="comment">//2</span></span><br><span class="line">  <span class="comment">//true</span></span><br><span class="line">  <span class="comment">// 1</span></span><br><span class="line">  <span class="comment">// 2</span></span><br><span class="line">  <span class="comment">// 3</span></span><br><span class="line">  <span class="comment">// null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>JSON对象与字符串的相互转化</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//从字符串解析JSON对象</span></span><br><span class="line">JSONObject obj = JSON.parseObject(<span class="string">"&#123;\"runoob\":\"菜鸟教程\"&#125;"</span>);</span><br><span class="line"><span class="comment">//从字符串解析JSON数组</span></span><br><span class="line">JSONArray arr = JSON.parseArray(<span class="string">"[\"菜鸟教程\",\"RUNOOB\"]\n"</span>);</span><br><span class="line"><span class="comment">//将JSON对象转化为字符串</span></span><br><span class="line">String objStr = JSON.toJSONString(obj);</span><br><span class="line"><span class="comment">//将JSON数组转化为字符串</span></span><br><span class="line">String arrStr = JSON.toJSONString(arr);</span><br></pre></td></tr></table></figure>
-
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://www.runoob.com/json/json-tutorial.html" target="_blank" rel="noopener">菜鸟：JSON教程</a></p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilR0003.jpg" alt="平凡的一天"></p>
-]]></content>
-      <categories>
-        <category>java</category>
-      </categories>
-      <tags>
-        <tag>概念</tag>
-        <tag>Json</tag>
-        <tag>数据传输</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java浅拷贝和深拷贝</title>
-    <url>/2020/10/17/Java%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/</url>
-    <content><![CDATA[<p>本文转载自简书（安静的蓝孩子）<a href="https://www.jianshu.com/p/94dbef2de298" target="_blank" rel="noopener">Java浅拷贝和深拷贝</a></p>
-<blockquote>
-<p>作者：安静的蓝孩子 链接：<a href="https://www.jianshu.com/p/94dbef2de298" target="_blank" rel="noopener">https://www.jianshu.com/p/94dbef2de298</a>  来源：简书</p>
-</blockquote>
-<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>开发过程中，有时会遇到把现有的一个对象的所有成员属性拷贝给另一个对象的需求。<br>比如说对象 A 和对象 B，二者都是 ClassC 的对象，具有成员变量 a 和 b，现在对对象 A 进行拷贝赋值给 B，也就是 B.a = A.a; B.b = A.b;</p>
-<p>这时再去改变 B 的属性 a 或者 b 时，可能会遇到问题：假设 a 是基础数据类型，b 是引用类型。<br>当改变 B.a 的值时，没有问题；<br>当改变 B.b 的值时，同时也会改变 A.b 的值，因为其实上面的例子中只是把 A.b 赋值给了 B.b，因为是 b 引用类型的，所以它们是指向同一个地址的。这可能就会给我们使用埋下隐患。</p>
-<blockquote>
-<p>Java 中的数据类型分为基本数据类型和引用数据类型。对于这两种数据类型，在进行赋值操作、用作方法参数或返回值时，会有值传递和引用（地址）传递的差别。</p>
-</blockquote>
-<h1 id="拷贝分类"><a href="#拷贝分类" class="headerlink" title="拷贝分类"></a>拷贝分类</h1><p>上面的问题，其实就是因为对拷贝的不熟悉导致的。</p>
-<p>根据对对象属性的拷贝程度（基本数据类和引用类型），会分为两种：</p>
-<ul>
-<li>浅拷贝 (<code>Shallow Copy</code>)</li>
-<li>深拷贝 (<code>Deep Copy</code>)</li>
-</ul>
-<h1 id="浅拷贝"><a href="#浅拷贝" class="headerlink" title="浅拷贝"></a>浅拷贝</h1><h2 id="1-浅拷贝介绍"><a href="#1-浅拷贝介绍" class="headerlink" title="1. 浅拷贝介绍"></a>1. 浅拷贝介绍</h2><p>浅拷贝是按位拷贝对象，它会创建一个新对象，这个对象有着原始对象属性值的一份精确拷贝。如果属性是基本类型，拷贝的就是基本类型的值；如果属性是内存地址（引用类型），拷贝的就是内存地址 ，因此如果其中一个对象改变了这个地址，就会影响到另一个对象。即默认拷贝构造函数只是对对象进行浅拷贝复制(逐个成员依次拷贝)，即只复制对象空间而不复制资源。</p>
-<h2 id="2-浅拷贝特点"><a href="#2-浅拷贝特点" class="headerlink" title="2. 浅拷贝特点"></a>2. 浅拷贝特点</h2><p>(1) 对于基本数据类型的成员对象，因为基础数据类型是值传递的，所以是直接将属性值赋值给新的对象。基础类型的拷贝，其中一个对象修改该值，不会影响另外一个。<br>(2) 对于引用类型，比如数组或者类对象，因为引用类型是引用传递，所以浅拷贝只是把内存地址赋值给了成员变量，它们指向了同一内存空间。改变其中一个，会对另外一个也产生影响。</p>
-<p>结构图如下：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/note/shallowClone.png" alt="浅拷贝"></p>
-<h2 id="3-浅拷贝的实现"><a href="#3-浅拷贝的实现" class="headerlink" title="3. 浅拷贝的实现"></a>3. 浅拷贝的实现</h2><p>实现对象拷贝的类，需要实现 <code>Cloneable</code> 接口，并覆写 <code>clone()</code> 方法。</p>
-<p>示例如下：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Subject</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Subject</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"[Subject: "</span> + <span class="keyword">this</span>.hashCode() + <span class="string">",name:"</span> + name + <span class="string">"]"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight aspectj"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Cloneable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//引用类型</span></span><br><span class="line">    <span class="keyword">private</span> Subject subject;</span><br><span class="line">    <span class="comment">//基础数据类型</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function">Subject <span class="title">getSubject</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> subject;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setSubject</span><span class="params">(Subject subject)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.subject = subject;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function">String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *  重写clone()方法</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function">Object <span class="title">clone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//浅拷贝</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 直接调用父类的clone()方法</span></span><br><span class="line">            <span class="function"><span class="keyword">return</span> <span class="keyword">super</span>.<span class="title">clone</span><span class="params">()</span></span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (CloneNotSupportedException e) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function">String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"[Student: "</span> + <span class="keyword">this</span>.hashCode() + <span class="string">",subject:"</span> + subject + <span class="string">",name:"</span> + name + <span class="string">",age:"</span> + age + <span class="string">"]"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">public <span class="keyword">class</span> ShallowCopy &#123;</span><br><span class="line">    public static void main(String<span class="literal">[]</span> args) &#123;</span><br><span class="line">        Subject subject = <span class="keyword">new</span> <span class="constructor">Subject(<span class="string">"yuwen"</span>)</span>;</span><br><span class="line">        Student studentA = <span class="keyword">new</span> <span class="constructor">Student()</span>;</span><br><span class="line">        studentA.set<span class="constructor">Subject(<span class="params">subject</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Name(<span class="string">"Lynn"</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Age(20)</span>;</span><br><span class="line">        Student studentB = (Student) studentA.clone<span class="literal">()</span>;</span><br><span class="line">        studentB.set<span class="constructor">Name(<span class="string">"Lily"</span>)</span>;</span><br><span class="line">        studentB.set<span class="constructor">Age(18)</span>;</span><br><span class="line">        Subject subjectB = studentB.get<span class="constructor">Subject()</span>;</span><br><span class="line">        subjectB.set<span class="constructor">Name(<span class="string">"lishi"</span>)</span>;</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentA:"</span> + studentA.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentB:"</span> + studentB.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>输出的结果：</p>
-<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="string">studentA:</span>[<span class="string">Student:</span> <span class="number">460141958</span>,<span class="string">subject:</span>[<span class="string">Subject:</span> <span class="number">1163157884</span>,<span class="string">name:</span>lishi],<span class="string">name:</span>Lynn,<span class="string">age:</span><span class="number">20</span>]</span><br><span class="line"><span class="string">studentB:</span>[<span class="string">Student:</span> <span class="number">1956725890</span>,<span class="string">subject:</span>[<span class="string">Subject:</span> <span class="number">1163157884</span>,<span class="string">name:</span>lishi],<span class="string">name:</span>Lily,<span class="string">age:</span><span class="number">18</span>]</span><br></pre></td></tr></table></figure>
-
-<p>由输出的结果可见，通过 <code>studentA.clone()</code> 拷贝对象后得到的 <code>studentB</code>，和 <code>studentA</code> 是两个不同的对象。<code>studentA</code> 和 <code>studentB</code> 的基础数据类型的修改互不影响，而引用类型 <code>subject</code> 修改后是会有影响的。</p>
-<h2 id="浅拷贝和对象拷贝的区别："><a href="#浅拷贝和对象拷贝的区别：" class="headerlink" title="浅拷贝和对象拷贝的区别："></a>浅拷贝和对象拷贝的区别：</h2><figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">public static void main(String<span class="literal">[]</span> args) &#123;</span><br><span class="line">        Subject subject = <span class="keyword">new</span> <span class="constructor">Subject(<span class="string">"yuwen"</span>)</span>;</span><br><span class="line">        Student studentA = <span class="keyword">new</span> <span class="constructor">Student()</span>;</span><br><span class="line">        studentA.set<span class="constructor">Subject(<span class="params">subject</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Name(<span class="string">"Lynn"</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Age(20)</span>;</span><br><span class="line">        Student studentB = studentA;</span><br><span class="line">        studentB.set<span class="constructor">Name(<span class="string">"Lily"</span>)</span>;</span><br><span class="line">        studentB.set<span class="constructor">Age(18)</span>;</span><br><span class="line">        Subject subjectB = studentB.get<span class="constructor">Subject()</span>;</span><br><span class="line">        subjectB.set<span class="constructor">Name(<span class="string">"lishi"</span>)</span>;</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentA:"</span> + studentA.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentB:"</span> + studentB.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<p>这里把 <code>Student studentB = (Student) studentA.clone()</code> 换成了 <code>Student studentB = studentA</code>。<br>输出的结果：</p>
-<figure class="highlight groovy"><table><tr><td class="code"><pre><span class="line"><span class="string">studentA:</span>[<span class="string">Student:</span> <span class="number">460141958</span>,<span class="string">subject:</span>[<span class="string">Subject:</span> <span class="number">1163157884</span>,<span class="string">name:</span>lishi],<span class="string">name:</span>Lily,<span class="string">age:</span><span class="number">18</span>]</span><br><span class="line"><span class="string">studentB:</span>[<span class="string">Student:</span> <span class="number">460141958</span>,<span class="string">subject:</span>[<span class="string">Subject:</span> <span class="number">1163157884</span>,<span class="string">name:</span>lishi],<span class="string">name:</span>Lily,<span class="string">age:</span><span class="number">18</span>]</span><br></pre></td></tr></table></figure>
-
-<p>可见，对象拷贝后没有生成新的对象，二者的对象地址是一样的；而浅拷贝的对象地址是不一样的。</p>
-<h1 id="深拷贝"><a href="#深拷贝" class="headerlink" title="深拷贝"></a>深拷贝</h1><h2 id="1-深拷贝介绍"><a href="#1-深拷贝介绍" class="headerlink" title="1. 深拷贝介绍"></a>1. 深拷贝介绍</h2><p>通过上面的例子可以看到，浅拷贝会带来数据安全方面的隐患，例如我们只是想修改了 studentB 的 subject，但是 studentA 的 subject 也被修改了，因为它们都是指向的同一个地址。所以，此种情况下，我们需要用到深拷贝。</p>
-<p>深拷贝，在拷贝引用类型成员变量时，为引用类型的数据成员另辟了一个独立的内存空间，实现真正内容上的拷贝。</p>
-<h2 id="2-深拷贝特点"><a href="#2-深拷贝特点" class="headerlink" title="2. 深拷贝特点"></a>2. 深拷贝特点</h2><p>(1) 对于基本数据类型的成员对象，因为基础数据类型是值传递的，所以是直接将属性值赋值给新的对象。基础类型的拷贝，其中一个对象修改该值，不会影响另外一个（和浅拷贝一样）。<br>(2) 对于引用类型，比如数组或者类对象，深拷贝会新建一个对象空间，然后拷贝里面的内容，所以它们指向了不同的内存空间。改变其中一个，不会对另外一个也产生影响。<br>(3) 对于有多层对象的，每个对象都需要实现 <code>Cloneable</code> 并重写 <code>clone()</code> 方法，进而实现了对象的串行层层拷贝。<br>(4) 深拷贝相比于浅拷贝速度较慢并且花销较大。</p>
-<p>结构图如下：<br><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/note/deepClone.png" alt="深拷贝"></p>
-<h2 id="3-深拷贝的实现"><a href="#3-深拷贝的实现" class="headerlink" title="3. 深拷贝的实现"></a>3. 深拷贝的实现</h2><p>对于 <code>Student</code> 的引用类型的成员变量 <code>Subject</code> ，需要实现 <code>Cloneable</code> 并重写 <code>clone()</code> 方法。</p>
-<figure class="highlight aspectj"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Subject</span> <span class="keyword">implements</span> <span class="title">Cloneable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Subject</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function">String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="function">Object <span class="title">clone</span><span class="params">()</span> <span class="keyword">throws</span> CloneNotSupportedException </span>&#123;</span><br><span class="line">        <span class="comment">//Subject 如果也有引用类型的成员属性，也应该和 Student 类一样实现</span></span><br><span class="line">        <span class="function"><span class="keyword">return</span> <span class="keyword">super</span>.<span class="title">clone</span><span class="params">()</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function">String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"[Subject: "</span> + <span class="keyword">this</span>.hashCode() + <span class="string">",name:"</span> + name + <span class="string">"]"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在 <code>Student</code> 的 <code>clone()</code> 方法中，需要拿到拷贝自己后产生的新的对象，然后对新的对象的引用类型再调用拷贝操作，实现对引用类型成员变量的深拷贝。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">implements</span> <span class="title">Cloneable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//引用类型</span></span><br><span class="line">    <span class="keyword">private</span> Subject subject;</span><br><span class="line">    <span class="comment">//基础数据类型</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Subject <span class="title">getSubject</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> subject;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setSubject</span><span class="params">(Subject subject)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.subject = subject;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     *  重写clone()方法</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">clone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//深拷贝</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 直接调用父类的clone()方法</span></span><br><span class="line">            Student student = (Student) <span class="keyword">super</span>.clone();</span><br><span class="line">            student.subject = (Subject) subject.clone();</span><br><span class="line">            <span class="keyword">return</span> student;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (CloneNotSupportedException e) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"[Student: "</span> + <span class="keyword">this</span>.hashCode() + <span class="string">",subject:"</span> + subject + <span class="string">",name:"</span> + name + <span class="string">",age:"</span> + age + <span class="string">"]"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>一样的使用方式</p>
-<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">public <span class="keyword">class</span> ShallowCopy &#123;</span><br><span class="line">    public static void main(String<span class="literal">[]</span> args) &#123;</span><br><span class="line">        Subject subject = <span class="keyword">new</span> <span class="constructor">Subject(<span class="string">"yuwen"</span>)</span>;</span><br><span class="line">        Student studentA = <span class="keyword">new</span> <span class="constructor">Student()</span>;</span><br><span class="line">        studentA.set<span class="constructor">Subject(<span class="params">subject</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Name(<span class="string">"Lynn"</span>)</span>;</span><br><span class="line">        studentA.set<span class="constructor">Age(20)</span>;</span><br><span class="line">        Student studentB = (Student) studentA.clone<span class="literal">()</span>;</span><br><span class="line">        studentB.set<span class="constructor">Name(<span class="string">"Lily"</span>)</span>;</span><br><span class="line">        studentB.set<span class="constructor">Age(18)</span>;</span><br><span class="line">        Subject subjectB = studentB.get<span class="constructor">Subject()</span>;</span><br><span class="line">        subjectB.set<span class="constructor">Name(<span class="string">"lishi"</span>)</span>;</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentA:"</span> + studentA.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">        <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println(<span class="string">"studentB:"</span> + studentB.<span class="keyword">to</span><span class="constructor">String()</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>输出结果：</p>
-<figure class="highlight less"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="attribute">studentA</span>:[<span class="attribute">Student</span>: <span class="number">460141958</span>,<span class="attribute">subject</span>:[<span class="attribute">Subject</span>: <span class="number">1163157884</span>,<span class="attribute">name</span>:yuwen],<span class="attribute">name</span>:Lynn,<span class="attribute">age</span>:<span class="number">20</span>]</span><br><span class="line"><span class="attribute">studentB</span>:[<span class="attribute">Student</span>: <span class="number">1956725890</span>,<span class="attribute">subject</span>:[<span class="attribute">Subject</span>: <span class="number">356573597</span>,<span class="attribute">name</span>:lishi],<span class="attribute">name</span>:Lily,<span class="attribute">age</span>:<span class="number">18</span>]</span><br></pre></td></tr></table></figure>
-
-<p>由输出结果可见，深拷贝后，不管是基础数据类型还是引用类型的成员变量，修改其值都不会相互造成影响。</p>
-<p>参考：</p>
-<p><a href="https://www.cnblogs.com/shakinghead/p/7651502.html" target="_blank" rel="noopener">Java 浅拷贝和深拷贝的理解和实现方式</a><br><a href="https://blog.csdn.net/u014727260/article/details/55003402" target="_blank" rel="noopener">浅拷贝和深拷贝(谈谈java中的clone)</a></p>
-]]></content>
-      <categories>
-        <category>java</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-        <tag>拷贝</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用Comparator比较器</title>
-    <url>/2020/11/10/%E4%BD%BF%E7%94%A8Comparator%E6%AF%94%E8%BE%83%E5%99%A8/</url>
-    <content><![CDATA[<p>数组的排序方式有很多。</p>
-<p>排序，必须选择一个排序标准，可以按照元素的值（整型数组），或者元素的某个属性值（元素为对象时）。</p>
-<p><strong>Arrays工具类，位于java.util包，提供了sort方法。支持自定义比较器，实现升序、降序排列等。</strong></p>
-<p>多维数组，可以看作元素是数组的集合。同样的思想，按照元素的某一个属性，比如元素的某一列值（二维数组）排序。</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.Comparator;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="symbol">ComparatorOrder</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> static <span class="built_in">void</span> main(String[] args) &#123;</span><br><span class="line">        Integer[] nums = new Integer[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line">        Arrays.sort(nums, (o1, o2) -&gt; o2-o1);</span><br><span class="line">        <span class="comment">//降序，输出：[6,4,3,2,2,1]</span></span><br><span class="line">        System.<span class="keyword">out</span>.println(Arrays.toString(nums));</span><br><span class="line"></span><br><span class="line">        <span class="built_in">int</span>[][] nums2=new <span class="built_in">int</span>[][]&#123;&#123;<span class="number">7</span>,<span class="number">0</span>&#125;,&#123;<span class="number">4</span>,<span class="number">1</span>&#125;,&#123;<span class="number">5</span>,<span class="number">2</span>&#125;,&#123;<span class="number">6</span>,<span class="number">3</span>&#125;,&#123;<span class="number">8</span>,<span class="number">6</span>&#125;&#125;;</span><br><span class="line"><span class="comment">//        Arrays.sort(nums2, new Comparator&lt;int[]&gt;() &#123;</span></span><br><span class="line"><span class="comment">//            @Override</span></span><br><span class="line"><span class="comment">//            public int compare(int[] o1, int[] o2) &#123;</span></span><br><span class="line"><span class="comment">//                return o1[1]-o2[1];</span></span><br><span class="line"><span class="comment">//            &#125;</span></span><br><span class="line"><span class="comment">//        &#125;);</span></span><br><span class="line">        Arrays.sort(nums2,((o1, o2) -&gt; o1[<span class="number">1</span>]-o2[<span class="number">1</span>]));</span><br><span class="line"></span><br><span class="line">        <span class="comment">//二维数组，按第二列升序</span></span><br><span class="line">        <span class="comment">//输出：</span></span><br><span class="line">        <span class="comment">//[7,0]</span></span><br><span class="line">        <span class="comment">//[4,1]</span></span><br><span class="line">        <span class="comment">//[5,2]</span></span><br><span class="line">        <span class="comment">//[6,3]</span></span><br><span class="line">        <span class="comment">//[8,6]</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span>[] n:nums2)&#123;</span><br><span class="line">            System.<span class="keyword">out</span>.println(Arrays.toString(n));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>写这个是因为，对compare方法的参数顺序有点懵。所以写下来，理一理。</p>
-<p>o1与o2只是参数名称。</p>
-<p><strong>（o1,o2）-&gt; o1-o2 ，这种形式，代表升序。</strong></p>
-<p>o1代表当前元素，o2是前一个元素。返回o1-o2，默认为正值，表示o1大于o2，即当前元素大于前一个元素。是对数组进行升序排列。</p>
-<p>测试过程中，发现对int[ ] 类型的一维数组，不能使用传入自定义的比较器来进行降序排列。</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="built_in">int</span>[] nums = new <span class="built_in">int</span>[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line">Arrays.sort(nums, (o1, o2) -&gt; o2-o1);</span><br></pre></td></tr></table></figure>
-
-<p>上述的写法会报错（可检查）。<code>操作符-不能被应用到T</code>，即说明自定义比较器中<strong>两个用于比较的元素必须是对象，或者说是引用类型。</strong></p>
-<p>改为如下写法，则编译运行正常。</p>
-<figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line"><span class="type">Integer</span>[] nums = <span class="built_in">new</span> <span class="type">Integer</span>[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line"> </span><br><span class="line">Arrays.sort(nums, <span class="built_in">new</span> Comparator&lt;<span class="type">Integer</span>&gt;()&#123;</span><br><span class="line">    @Override</span><br><span class="line">    <span class="built_in">public</span> <span class="type">int</span> compare(<span class="type">Integer</span> o1, <span class="type">Integer</span> o2) &#123;</span><br><span class="line">        <span class="keyword">return</span> o1-o2;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>java</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-        <tag>排序</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>docker通过nginx镜像部署静态文件</title>
     <url>/2020/09/18/docker%E9%80%9A%E8%BF%87nginx%E9%95%9C%E5%83%8F%E9%83%A8%E7%BD%B2%E9%9D%99%E6%80%81%E6%96%87%E4%BB%B6/</url>
     <content><![CDATA[<p>docker通过nginx镜像部署项目的实质，就是<strong>将（项目）静态文件和及其依赖（nginx）制作成镜像(image)，然后通过镜像生成容器</strong>的过程。这样，通过运行容器就能运行服务，而且image可以方便分享。</p>
@@ -317,9 +301,23 @@
         <category>docker</category>
       </categories>
       <tags>
-        <tag>docker</tag>
         <tag>教程</tag>
+        <tag>docker</tag>
         <tag>nginx</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>docker常用指令</title>
+    <url>/2020/09/18/docker%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/</url>
+    <content><![CDATA[<figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 进入容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//（run方式）运行容器时在使用 -d 参数时，容器启动后会进入后台</span></span><br><span class="line"><span class="comment">// -it参数：命令提示符效果（i：交互式 t：伪终端）</span></span><br><span class="line"><span class="comment">// /bin/bash 参数表明进入容器后执行的cmd命令（使用shell指令）</span></span><br><span class="line"></span><br><span class="line">docker exec -it 容器id /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment">//退出当前容器（exec进入，exit退出时不停止容器；attach进入，停止）</span></span><br><span class="line"></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta"># 拉取镜像（从docker hub镜像仓库）</span></span><br><span class="line">docker pull nginx(镜像名称)</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看镜像 </span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta"># 创建镜像（提前写好Dockerfile） </span></span><br><span class="line"><span class="comment">// -t 指定构建的镜像名称（target）</span></span><br><span class="line">docker image build -t diyimage:<span class="number">0.0</span><span class="number">.1</span> .</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除镜像 </span></span><br><span class="line"><span class="comment">// -f参数：force</span></span><br><span class="line">docker image rm 镜像id</span><br><span class="line">docker rmi [-f] 镜像id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 通过镜像生成容器 </span></span><br><span class="line">docker container run -p <span class="number">8000</span>:<span class="number">3000</span> -itd --name 容器名称 image01:<span class="number">0.0</span><span class="number">.1</span> /bin/bash</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">注：</span></span><br><span class="line"><span class="comment">每次run都会新增容器</span></span><br><span class="line"><span class="comment">-p参数：容器的 3000 端口映射到本机的 8000 端口。</span></span><br><span class="line"><span class="comment">-it参数：容器的 Shell 映射到当前的 Shell，然后你在本机窗口输入的命令，就会传入容器。</span></span><br><span class="line"><span class="comment">-d参数：容器生成后，后台运行</span></span><br><span class="line"><span class="comment">--name参数：指定容器的名称（不指定系统随机命名）</span></span><br><span class="line"><span class="comment">image01:0.0.1：image 文件的名字（如果有标签，还需要提供标签，默认是 latest 标签）</span></span><br><span class="line"><span class="comment">/bin/bash：容器启动以后，内部第一个执行的命令。这里是启动 Bash，保证用户可以使用 Shell。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">又注：如果镜像是基于nginx的，则不要写/bin/bash，否则映射出去的端口失效(无法访问)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 停止/启动容器 </span></span><br><span class="line">docker container kill/stop/start [containID]</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除容器 </span></span><br><span class="line">docker container rm 容器id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看容器 </span></span><br><span class="line">docker container ls</span><br><span class="line">docker container ls -all</span><br><span class="line"></span><br><span class="line">docker ps</span><br><span class="line">docker ps -a</span><br><span class="line"></span><br><span class="line"><span class="meta"># 保存镜像（eg：viewer-镜像名） </span></span><br><span class="line"></span><br><span class="line">docker save viewers-images  -o  /home/ldj/viewers-image.tar</span><br><span class="line"></span><br><span class="line"><span class="meta"># 载入本地镜像 </span></span><br><span class="line"></span><br><span class="line">docker load -i viewers-image.tar</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>docker</category>
+      </categories>
+      <tags>
+        <tag>docker</tag>
+        <tag>命令</tag>
       </tags>
   </entry>
   <entry>
@@ -378,81 +376,6 @@
       </tags>
   </entry>
   <entry>
-    <title>博客伊始</title>
-    <url>/2019/09/20/%E5%8D%9A%E5%AE%A2%E4%BC%8A%E5%A7%8B/</url>
-    <content><![CDATA[<h2 id="博客伊始"><a href="#博客伊始" class="headerlink" title="博客伊始"></a>博客伊始</h2><p align="right"><font color="grey">作者：冬结</font></p>
-
-<blockquote>
-<p>写在前面：<br>偶然看到Hexo模板的博客，观感不错，加上前辈也搭过，就试试以这种相对简单的形式搭建起来玩。一方面简单学习以现有框架搭建专属博客的“技术”，另一方面也能有个容器装一点自己的笔记，尽管可能比较少，可能并不安全，聊胜于无。</p>
-</blockquote>
-<h3 id="兴趣"><a href="#兴趣" class="headerlink" title="兴趣"></a>兴趣</h3><p>我的兴趣，很难讲。佛系（可能）心态的人在平静生活中貌似对所有的事不放心上，所以，电影可以不看、单车可以不骑、乒乓球可以不打、书可以不阅读、随笔可以不写、游戏可以不玩。自我认知是一个漫长的过程，从浪漫理想主义到实用现实主义，说到底也划不清界限。妥协的做法是就此作罢，不去深究，也就能将困惑搁置一旁。况且说辞也是一大把，比如复杂的个体就能说服我自己。一贯的自我否定，也可以说深究一法至少能够审视自我更加全面深刻，更加接近真实。否定之否定，打住！</p>
-<p>接着说兴趣。从某种维度上讲，兴趣带来愉悦、专注与充实感。</p>
-<p>这样说来，好的电影是我的兴趣，带给我专注与思考。看过的电影也不少，影评却没尝试过一篇。电影没有带给我充实感，但我并不认为它在浪费时间。娱乐的底质，依旧能够容纳艺术与生活。尽管总能从这种媒介中看到不真实，生活的经验依然鲜活。现在的我能以相对包容的眼光对待现实的种种“怪象”，大抵与之有所关联。</p>
-<p>骑单车溜达也算得上。单车是真的单车，单人单骑，随便找个目标，也就慢慢悠悠的去。骑行就不能描述我的方式了，老老实实地去骑单车溜达。某次，什么背景的现在全无记忆，只是感到沉闷的低落，简直到不能忍受的地步，然后就溜达着去后海那边。也许逛胡同，也许没有。至于能否缓解我的状态，我也记不得。只是到那种状态，我能想到这种方式去排解，多少也算是一种认同吧。</p>
-<p>至于随笔（恰当称谓？），也能算是我的兴趣。偶尔写写东西，偶尔是真的偶偶尔。我从写文字当中获取的安静、专注、充实感显而易见，而文字大多都是当时的情绪与想法，可能脱胎于日记，但也将一些真实到黑暗的思考隐藏起来，多少能见光。不知道将自我产出的文字视若珍宝算不算病态，但我的确珍视，在我眼里这些文字能真切表示一种状态，这一刻我就是美化的真实的。至于这种方式何以占据重要的位置，大概因为内心戏丰富如我，不善表达情绪，多少是关掉大门开几扇窗。</p>
-<p>其他能说的，读书、乒乓和游戏，目前的程度都还比较浅。曾经都热过一阵的行为，慢慢沉寂下来也沾上了尘土。所谓的我的兴趣，没得一项算是个人特长。骑车只是休闲，电影只是娱乐，随笔也只是偶尔的文艺，但是至少这些，能够成为生活的调剂，是能够令我感到舒适的生活方式。</p>
-<h3 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h3><p>整理些技术向的学习内容，也多少要往这博客里边搁，况且，这本就是搭建这玩意的初衷。尽管不太喜欢用“工作”一词，但还是必须得慢慢习惯的。</p>
-<p>求学时期拥有很好的学习环境，这段时间也就余下几年，两者都不得不承认。实验室的一些开发工作，还有自己看过的、学过的、实践过的一些内容，选择性的往这个博客里边搁。尽量减少一些空洞的文字（多一些图），减少随处可见的教程，多一点自己的总结，就是描述不规范，甚至有错误也无关紧要。他人的是他人的，转化为自己的才是自己的。尽管这些话可有可无，也就这样摆在这里了。</p>
-<p>至于具体的工作内容，也没法细说。只是一段时间过去，觉得稍微闲下来时，慢悠悠写一点总结，多少能够察觉出自己在缓慢的生长，就很开心了。至于成长的快与慢，也不多去琢磨。吃饭慢，跑步慢，性子慢……真要快节奏起来，真就为难我“胖虎”了！</p>
-<h3 id="成长"><a href="#成长" class="headerlink" title="成长"></a>成长</h3><p>现在过多的想法与计划一如既往地空白，只是希望每天有点进步，慢慢生长吧。</p>
-<p>趁现在还有点记忆，罗列下自初中以来每个阶段自我希求的关键词。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">改变 ：白墙上丑陋的浓墨毛笔字，墨迹未干尚不回望，小屋也拆了，斑驳的往事不能再找回。</span><br><span class="line">掌控 ：年少时总希望能够决定自己的命运，可是连早睡早起也没有做到。</span><br><span class="line">自由 ：那四年时光，持续性潇洒，间歇性焦虑。觉睡得很饱，书读得也少。向自己一样平平淡淡。</span><br><span class="line">成长 ：有的人每天跑步，有的人会慢慢散步。蜗牛和火箭，都在自以为的前进。</span><br></pre></td></tr></table></figure>
-
-<h3 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h3><p>今天是2019年9月20日，算是一个开始吧！</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/xingkong.jpeg" alt="星空"></p>
-]]></content>
-      <categories>
-        <category>随笔</category>
-      </categories>
-      <tags>
-        <tag>随笔</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>数据库的锁</title>
-    <url>/2020/11/12/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E9%94%81/</url>
-    <content><![CDATA[<h1 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h1><p>锁是网络数据库中的一个非常重要的概念，当多个用户同时对数据库并发操作时，会带来数据不一致的问题，所以，锁主要用于多用户环境下保证数据库完整性和一致性。</p>
-<p>在数据库中加锁时，除了<strong>可以对不同的资源加锁，还可以使用不同程度的加锁方式</strong>，即锁有多种模式。</p>
-<h1 id="2-乐观锁与悲观锁"><a href="#2-乐观锁与悲观锁" class="headerlink" title="2. 乐观锁与悲观锁"></a>2. 乐观锁与悲观锁</h1><p>从程序员的角度看，分为乐观锁和悲观锁。</p>
-<p><strong>悲观锁</strong>（Pessimistic Lock），顾名思义，就是很悲观，每次去拿数据的时候都认为别人会修改，所以，每次在拿数据的时候都会上锁，这样别人想拿这个数据就会block（阻塞），直到它拿到锁。传统的关系型数据库里边就用到了很多这种锁机制，比如行锁、表锁、读锁和写锁等，都是在做操作之前先上锁。</p>
-<p><strong>乐观锁</strong>（Optimistic Lock），顾名思义，就是很乐观，每次去拿数据的时候都认为别人不会修改，所以，不会上锁，但是在更新的时候会判断一下在此期间别人有没有去更新这个数据，可以使用<strong>版本号、时间戳</strong>等机制。乐观锁适用于多读的应用类型，这样可以提高吞吐量，如果数据库提供类似于write_condition机制，其实都是提供的乐观锁。</p>
-<blockquote>
-<p>链接：<a href="https://www.nowcoder.com/questionTerminal/97c7972a55f6459a900a664ee687536f" target="_blank" rel="noopener">https://www.nowcoder.com/questionTerminal/97c7972a55f6459a900a664ee687536f</a>    来源：牛客网</p>
-</blockquote>
-<h1 id="3-具体的锁"><a href="#3-具体的锁" class="headerlink" title="3. 具体的锁"></a>3. 具体的锁</h1><p>表级锁：共享、排他、意向锁</p>
-<p>行级锁：共享、排他、更新锁</p>
-<h2 id="3-1-共享锁"><a href="#3-1-共享锁" class="headerlink" title="3.1 共享锁"></a>3.1 共享锁</h2><p><strong>共享锁也称为S（Share Lock）锁，用于所有的只读数据操作。</strong></p>
-<p>共享锁是非独占的，允许多个并发事务读取其锁定的资源。</p>
-<p>它具有以下性质：<strong>多个事务可封锁一个共享页；任何事务都不能修改该页；通常是该页被读取完毕，S锁立即被释放。</strong></p>
-<p>在SQL Server中，默认情况下，数据被读取后，立即释放共享锁。例如，执行查询语句“SELECT * FROM my_table”时，首先锁定第一页，读取之后，释放对第一页的锁定，然后锁定第二页。这样，就允许在读操作过程中，修改未被锁定的第一页。</p>
-<p>但是，事务隔离级别连接选项设置和SELECT语句中的锁定设置都可以改变SQL Server的这种默认设置。<br>例如，语句“SELECT * FROM my_table HOLDLOCK”就要求在整个查询过程中，保持对表的锁定，直到查询完成才释放锁定。</p>
-<h2 id="3-2-排他锁"><a href="#3-2-排他锁" class="headerlink" title="3.2 排他锁"></a>3.2 排他锁</h2><p><strong>排他锁（Exclusive Lock，也叫X锁）也叫写锁（X）。表示对数据进行写操作。如果一个事务对对象加了排他锁，其他事务就不能再给它加任何锁了。</strong></p>
-<p>排他锁具有以下几点性质：仅允许一个事务封锁此页；其他任何事务必须等到X锁被释放才能对该页进行访问；X锁一直到事务结束才能被释放。</p>
-<p>产生排他锁的SQL语句如下所示：select * from ad_plan for update;</p>
-<h2 id="3-3-更新锁"><a href="#3-3-更新锁" class="headerlink" title="3.3 更新锁"></a>3.3 更新锁</h2><p><strong>更新锁（也叫U锁）在修改操作的初始化阶段用来锁定可能要被修改的资源，这样可以避免使用共享锁造成的死锁现象。</strong></p>
-<p>因为，当使用共享锁时，修改数据的操作分为两步，首先获得一个共享锁，读取数据，然后将共享锁升级为排他锁，然后再执行修改操作。这样，如果有两个或多个事务同时对一个事务申请了共享锁，在修改数据的时候，这些事务都要将共享锁升级为排他锁。这时，这些事务都不会释放共享锁而是一直等待对方释放，这样就造成了死锁。</p>
-<p>如果一个数据在修改前直接申请更新锁，在数据修改的时候再升级为排他锁，就可以避免死锁。</p>
-<p><strong>更新锁</strong>具有以下性质：<strong>用来预定要对此页施加X锁，它允许其他事务读，但不允许再施加U锁或X锁；当被读取的页将要被更新时，则升级为X锁；U锁一直到事务结束时才能被释放。</strong></p>
-<h2 id="3-4-意向锁"><a href="#3-4-意向锁" class="headerlink" title="3.4 意向锁"></a>3.4 意向锁</h2><p><strong>申请意向锁的动作是数据库完成的，就是说，事务A申请一行的行锁的时候，数据库会自动先开始申请表的意向锁，不需要我们程序员使用代码来申请。</strong></p>
-<p>意向锁说明SQL Server有在资源的低层获得共享锁或独占锁的意向。</p>
-<p>例如，表级的共享意向锁说明事务意图将独占锁释放到表中的页或者行。</p>
-<p>意向锁又可以分为共享意向锁、 独占意向锁和共享式独占意向锁。</p>
-<p>共享意向锁说明事务意图在共享意向锁所锁定的低层资源上放置共享锁来读取数据。</p>
-<p>独占意向锁说明事务意图在共享意向锁所锁定 的低层资源上放置独占锁来修改数据。</p>
-<p>共享式独占锁说明事务允许其他事务使用共享锁来读取顶层资源，并意图在该资源低层上放置独占锁。 </p>
-<blockquote>
-<p>参考来源：<a href="https://blog.csdn.net/C_J33/article/details/79487941" target="_blank" rel="noopener">数据库的锁机制及原理</a></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
-        <tag>锁</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>二叉树的遍历</title>
     <url>/2020/10/30/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E9%81%8D%E5%8E%86/</url>
     <content><![CDATA[<p>二叉树的遍历主要分为<strong>深度优先遍历</strong>(dfs)和<strong>广度优先遍历</strong>(bfs)。</p>
@@ -502,6 +425,35 @@
       </tags>
   </entry>
   <entry>
+    <title>使用Comparator比较器</title>
+    <url>/2020/11/10/%E4%BD%BF%E7%94%A8Comparator%E6%AF%94%E8%BE%83%E5%99%A8/</url>
+    <content><![CDATA[<p>数组的排序方式有很多。</p>
+<p>排序，必须选择一个排序标准，可以按照元素的值（整型数组），或者元素的某个属性值（元素为对象时）。</p>
+<p><strong>Arrays工具类，位于java.util包，提供了sort方法。支持自定义比较器，实现升序、降序排列等。</strong></p>
+<p>多维数组，可以看作元素是数组的集合。同样的思想，按照元素的某一个属性，比如元素的某一列值（二维数组）排序。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.Comparator;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="symbol">ComparatorOrder</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> static <span class="built_in">void</span> main(String[] args) &#123;</span><br><span class="line">        Integer[] nums = new Integer[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line">        Arrays.sort(nums, (o1, o2) -&gt; o2-o1);</span><br><span class="line">        <span class="comment">//降序，输出：[6,4,3,2,2,1]</span></span><br><span class="line">        System.<span class="keyword">out</span>.println(Arrays.toString(nums));</span><br><span class="line"></span><br><span class="line">        <span class="built_in">int</span>[][] nums2=new <span class="built_in">int</span>[][]&#123;&#123;<span class="number">7</span>,<span class="number">0</span>&#125;,&#123;<span class="number">4</span>,<span class="number">1</span>&#125;,&#123;<span class="number">5</span>,<span class="number">2</span>&#125;,&#123;<span class="number">6</span>,<span class="number">3</span>&#125;,&#123;<span class="number">8</span>,<span class="number">6</span>&#125;&#125;;</span><br><span class="line"><span class="comment">//        Arrays.sort(nums2, new Comparator&lt;int[]&gt;() &#123;</span></span><br><span class="line"><span class="comment">//            @Override</span></span><br><span class="line"><span class="comment">//            public int compare(int[] o1, int[] o2) &#123;</span></span><br><span class="line"><span class="comment">//                return o1[1]-o2[1];</span></span><br><span class="line"><span class="comment">//            &#125;</span></span><br><span class="line"><span class="comment">//        &#125;);</span></span><br><span class="line">        Arrays.sort(nums2,((o1, o2) -&gt; o1[<span class="number">1</span>]-o2[<span class="number">1</span>]));</span><br><span class="line"></span><br><span class="line">        <span class="comment">//二维数组，按第二列升序</span></span><br><span class="line">        <span class="comment">//输出：</span></span><br><span class="line">        <span class="comment">//[7,0]</span></span><br><span class="line">        <span class="comment">//[4,1]</span></span><br><span class="line">        <span class="comment">//[5,2]</span></span><br><span class="line">        <span class="comment">//[6,3]</span></span><br><span class="line">        <span class="comment">//[8,6]</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">int</span>[] n:nums2)&#123;</span><br><span class="line">            System.<span class="keyword">out</span>.println(Arrays.toString(n));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>写这个是因为，对compare方法的参数顺序有点懵。所以写下来，理一理。</p>
+<p>o1与o2只是参数名称。</p>
+<p><strong>（o1,o2）-&gt; o1-o2 ，这种形式，代表升序。</strong></p>
+<p>o1代表当前元素，o2是前一个元素。返回o1-o2，默认为正值，表示o1大于o2，即当前元素大于前一个元素。是对数组进行升序排列。</p>
+<p>测试过程中，发现对int[ ] 类型的一维数组，不能使用传入自定义的比较器来进行降序排列。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="built_in">int</span>[] nums = new <span class="built_in">int</span>[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line">Arrays.sort(nums, (o1, o2) -&gt; o2-o1);</span><br></pre></td></tr></table></figure>
+
+<p>上述的写法会报错（可检查）。<code>操作符-不能被应用到T</code>，即说明自定义比较器中<strong>两个用于比较的元素必须是对象，或者说是引用类型。</strong></p>
+<p>改为如下写法，则编译运行正常。</p>
+<figure class="highlight pgsql"><table><tr><td class="code"><pre><span class="line"><span class="type">Integer</span>[] nums = <span class="built_in">new</span> <span class="type">Integer</span>[]&#123;<span class="number">2</span>, <span class="number">1</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">6</span>, <span class="number">2</span>&#125;;</span><br><span class="line"> </span><br><span class="line">Arrays.sort(nums, <span class="built_in">new</span> Comparator&lt;<span class="type">Integer</span>&gt;()&#123;</span><br><span class="line">    @Override</span><br><span class="line">    <span class="built_in">public</span> <span class="type">int</span> compare(<span class="type">Integer</span> o1, <span class="type">Integer</span> o2) &#123;</span><br><span class="line">        <span class="keyword">return</span> o1-o2;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>排序</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>对象的序列化：Serializable接口</title>
     <url>/2020/10/12/%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9ASerializable%E6%8E%A5%E5%8F%A3/</url>
     <content><![CDATA[<p>一般而言，定义实体类时会实现 <code>Serializable</code>接口，同时还要显示指定<code>serialVersionUID</code>的值。</p>
@@ -533,6 +485,170 @@
       <tags>
         <tag>java</tag>
         <tag>Serializable接口</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>博客伊始</title>
+    <url>/2019/09/20/%E5%8D%9A%E5%AE%A2%E4%BC%8A%E5%A7%8B/</url>
+    <content><![CDATA[<h2 id="博客伊始"><a href="#博客伊始" class="headerlink" title="博客伊始"></a>博客伊始</h2><p align="right"><font color="grey">作者：冬结</font></p>
+
+<blockquote>
+<p>写在前面：<br>偶然看到Hexo模板的博客，观感不错，加上前辈也搭过，就试试以这种相对简单的形式搭建起来玩。一方面简单学习以现有框架搭建专属博客的“技术”，另一方面也能有个容器装一点自己的笔记，尽管可能比较少，可能并不安全，聊胜于无。</p>
+</blockquote>
+<h3 id="兴趣"><a href="#兴趣" class="headerlink" title="兴趣"></a>兴趣</h3><p>我的兴趣，很难讲。佛系（可能）心态的人在平静生活中貌似对所有的事不放心上，所以，电影可以不看、单车可以不骑、乒乓球可以不打、书可以不阅读、随笔可以不写、游戏可以不玩。自我认知是一个漫长的过程，从浪漫理想主义到实用现实主义，说到底也划不清界限。妥协的做法是就此作罢，不去深究，也就能将困惑搁置一旁。况且说辞也是一大把，比如复杂的个体就能说服我自己。一贯的自我否定，也可以说深究一法至少能够审视自我更加全面深刻，更加接近真实。否定之否定，打住！</p>
+<p>接着说兴趣。从某种维度上讲，兴趣带来愉悦、专注与充实感。</p>
+<p>这样说来，好的电影是我的兴趣，带给我专注与思考。看过的电影也不少，影评却没尝试过一篇。电影没有带给我充实感，但我并不认为它在浪费时间。娱乐的底质，依旧能够容纳艺术与生活。尽管总能从这种媒介中看到不真实，生活的经验依然鲜活。现在的我能以相对包容的眼光对待现实的种种“怪象”，大抵与之有所关联。</p>
+<p>骑单车溜达也算得上。单车是真的单车，单人单骑，随便找个目标，也就慢慢悠悠的去。骑行就不能描述我的方式了，老老实实地去骑单车溜达。某次，什么背景的现在全无记忆，只是感到沉闷的低落，简直到不能忍受的地步，然后就溜达着去后海那边。也许逛胡同，也许没有。至于能否缓解我的状态，我也记不得。只是到那种状态，我能想到这种方式去排解，多少也算是一种认同吧。</p>
+<p>至于随笔（恰当称谓？），也能算是我的兴趣。偶尔写写东西，偶尔是真的偶偶尔。我从写文字当中获取的安静、专注、充实感显而易见，而文字大多都是当时的情绪与想法，可能脱胎于日记，但也将一些真实到黑暗的思考隐藏起来，多少能见光。不知道将自我产出的文字视若珍宝算不算病态，但我的确珍视，在我眼里这些文字能真切表示一种状态，这一刻我就是美化的真实的。至于这种方式何以占据重要的位置，大概因为内心戏丰富如我，不善表达情绪，多少是关掉大门开几扇窗。</p>
+<p>其他能说的，读书、乒乓和游戏，目前的程度都还比较浅。曾经都热过一阵的行为，慢慢沉寂下来也沾上了尘土。所谓的我的兴趣，没得一项算是个人特长。骑车只是休闲，电影只是娱乐，随笔也只是偶尔的文艺，但是至少这些，能够成为生活的调剂，是能够令我感到舒适的生活方式。</p>
+<h3 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h3><p>整理些技术向的学习内容，也多少要往这博客里边搁，况且，这本就是搭建这玩意的初衷。尽管不太喜欢用“工作”一词，但还是必须得慢慢习惯的。</p>
+<p>求学时期拥有很好的学习环境，这段时间也就余下几年，两者都不得不承认。实验室的一些开发工作，还有自己看过的、学过的、实践过的一些内容，选择性的往这个博客里边搁。尽量减少一些空洞的文字（多一些图），减少随处可见的教程，多一点自己的总结，就是描述不规范，甚至有错误也无关紧要。他人的是他人的，转化为自己的才是自己的。尽管这些话可有可无，也就这样摆在这里了。</p>
+<p>至于具体的工作内容，也没法细说。只是一段时间过去，觉得稍微闲下来时，慢悠悠写一点总结，多少能够察觉出自己在缓慢的生长，就很开心了。至于成长的快与慢，也不多去琢磨。吃饭慢，跑步慢，性子慢……真要快节奏起来，真就为难我“胖虎”了！</p>
+<h3 id="成长"><a href="#成长" class="headerlink" title="成长"></a>成长</h3><p>现在过多的想法与计划一如既往地空白，只是希望每天有点进步，慢慢生长吧。</p>
+<p>趁现在还有点记忆，罗列下自初中以来每个阶段自我希求的关键词。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">改变 ：白墙上丑陋的浓墨毛笔字，墨迹未干尚不回望，小屋也拆了，斑驳的往事不能再找回。</span><br><span class="line">掌控 ：年少时总希望能够决定自己的命运，可是连早睡早起也没有做到。</span><br><span class="line">自由 ：那四年时光，持续性潇洒，间歇性焦虑。觉睡得很饱，书读得也少。向自己一样平平淡淡。</span><br><span class="line">成长 ：有的人每天跑步，有的人会慢慢散步。蜗牛和火箭，都在自以为的前进。</span><br></pre></td></tr></table></figure>
+
+<h3 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h3><p>今天是2019年9月20日，算是一个开始吧！</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/xingkong.jpeg" alt="星空"></p>
+]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>随笔</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>浅谈图像</title>
+    <url>/2020/06/01/%E6%B5%85%E8%B0%88%E5%9B%BE%E5%83%8F/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>一切要从图像分辨率说起。前不久问过自己一个问题：<strong>小米6只有1920x1080的分辨率为什么能拍出4032x3016px的照片？</strong></p>
+<p>不知当时脑袋想什么，问出这样一个特别蠢的问题。但它居然就这样作为一个导火索，让我不得不去了解一下关于图像的基本知识。</p>
+<p>这里需要说明的是，这个问题本身就是个问题。小米6的分辨率1920x1080是说的屏幕分辨率，而4032x3016px的照片是相机拍出来的图像分辨率，也就是米6后置的1200万像素摄像头拍出来的。一个是屏幕显示分辨率，另一个是拍照图像分辨率，就没得啥关联的。</p>
+<p>然后又因为接触<code>React Native</code>，知道其组件的宽高用的是逻辑像素作为单位。之前买的kindle参数里其中一项是PPI，笔记本外设显示器4K屏……</p>
+<p>于是就简单整理一下图像基础知识及相关概念，权作了解。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0001.jpg" alt="图像啊图像"></p>
+<h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><p>位图和矢量图是计算机图形中的两大概念。</p>
+<h2 id="位图"><a href="#位图" class="headerlink" title="位图"></a>位图</h2><p><strong>位图</strong>（bitmap）也叫点阵图、栅格图像、<strong>像素图</strong>。<strong>构成位图的最小单位是像素</strong>，位图就是依靠像素阵列的排列来实现其显示效果的，缩放位图会导致失真（边缘锯齿）。例如放大后的位图出现“马赛克”。</p>
+<p><strong>位图图像善于重现颜色的细微层次</strong>，能够制作出色彩和亮度变化丰富的图像，可逼真地再现这个世界，文件庞大，<strong>不能随意缩放，打印和输出的精度是有限的。</strong></p>
+<p><strong>位图的文件类型</strong>很多，如.bmp、.pcx、.gif、.jpg、.tif等。同样的图形，存盘成以上几种文件时文件的字节数会有一些差别，尤其是jpg格式，它的大小只有同样的bmp格式的1/20到1/35，这是因为它们的点矩阵经过了复杂的压缩算法的缘故。</p>
+<p><strong>位图图像面积越大，图像文件的色彩越丰富，文件的字节数就越多。</strong></p>
+<h2 id="矢量图"><a href="#矢量图" class="headerlink" title="矢量图"></a>矢量图</h2><p><strong>矢量图</strong>（vector）也叫向量图，是一种<strong>缩放不失真</strong>的图像格式。矢量图是通过多个对象的组合生成的，对其中的每一个对象的纪录方式，都是以数学函数来实现的，也就是说，矢量图实际上并不是像位图那样纪录画面上每一点的信息，而是纪录了元素形状及颜色的算法，当你打开矢量图的时候，软件利用图行对应的函数进行运算，将运算结果[图形的形状和颜色]显示给你看。</p>
+<p>矢量图形能<strong>重现清晰的轮廓</strong>，线条非常光滑、且<strong>具有良好的缩放性</strong>。因为图像中保存的是线条和图块的信息，与分辨率和图形大小无关，只与图像的复杂程度有关，所以图像文件所占的存储空间较小（图像不复杂情况下）。</p>
+<p>与位图相比，在显示和打印方面都快的多；<strong>图形不真实生动，颜色不丰富</strong>。无法像照片一样真实地再现这个世界的景色。（矢量图基本都需要专门软件打开）</p>
+<p><strong>矢量图形格式</strong>也很多，常见的如.SVG。</p>
+<p>矢量图形文件的规律：</p>
+<ul>
+<li>可以无限放大图形中的细节，不用担心会造成失真和色块。</li>
+<li>一般的线条的图形和卡通图形，存成矢量图文件就比存成位图文件要小很多。</li>
+<li>存盘后<strong>文件的大小</strong>与图形中<strong>元素的个数</strong>和每个<strong>元素的复杂程度</strong>成正比。而与图形面积和色彩的丰富程度无关。（元素的复杂程度指的是这个元素的结构复杂度，如五角星就比矩形复杂、一个任意曲线就比一个直线段复杂）。</li>
+<li>通过软件，<strong>矢量图可以轻松地转化为位图，而位图转化为矢量图就需要经过复杂而庞大的数据处理</strong>，而且生成的矢量图的质量绝对不能和原来的图形比拟。</li>
+</ul>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0002.jpg" alt="图像啊图像"></p>
+<h2 id="一些单位"><a href="#一些单位" class="headerlink" title="一些单位"></a>一些单位</h2><p>绝对单位与相对单位。比如设备尺寸5.15 inch就是绝对的物理长度，像素（pixel）就是相对单位，1英寸显示屏可以只有1个像素，也可以有100个像素。<strong>相同面积不同分辨率的显示屏，其像素点大小就不相同。</strong></p>
+<p><strong>px</strong>：<code>pixel</code>，像素，是<strong>组成数字图像的基本单元</strong>。这种基本单元越多，越能呈现出图像的细节，图像就越清晰。像素的大小是没有固定长度的，不同设备上一个单位像素色块的大小是不一样的。</p>
+<p><strong>ppi</strong> ：<code>pixels per inch</code>,等于屏幕对角线像素点／屏幕对角线物理宽度，是每英寸对角线上所拥有的像素（pixel）数目，通常也叫<strong>像素密度</strong>。手机屏幕的PPI当达到一定数值（300ppi）时，人眼就分辨不出颗粒感了。</p>
+<p><strong>dpi</strong>：<code>dots per inch</code>,是每英寸所能打印的点数，通常也叫<strong>打印精度</strong>。如：打印机输出可达600DPI的分辨率，表示打印机可以在每一平方英寸的面积中可以输出600X600＝360000个输出点。大多数情况下，PPI与DPI的数值是相等的。</p>
+<p><strong>dp</strong>：<code>density-independent pixels</code>,一种基于屏幕密度的抽象单位。在每英寸160点的显示器上，1dp = 1px。<a href="https://developer.android.com/guide/practices/screens_support.html" target="_blank" rel="noopener">dp的提出</a>是为了解决控件对不同屏幕的适配问题。</p>
+<p><strong>sp</strong>：<code>scale-independent pixel</code>，与缩放无关的抽象像素，安卓开发用的字体大小单位。一般情况下可认为sp=dp。</p>
+<p><strong>density</strong> ：密度。density ≈ 设备PPI/160PPI。比如我是320PPI设备，density＝320PPI/160PPI=2;density是一个int类型的值。</p>
+<p><strong>运算案例</strong></p>
+<p>小米6设备参数：显示屏尺寸5.15英寸（1 inch=2.54 cm），分辨率1920x1080px</p>
+<p>计算得：PPI=428 ，density≈3，1dp=2.67px≈3px。</p>
+<h2 id="分辨率"><a href="#分辨率" class="headerlink" title="分辨率"></a>分辨率</h2><p>分辨率，又称解析度。分辨率=画面水平方向的像素值x画面垂直方向的像素值，分为 <strong>屏幕分辨率</strong>和<strong>图像分辨率</strong>。</p>
+<p>显示分辨率（屏幕分辨率）是屏幕图像的精密度，是指<strong>显示器所能显示的像素有多少</strong>。由于屏幕上的点、线和面都是由像素组成的，显示器可显示的像素越多，画面就越精细，同样的屏幕区域内能显示的信息也越多。显示分辨率一定的情况下，显示屏越小图像越清晰，反之，显示屏大小固定时，显示分辨率越高图像越清晰。</p>
+<p>屏幕分辨率1920x1080（16:9显示屏），就是说设备屏幕的水平方向上有1920个像素点，垂直方向上有1080个像素点。<strong>同一台硬件设备上的屏幕分辨率、像素块大小是不会变的（倾向于说显示器分辨率）</strong>。PC电脑上之所以可以调整屏幕分辨率，其实是通过算法转换实现的。</p>
+<p><strong>图像分辨率是指每英寸图像内的像素点数</strong>（这种定义方式更精准）。图像分辨率是有单位的，叫 像素每英寸。分辨率越高，像素的点密度越高（图像尺寸一定时），图像越逼真。</p>
+<p>分辨率和清晰度不能对等，虽然<strong>很多情况下高分辨率的确意味着高清晰度</strong>。比如一张1920x1080尺寸的图片，放在1920x1080分辨率的PC屏幕上显示没问题（大小合适），但放在4K屏上就会发现图片变模糊（失真）了（因为4K屏幕大，图像放大失真）。又比如1920x1080和1280x720的图片作为手机壁纸，其实清晰度看起来差不多的。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0012.jpg" alt="图像啊图像"></p>
+<h1 id="图像深度与像素深度"><a href="#图像深度与像素深度" class="headerlink" title="图像深度与像素深度"></a>图像深度与像素深度</h1><p>像素深度和图像深度是两个相互关联但又有所不同的两个概念。</p>
+<h2 id="像素深度"><a href="#像素深度" class="headerlink" title="像素深度"></a>像素深度</h2><p><strong>像素深度</strong>是指<strong>存储每个像素所用的位数</strong>，它也是用来度量图像的分辨率。</p>
+<p><strong>像素深度决定彩色图像的每个像素可能有的颜色数，或者确定灰度图像的每个像素可能有的灰度级数</strong>。例如，一幅彩色图像的每个像素用R，G，B三个分量表示，若每个分量用8位，那么一个像素共用24位表示，就说像素的深度为24，每个像素可以是16 777 216（2的24次方）种颜色中的一种。在这个意义上，往往把像素深度说成是图像深度。表示一个像素的位数越多，它能表达的颜色数目就越多，而它的深度就越深。</p>
+<h2 id="图像深度"><a href="#图像深度" class="headerlink" title="图像深度"></a>图像深度</h2><p><strong>图像深度</strong>是指<strong>像素深度中实际用于存储图像的灰度或色彩所需要的比特位数</strong>。假定图像的像素深度为16bit，但用于表示图像的灰度或色彩的位数只有15位，则图像的图像深度为15。</p>
+<p>在用二进制数表示彩色图像的像素时，除R，G，B分量用固定位数表示外，往往还增加1位或几位作为属性(Attribute)位。例如，RGB 5∶5∶5表示一个像素时，用2个字节共16位表示，其中R，G，B各占5位，剩下一位作为属性位。在这种情况下，像素深度为16位，而图像深度为15位。</p>
+<h2 id="图像通道"><a href="#图像通道" class="headerlink" title="图像通道"></a>图像通道</h2><p>我们都知道颜色的三元素 Red, Green, Blue。 如果是深度为24=3*8，我们刚好就可以用第一个8位存储Red值，第二个存储Green值，第三个存储Blue值, 2的8次方刚好是255,所以我们一般看到的RGB值都是(0-255,0-255,0-255)这样的值。如果用rgb来表示图片的颜色值，我们称这样的图片通道为三。<br>每个像素点都有3个值表示 ，所以就是3通道；也有4通道的图（RGB+alpha），灰度图一般为单通道。</p>
+<h2 id="灰度图像"><a href="#灰度图像" class="headerlink" title="灰度图像"></a>灰度图像</h2><p><strong>灰度</strong>也可以认为是亮度，简单说就是<strong>色彩的深浅程度</strong>。</p>
+<p>灰度图像是二值图像的进化版本，是彩色图像的退化版，也就是灰度图保存的信息没有彩色图像多，但比二值图像多，灰度图只包含一个通道的信息，而彩色图通常包含三个通道的信息。</p>
+<p><strong>灰度数字图像是每个像素只有一个采样颜色的图像</strong>（灰度图没有色彩）。这类图像通常显示为从最暗黑色到最亮的白色的灰度，尽管理论上这个采样可以任何颜色的不同深浅，甚至可以是不同亮度上的不同颜色。灰度图像与黑白图像不同，在计算机图像领域中黑白图像只有黑白两种颜色，灰度图像在黑色与白色之间还有许多级的颜色深度。</p>
+<p><strong>彩色图像可以二值化和灰度化</strong>。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1021.jpeg" alt="图像啊图像"></p>
+<h1 id="图像格式"><a href="#图像格式" class="headerlink" title="图像格式"></a>图像格式</h1><p>BMP、PNG、GIF、TIF和JPG格式的文件是位图文件，文件的扩展明指明了图像文件的标准。SVG是矢量图文件格式。<font color="red">图片文件格式本质上是一种对图片进行压缩进而减少文件大小的解决方案。</font></p>
+<p>如果将图像原始格式直接存储到文件中将会非常大，比如一个5000x5000 24位图，所占文件大小为5000x5000x3字节=71.5MB, 其大小非常可观。<br>如果用zip或rar之类的通用算法来压缩像素数据，得到的压缩比例通常不会太高，因为这些压缩算法没有针对图像数据结构进行特殊处理。</p>
+<h2 id="jpeg"><a href="#jpeg" class="headerlink" title="jpeg"></a>jpeg</h2><p>全称<code>JointPhotographicExpertsGroup</code>，<br>JEPG格式，也叫做JPG或JPE格式，是最常用的一种文件格式。<strong>实际测试.jpeg后缀文件更改为.jpg后缀依旧可读</strong>。</p>
+<p>JPEG格式的压缩技术十分先进，<strong>能够将图像压缩在很小的储存空间</strong>，不过这种压缩是<strong>有损耗</strong>的，过度压缩会降低图片的质量。JPEG格式压缩的主要是高频信息，对色彩的信息保留较好，因此特别适合应用于互联网，可减少图像的传输和加载时间。</p>
+<p>jpeg没有透明信息。<strong>jpeg比较适合用来存储相机拍出来的照片，这类图像用jpeg压缩后的体积比较小</strong>。其使用的具体算法核心是离散余弦变换、Huffman编码、算术编码等技术。</p>
+<h2 id="png"><a href="#png" class="headerlink" title="png"></a>png</h2><p>全称<code>Portable Network Graphic Format</code>。<br>png 最重要的特点是<strong>支持alpha 通道透明度</strong>，也就是说，<strong>PNG图片支持透明背景</strong>。一般来说彩色图像是24位3通道图像，png格式的图像就是4通道的。</p>
+<p>png的设计目的是试图替代gif和tiff。png是一种支持无损压缩的图像格式（从LZ77派生的无损数据压缩算法），没有可调整的压缩质量设置（有损程度）。虽然PNG提供的压缩量比JPEG少，但PNG图片却比JPEG图片有更小的文档尺寸，因此现在越来越多的网络图像开始采用PNG格式。</p>
+<p><strong>jpeg比较适合存储色彩“杂乱”的拍摄图片，png比较适合存储几何特征强的图形类图片（颜色值少）</strong>。</p>
+<h2 id="gif"><a href="#gif" class="headerlink" title="gif"></a>gif</h2><p>全称<code>Graphics Interchange Format</code>。<br>GIF也是一种压缩的图片格式，分为动态GIF和静态GIF两种。</p>
+<p>GIF格式的最大特点是<strong>支持动态图片</strong>（多帧），并且支持透明背景。网络上绝大部分动图、表情包都是GIF格式的，相比与动画，GIF动态图片占用的存储空间小，加载速度快，因此非常流行。</p>
+<h2 id="psd"><a href="#psd" class="headerlink" title="psd"></a>psd</h2><p>全称<code>Photoshop Document</code>。<br>PSD格式是Photoshop默认的存储格式，<strong>适用于存储源文档和工作文件</strong>，修改起来比较方便。<br>PSD格式的最大特点是可以保留透明度、图层、路径、通道等PS处理信息，但是需要专业的图形处理软件才能打开。PSD格式的缺点是体积庞大，十分占用存储空间。</p>
+<h2 id="tiff"><a href="#tiff" class="headerlink" title="tiff"></a>tiff</h2><p>全称<code>Tagged Image File Format</code><br>，TIFF格式，也叫做或TIF格式，可以支持不同颜色模式、路径、透明度、以及通道，是打印文档中最常用的格式。Photoshop支持在TIFF文件中保存图层以及其他信息，在很多方面类似于PSD格式文件。</p>
+<h2 id="bmp"><a href="#bmp" class="headerlink" title="bmp"></a>bmp</h2><p>全称<code>Bitmap</code>。<br>BMP 格式是Windows操作系统中的标准图像文件格式，能够被多种Windows应用程序所支持。BMP格式包含的图像信息较丰富，<strong>几乎不进行压缩</strong>，但由此导致了它占用的存储空间很大，所以，目前BMP在单机上比较流行。</p>
+<h2 id="webp"><a href="#webp" class="headerlink" title="webp"></a>webp</h2><p>google开发的一种有损、透明图片格式，相当于jpeg和png的合体，google声称其可以把图片大小减少40%。但是当前支持差，压得慢。</p>
+<h2 id="svg"><a href="#svg" class="headerlink" title="svg"></a>svg</h2><p>全称<code>Scalable Vector Graphics</code>，意思为可缩放的矢量图形。它是<strong>基于XML</strong>（Extensible Markup Language），由World Wide Web Consortium（W3C）联盟进行开发的。严格来说应该是一种开放标准的矢量图形语言，可让你设计激动人心的、高分辨率的Web图形页面。用户可以直接用代码来描绘图像，可以用任何文字处理工具打开SVG图像，通过改变部分代码来使图像具有交互功能，并可以随时插入到HTML中通过浏览器来观看。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0003.jpg" alt="图像啊图像"></p>
+<h1 id="图像的附加信息"><a href="#图像的附加信息" class="headerlink" title="图像的附加信息"></a>图像的附加信息</h1><h2 id="Exif信息"><a href="#Exif信息" class="headerlink" title="Exif信息"></a>Exif信息</h2><p>Exif <code>Exchangeable image file format</code>可交换图像文件格式，是<strong>专门为数码相机的照片设定的，可以记录数码照片的属性信息和拍摄数据</strong>。如米6拍摄的照片，照片文件详情中附带有拍摄参数，便是exif信息。Exif可以附加于JPEG、TIFF、RIFF等文件之中，为其增加有关数码相机拍摄信息的内容和索引图或图像处理软件的版本信息。</p>
+<p>所有的JPEG文件以字符串“0xFFD8”开头，并以字符串“0xFFD9”结束。文件头中有一系列“0xFF??”格式的字符串，称为“标识”，用来标记JPEG文件的信息段。“0xFFD8”表示图像信息开始，“0xFFD9”表示图像信息结束，这两个标识后面没有信息，而其它标识紧跟一些信息字符。0xFFE0 – 0xFFEF之间的标识符称为“<strong>应用标记</strong>”，没有被常规JPEG文件利用，<strong>Exif正是利用这些信息串记录拍摄信息如快门速度、光圈值等，甚至可以包括全球定位信息。</strong></p>
+<h2 id="隐私数据思考"><a href="#隐私数据思考" class="headerlink" title="隐私数据思考"></a>隐私数据思考</h2><p><strong>手机所拍的照片，在查看详情时可能看到地理位置信息，即拍摄地的经纬度坐标信息</strong>。通过经纬度坐标，利用百度的拾取坐标系统进行坐标反查，能够精准定位相片的拍摄地址。这里便思考到隐私数据的问题，如果拍摄的相片都附加这些地址信息，那是不是存在隐私泄露的问题。</p>
+<p>于是我尝试将图片原图（包含地址信息）从手机QQ/微信传到电脑QQ/微信，图片另存为，查看图片详情（文件大小未变化），发现图像的拍摄参数及地址信息依旧能看到。进一步，我下载来自朋友圈和QQ动态的实拍图片（自己上传测试用的照片），并查看详细信息，拍摄参数以及地址信息均为空。</p>
+<p>那么照片的exif信息是被脱敏了吗？还是我们的exif信息在特定的传输过程被丢弃（蓝牙传输文件exif信息仍存在）？当我们的原图上传到qq空间或朋友圈后，图片的存储位置在腾讯的数据中心，腾讯里的我们的照片已经不包含地址信息了吗？还是图片进一步有损压缩（提高网络传输效率）直接丢弃附属信息？</p>
+<p>答案尚且确定不了。但知道一点，<strong>相机设置里可以关闭 保存地理位置信息 的选项</strong>。如此，原图没有位置信息，便不存在地址泄露的隐私问题了。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>大致整理一下，才发现枯燥的文字是真的多。收获就是大概知道web开发过程中为什么logo选择.svg或者.icon格式的矢量图，为什么一亿像素相机的相片用HEIF图片格式（米10高质量图片降低文件大小的解决方案），知道jpeg格式图片改动后保存会导致图片越来越小。</p>
+<p>更重要的是知道这样一种观点：<font color="red">无论哪一种图片格式规范，其本质都是为了图像传输的高效或者图像的高质量，两者不可得兼</font>。没得最完美的，适合你需求的就是最好的选择。</p>
+<h1 id="参考文献："><a href="#参考文献：" class="headerlink" title="参考文献："></a>参考文献：</h1><p><a href="https://www.coreldrawchina.com/xinshourumen/weitu-shiliangtu.html" target="_blank" rel="noopener">矢量图与位图的区别</a><br><a href="https://www.zhihu.com/question/21283005" target="_blank" rel="noopener">知乎：既然矢量图放大缩小都不失真，为什么还要使用位图？</a><br><a href="https://www.zhihu.com/question/20028452" target="_blank" rel="noopener">图片格式 jpg、png、gif各有什么优缺点？什么情况下用什么格式的图片呢？</a><br><a href="https://zhuanlan.zhihu.com/p/143649897" target="_blank" rel="noopener">几种常见图片格式的区别</a><br><a href="https://blog.csdn.net/jianzhengzhouzjz/article/details/7427432" target="_blank" rel="noopener">像素深度与图像深度</a><br><a href="https://blog.csdn.net/tz_zs/article/details/79768201" target="_blank" rel="noopener">二值图像、灰度图像、彩色图像</a><br><a href="https://juejin.im/post/5c8e4feb6fb9a070aa5ce200" target="_blank" rel="noopener">PNG图片压缩原理解析</a>  </p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0013.jpg" alt="图像啊图像"></p>
+]]></content>
+      <categories>
+        <category>常识</category>
+      </categories>
+      <tags>
+        <tag>概念</tag>
+        <tag>图像</tag>
+        <tag>常识</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>数据库的锁</title>
+    <url>/2020/11/12/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E9%94%81/</url>
+    <content><![CDATA[<h1 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h1><p>锁是网络数据库中的一个非常重要的概念，当多个用户同时对数据库并发操作时，会带来数据不一致的问题，所以，锁主要用于多用户环境下保证数据库完整性和一致性。</p>
+<p>在数据库中加锁时，除了<strong>可以对不同的资源加锁，还可以使用不同程度的加锁方式</strong>，即锁有多种模式。</p>
+<h1 id="2-乐观锁与悲观锁"><a href="#2-乐观锁与悲观锁" class="headerlink" title="2. 乐观锁与悲观锁"></a>2. 乐观锁与悲观锁</h1><p>从程序员的角度看，分为乐观锁和悲观锁。</p>
+<p><strong>悲观锁</strong>（Pessimistic Lock），顾名思义，就是很悲观，每次去拿数据的时候都认为别人会修改，所以，每次在拿数据的时候都会上锁，这样别人想拿这个数据就会block（阻塞），直到它拿到锁。传统的关系型数据库里边就用到了很多这种锁机制，比如行锁、表锁、读锁和写锁等，都是在做操作之前先上锁。</p>
+<p><strong>乐观锁</strong>（Optimistic Lock），顾名思义，就是很乐观，每次去拿数据的时候都认为别人不会修改，所以，不会上锁，但是在更新的时候会判断一下在此期间别人有没有去更新这个数据，可以使用<strong>版本号、时间戳</strong>等机制。乐观锁适用于多读的应用类型，这样可以提高吞吐量，如果数据库提供类似于write_condition机制，其实都是提供的乐观锁。</p>
+<blockquote>
+<p>链接：<a href="https://www.nowcoder.com/questionTerminal/97c7972a55f6459a900a664ee687536f" target="_blank" rel="noopener">https://www.nowcoder.com/questionTerminal/97c7972a55f6459a900a664ee687536f</a>    来源：牛客网</p>
+</blockquote>
+<h1 id="3-具体的锁"><a href="#3-具体的锁" class="headerlink" title="3. 具体的锁"></a>3. 具体的锁</h1><p>表级锁：共享、排他、意向锁</p>
+<p>行级锁：共享、排他、更新锁</p>
+<h2 id="3-1-共享锁"><a href="#3-1-共享锁" class="headerlink" title="3.1 共享锁"></a>3.1 共享锁</h2><p><strong>共享锁也称为S（Share Lock）锁，用于所有的只读数据操作。</strong></p>
+<p>共享锁是非独占的，允许多个并发事务读取其锁定的资源。</p>
+<p>它具有以下性质：<strong>多个事务可封锁一个共享页；任何事务都不能修改该页；通常是该页被读取完毕，S锁立即被释放。</strong></p>
+<p>在SQL Server中，默认情况下，数据被读取后，立即释放共享锁。例如，执行查询语句“SELECT * FROM my_table”时，首先锁定第一页，读取之后，释放对第一页的锁定，然后锁定第二页。这样，就允许在读操作过程中，修改未被锁定的第一页。</p>
+<p>但是，事务隔离级别连接选项设置和SELECT语句中的锁定设置都可以改变SQL Server的这种默认设置。<br>例如，语句“SELECT * FROM my_table HOLDLOCK”就要求在整个查询过程中，保持对表的锁定，直到查询完成才释放锁定。</p>
+<h2 id="3-2-排他锁"><a href="#3-2-排他锁" class="headerlink" title="3.2 排他锁"></a>3.2 排他锁</h2><p><strong>排他锁（Exclusive Lock，也叫X锁）也叫写锁（X）。表示对数据进行写操作。如果一个事务对对象加了排他锁，其他事务就不能再给它加任何锁了。</strong></p>
+<p>排他锁具有以下几点性质：仅允许一个事务封锁此页；其他任何事务必须等到X锁被释放才能对该页进行访问；X锁一直到事务结束才能被释放。</p>
+<p>产生排他锁的SQL语句如下所示：select * from ad_plan for update;</p>
+<h2 id="3-3-更新锁"><a href="#3-3-更新锁" class="headerlink" title="3.3 更新锁"></a>3.3 更新锁</h2><p><strong>更新锁（也叫U锁）在修改操作的初始化阶段用来锁定可能要被修改的资源，这样可以避免使用共享锁造成的死锁现象。</strong></p>
+<p>因为，当使用共享锁时，修改数据的操作分为两步，首先获得一个共享锁，读取数据，然后将共享锁升级为排他锁，然后再执行修改操作。这样，如果有两个或多个事务同时对一个事务申请了共享锁，在修改数据的时候，这些事务都要将共享锁升级为排他锁。这时，这些事务都不会释放共享锁而是一直等待对方释放，这样就造成了死锁。</p>
+<p>如果一个数据在修改前直接申请更新锁，在数据修改的时候再升级为排他锁，就可以避免死锁。</p>
+<p><strong>更新锁</strong>具有以下性质：<strong>用来预定要对此页施加X锁，它允许其他事务读，但不允许再施加U锁或X锁；当被读取的页将要被更新时，则升级为X锁；U锁一直到事务结束时才能被释放。</strong></p>
+<h2 id="3-4-意向锁"><a href="#3-4-意向锁" class="headerlink" title="3.4 意向锁"></a>3.4 意向锁</h2><p><strong>申请意向锁的动作是数据库完成的，就是说，事务A申请一行的行锁的时候，数据库会自动先开始申请表的意向锁，不需要我们程序员使用代码来申请。</strong></p>
+<p>意向锁说明SQL Server有在资源的低层获得共享锁或独占锁的意向。</p>
+<p>例如，表级的共享意向锁说明事务意图将独占锁释放到表中的页或者行。</p>
+<p>意向锁又可以分为共享意向锁、 独占意向锁和共享式独占意向锁。</p>
+<p>共享意向锁说明事务意图在共享意向锁所锁定的低层资源上放置共享锁来读取数据。</p>
+<p>独占意向锁说明事务意图在共享意向锁所锁定 的低层资源上放置独占锁来修改数据。</p>
+<p>共享式独占锁说明事务允许其他事务使用共享锁来读取顶层资源，并意图在该资源低层上放置独占锁。 </p>
+<blockquote>
+<p>参考来源：<a href="https://blog.csdn.net/C_J33/article/details/79487941" target="_blank" rel="noopener">数据库的锁机制及原理</a></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+        <tag>锁</tag>
       </tags>
   </entry>
   <entry>
@@ -661,6 +777,124 @@
       </tags>
   </entry>
   <entry>
+    <title>面向对象设计原则</title>
+    <url>/2020/09/19/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/</url>
+    <content><![CDATA[<p>软件开发设计模式，不见得都会用到，但不得不知道。</p>
+<p>设计模式是经验总结的成果，说里边蕴藏着多妙的思想也好，说已经成为开发的规范也罢，无非就是提升<strong>系统稳定性与可维护性</strong>的手段。</p>
+<p>它们是设计方法，但也不是全能的。</p>
+<p>现在编程世界里出现众多框架，约定规范，日趋完善的IDE，归根结底就是为了效益。<strong>低成本，高效率，是最终目的。</strong></p>
+<p>java中有23种设计模式，都是围绕六大设计原则的具体运用。</p>
+<p>六大设计原则看起来容易理解，实际实现起来也偶有冲突，取舍适当即可。</p>
+<p>那就开始知道，皮毛也是毛，蚂蚁肉也是肉！</p>
+<h1 id="开闭原则"><a href="#开闭原则" class="headerlink" title="开闭原则"></a>开闭原则</h1><p><font color="red"><strong>软件实体应当对扩展开放，对修改关闭</strong>。软件开发的终极目标。</font></p>
+<p>当应用的需求改变时，在不修改软件实体的源代码或者二进制代码的前提下，可以扩展模块的功能，使其满足新的需求。</p>
+<p>软件实体包括：项目划分的模块，类/接口，方法。</p>
+<p>实现方法： </p>
+<p><strong>“抽象约束、封装变化”</strong>。通过接口或者抽象类为软件实体定义一个相对稳定的抽象层，而将相同的可变因素封装在相同的具体实现类中。</p>
+<p>好处：  </p>
+<ul>
+<li>软件测试可以只测扩展的代码，不必重复测试基础代码</li>
+<li>提升可复用性</li>
+<li>提高软件的可维护性</li>
+</ul>
+<h1 id="里氏替换原则"><a href="#里氏替换原则" class="headerlink" title="里氏替换原则"></a>里氏替换原则</h1><p><font color="red"><strong>更愿意称之为继承原则</strong>。继承必须确保超类所拥有的性质在子类中仍然成立。</font></p>
+<p>通俗来讲，<strong>子类可以扩展父类的功能，但不能改变父类原有的功能</strong>。子类继承父类时，除添加新的方法完成新增功能外，尽量不要重写父类的方法。</p>
+<p>实现方法：</p>
+<p>使用继承时，遵循里氏替换原则。类T2继承类T1时，除添加新的方法完成新增功能P2外，尽量不要重写父类T1的方法，也尽量不要重载父类T1的方法。</p>
+<p>例外：当父类存在缺省实现的方法时；需要实现多态时要求重写/重载；部分子类继承父类（类方法体为空）时，必须要求重写。  </p>
+<p>好处：</p>
+<p>继承原则实际上保证父类的可复用性，是继承复用的基础。</p>
+<h1 id="依赖倒置原则"><a href="#依赖倒置原则" class="headerlink" title="依赖倒置原则"></a>依赖倒置原则</h1><p><font color="red"><strong>核心要义是面向接口编程，不要面向实现编程</strong>。高层模块不应该依赖低层模块，两者都应该依赖其抽象；抽象不应该依赖细节，细节应该依赖抽象。</font></p>
+<p>在软件设计中，细节具有多变性，而抽象层则相对稳定，因此<strong>以抽象为基础搭建起来的架构要比以细节为基础搭建起来的架构要稳定得多</strong>。这里的抽象指接口或抽象类，细节指具体实现类。</p>
+<p>使用接口或者抽象类的目的是制定好规范和契约。</p>
+<p>实现方法：</p>
+<ul>
+<li>每个类尽量提供接口或抽象类，或者两者都具备</li>
+<li>变量的声明类型尽量是接口或者是抽象类</li>
+<li>任何类都不应该从具体类派生</li>
+<li>使用继承时尽量遵循里氏替换原则</li>
+</ul>
+<p>好处：</p>
+<ul>
+<li>降低类之间的耦合性</li>
+<li>提高系统稳定性</li>
+<li>减少并行开发引起的风险</li>
+<li>提高代码的可读性与可维护性</li>
+</ul>
+<h1 id="单一职责原则"><a href="#单一职责原则" class="headerlink" title="单一职责原则"></a>单一职责原则</h1><p><font color="red"><strong>就是说每个类的功能相对独立</strong>。单一职责原则规定一个类应该有且仅有一个引起它变化的原因，否则类应该被拆分。</font></p>
+<p>若一个类T有职责A、B，当需要变更职责A时，更改类T可能会影响职责B的正常应用</p>
+<p>实现方法：  </p>
+<p>看似简单实则不易，只是需要优秀设计。需要设计人员<strong>发现类的不同职责并将其分离</strong>，再封装到不同的类或模块中。考验分析设计能力和重构经验。</p>
+<p>好处：</p>
+<ul>
+<li>降低类的复杂度</li>
+<li>提高类的可读性</li>
+<li>提高系统的可维护性</li>
+<li>变更引起的风险降低</li>
+</ul>
+<h1 id="接口隔离原则"><a href="#接口隔离原则" class="headerlink" title="接口隔离原则"></a>接口隔离原则</h1><p><font color="red"><strong>一个类对另一个类的依赖应该建立在最小的接口上</strong>。客户端不应该被迫依赖于它不使用的方法。程序员需要尽量将臃肿庞大的接口拆分成更小的和更具体的接口，让接口中只包含客户感兴趣的方法。</font></p>
+<p>要为各个类建立它们需要的专用接口，而不要试图去建立一个很庞大的接口供所有依赖它的类去调用。</p>
+<p>接口隔离原则和单一职责都是为了<strong>提高类的内聚性、降低它们之间的耦合性</strong>，体现了封装的思想。</p>
+<p>但单一职责原则注重的是职责，而接口隔离原则注重的是对接口依赖的隔离。</p>
+<p>且单一职责原则主要是约束类，它针对的是程序中的实现和细节；接口隔离原则主要约束接口，主要针对抽象和程序整体框架的构建。</p>
+<p>实现方法：</p>
+<ul>
+<li>接口尽量小，但是要有限度</li>
+<li>为依赖接口的类定制服务</li>
+<li>接口拆分的标准需要深入了解业务逻辑</li>
+<li>使接口用最少的方法去完成最多的事情</li>
+</ul>
+<p>好处：</p>
+<ul>
+<li>粒度小的接口，可以预防外来变更的扩散，提高系统的灵活性和可维护性</li>
+<li>高了系统的内聚性，降低了系统的耦合性</li>
+<li>能减少项目工程中的代码冗余（过大的大接口里面通常放置许多不用的方法，这些方法可能被冗余实现）</li>
+</ul>
+<p>注意接口的粒度。如果定义过小，则会造成接口数量过多，使设计复杂化；如果定义太大，灵活性降低，无法提供定制服务，给整体项目带来无法预料的风险。</p>
+<h1 id="迪米特原则"><a href="#迪米特原则" class="headerlink" title="迪米特原则"></a>迪米特原则</h1><p><font color="red"><strong>只与你的直接朋友交谈，不跟“陌生人”说话。最少知识原则，只知道朋友</strong>。如果两个软件实体无须直接通信，那么就不应当发生直接的相互调用，可以通过第三方转发该调用。</font></p>
+<p>这里的朋友是指：<strong>当前对象本身、当前对象的成员对象、当前对象所创建的对象、当前对象的方法参数</strong>等，这些对象同当前对象存在关联、聚合或组合关系，可以直接访问这些对象的方法。</p>
+<p>目的就是降低类之间的耦合度，提高模块的相对独立性。</p>
+<p>实现方法：<br>从依赖者的角度来说，只依赖应该依赖的对象。从被依赖者的角度说，只暴露应该暴露的方法。</p>
+<ul>
+<li>在类的结构设计上，尽量降低类成员的访问权限</li>
+<li>在类的设计上，优先考虑将一个类设置成不变类</li>
+<li>在对其他类的引用上，将引用其他对象的次数降到最低。</li>
+<li>不暴露类的属性成员，而应该提供相应的访问器（set 和 get 方法）</li>
+<li>谨慎使用序列化（Serializable）功能</li>
+</ul>
+<p>好处：</p>
+<ul>
+<li>降低了类之间的耦合度，提高了模块的相对独立性</li>
+<li>由于亲合度降低，从而提高了类的可复用率和系统的扩展性</li>
+</ul>
+<p>过度使用迪米特法则会使系统产生大量的中介类，从而增加系统的复杂性，使模块之间的通信效率降低。</p>
+<h1 id="合成复用原则"><a href="#合成复用原则" class="headerlink" title="合成复用原则"></a>合成复用原则</h1><p><font color="red"><strong>组合/聚合复用原则。在软件复用时，要尽量先使用组合或者聚合等关联关系来实现，其次才考虑使用继承关系来实现</strong>。合成复用原则同里氏替换原则相辅相成的，两者都是开闭原则的具体实现规范。</font></p>
+<p>通常类的复用分为继承复用和合成复用两种。</p>
+<p>继承复用也叫“白箱”复用，简单易实现。但</p>
+<ul>
+<li>子类与父类的耦合度高</li>
+<li>继承会将父类的实现细节暴露给子类（父类透明）</li>
+<li>从父类继承而来的实现是静态的，在编译时已经定义，所以在运行时不可能发生变化</li>
+</ul>
+<p>组合或聚合复用，将已有对象纳入新对象中，使之成为新对象的一部分，新对象可以调用已有对象。这样</p>
+<ul>
+<li>它维持了类的封装性。因为成分对象的内部细节是新对象看不见的，所以这种复用又称为“黑箱”复用</li>
+<li>新旧类之间的耦合度低。这种复用所需的依赖较少，新对象存取成分对象的唯一方法是通过成分对象的接口</li>
+<li>复用的灵活性高。这种复用可以在运行时动态进行，新对象可以动态地引用与成分对象类型相同的对象</li>
+</ul>
+<p>实现方法：<br>合成复用原则是通过将已有的对象纳入新对象中，作为新对象的成员对象来实现的，新对象可以调用已有对象的功能，从而达到复用。就是<strong>需要某类里边的方法，不用去继承该类，直接以其对象作为本类的成员，再进行调用</strong>。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://c.biancheng.net/design_pattern/" target="_blank" rel="noopener">C语言中文网：Java设计模式</a></p>
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>概念</tag>
+        <tag>设计原则</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>漫谈JSP</title>
     <url>/2020/05/09/%E6%BC%AB%E8%B0%88JSP/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>以前倒是知道<code>JSP</code>概念，但只能算是大概中的大概。今天因缘际会，又大致去查了些资料，然后就知道了个大概。比起<code>JSP</code>本身的语法规则，我对其由盛及衰的发展历史，倒表现出更大的兴趣。</p>
@@ -780,124 +1014,6 @@
       </tags>
   </entry>
   <entry>
-    <title>面向对象设计原则</title>
-    <url>/2020/09/19/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/</url>
-    <content><![CDATA[<p>软件开发设计模式，不见得都会用到，但不得不知道。</p>
-<p>设计模式是经验总结的成果，说里边蕴藏着多妙的思想也好，说已经成为开发的规范也罢，无非就是提升<strong>系统稳定性与可维护性</strong>的手段。</p>
-<p>它们是设计方法，但也不是全能的。</p>
-<p>现在编程世界里出现众多框架，约定规范，日趋完善的IDE，归根结底就是为了效益。<strong>低成本，高效率，是最终目的。</strong></p>
-<p>java中有23种设计模式，都是围绕六大设计原则的具体运用。</p>
-<p>六大设计原则看起来容易理解，实际实现起来也偶有冲突，取舍适当即可。</p>
-<p>那就开始知道，皮毛也是毛，蚂蚁肉也是肉！</p>
-<h1 id="开闭原则"><a href="#开闭原则" class="headerlink" title="开闭原则"></a>开闭原则</h1><p><font color="red"><strong>软件实体应当对扩展开放，对修改关闭</strong>。软件开发的终极目标。</font></p>
-<p>当应用的需求改变时，在不修改软件实体的源代码或者二进制代码的前提下，可以扩展模块的功能，使其满足新的需求。</p>
-<p>软件实体包括：项目划分的模块，类/接口，方法。</p>
-<p>实现方法： </p>
-<p><strong>“抽象约束、封装变化”</strong>。通过接口或者抽象类为软件实体定义一个相对稳定的抽象层，而将相同的可变因素封装在相同的具体实现类中。</p>
-<p>好处：  </p>
-<ul>
-<li>软件测试可以只测扩展的代码，不必重复测试基础代码</li>
-<li>提升可复用性</li>
-<li>提高软件的可维护性</li>
-</ul>
-<h1 id="里氏替换原则"><a href="#里氏替换原则" class="headerlink" title="里氏替换原则"></a>里氏替换原则</h1><p><font color="red"><strong>更愿意称之为继承原则</strong>。继承必须确保超类所拥有的性质在子类中仍然成立。</font></p>
-<p>通俗来讲，<strong>子类可以扩展父类的功能，但不能改变父类原有的功能</strong>。子类继承父类时，除添加新的方法完成新增功能外，尽量不要重写父类的方法。</p>
-<p>实现方法：</p>
-<p>使用继承时，遵循里氏替换原则。类T2继承类T1时，除添加新的方法完成新增功能P2外，尽量不要重写父类T1的方法，也尽量不要重载父类T1的方法。</p>
-<p>例外：当父类存在缺省实现的方法时；需要实现多态时要求重写/重载；部分子类继承父类（类方法体为空）时，必须要求重写。  </p>
-<p>好处：</p>
-<p>继承原则实际上保证父类的可复用性，是继承复用的基础。</p>
-<h1 id="依赖倒置原则"><a href="#依赖倒置原则" class="headerlink" title="依赖倒置原则"></a>依赖倒置原则</h1><p><font color="red"><strong>核心要义是面向接口编程，不要面向实现编程</strong>。高层模块不应该依赖低层模块，两者都应该依赖其抽象；抽象不应该依赖细节，细节应该依赖抽象。</font></p>
-<p>在软件设计中，细节具有多变性，而抽象层则相对稳定，因此<strong>以抽象为基础搭建起来的架构要比以细节为基础搭建起来的架构要稳定得多</strong>。这里的抽象指接口或抽象类，细节指具体实现类。</p>
-<p>使用接口或者抽象类的目的是制定好规范和契约。</p>
-<p>实现方法：</p>
-<ul>
-<li>每个类尽量提供接口或抽象类，或者两者都具备</li>
-<li>变量的声明类型尽量是接口或者是抽象类</li>
-<li>任何类都不应该从具体类派生</li>
-<li>使用继承时尽量遵循里氏替换原则</li>
-</ul>
-<p>好处：</p>
-<ul>
-<li>降低类之间的耦合性</li>
-<li>提高系统稳定性</li>
-<li>减少并行开发引起的风险</li>
-<li>提高代码的可读性与可维护性</li>
-</ul>
-<h1 id="单一职责原则"><a href="#单一职责原则" class="headerlink" title="单一职责原则"></a>单一职责原则</h1><p><font color="red"><strong>就是说每个类的功能相对独立</strong>。单一职责原则规定一个类应该有且仅有一个引起它变化的原因，否则类应该被拆分。</font></p>
-<p>若一个类T有职责A、B，当需要变更职责A时，更改类T可能会影响职责B的正常应用</p>
-<p>实现方法：  </p>
-<p>看似简单实则不易，只是需要优秀设计。需要设计人员<strong>发现类的不同职责并将其分离</strong>，再封装到不同的类或模块中。考验分析设计能力和重构经验。</p>
-<p>好处：</p>
-<ul>
-<li>降低类的复杂度</li>
-<li>提高类的可读性</li>
-<li>提高系统的可维护性</li>
-<li>变更引起的风险降低</li>
-</ul>
-<h1 id="接口隔离原则"><a href="#接口隔离原则" class="headerlink" title="接口隔离原则"></a>接口隔离原则</h1><p><font color="red"><strong>一个类对另一个类的依赖应该建立在最小的接口上</strong>。客户端不应该被迫依赖于它不使用的方法。程序员需要尽量将臃肿庞大的接口拆分成更小的和更具体的接口，让接口中只包含客户感兴趣的方法。</font></p>
-<p>要为各个类建立它们需要的专用接口，而不要试图去建立一个很庞大的接口供所有依赖它的类去调用。</p>
-<p>接口隔离原则和单一职责都是为了<strong>提高类的内聚性、降低它们之间的耦合性</strong>，体现了封装的思想。</p>
-<p>但单一职责原则注重的是职责，而接口隔离原则注重的是对接口依赖的隔离。</p>
-<p>且单一职责原则主要是约束类，它针对的是程序中的实现和细节；接口隔离原则主要约束接口，主要针对抽象和程序整体框架的构建。</p>
-<p>实现方法：</p>
-<ul>
-<li>接口尽量小，但是要有限度</li>
-<li>为依赖接口的类定制服务</li>
-<li>接口拆分的标准需要深入了解业务逻辑</li>
-<li>使接口用最少的方法去完成最多的事情</li>
-</ul>
-<p>好处：</p>
-<ul>
-<li>粒度小的接口，可以预防外来变更的扩散，提高系统的灵活性和可维护性</li>
-<li>高了系统的内聚性，降低了系统的耦合性</li>
-<li>能减少项目工程中的代码冗余（过大的大接口里面通常放置许多不用的方法，这些方法可能被冗余实现）</li>
-</ul>
-<p>注意接口的粒度。如果定义过小，则会造成接口数量过多，使设计复杂化；如果定义太大，灵活性降低，无法提供定制服务，给整体项目带来无法预料的风险。</p>
-<h1 id="迪米特原则"><a href="#迪米特原则" class="headerlink" title="迪米特原则"></a>迪米特原则</h1><p><font color="red"><strong>只与你的直接朋友交谈，不跟“陌生人”说话。最少知识原则，只知道朋友</strong>。如果两个软件实体无须直接通信，那么就不应当发生直接的相互调用，可以通过第三方转发该调用。</font></p>
-<p>这里的朋友是指：<strong>当前对象本身、当前对象的成员对象、当前对象所创建的对象、当前对象的方法参数</strong>等，这些对象同当前对象存在关联、聚合或组合关系，可以直接访问这些对象的方法。</p>
-<p>目的就是降低类之间的耦合度，提高模块的相对独立性。</p>
-<p>实现方法：<br>从依赖者的角度来说，只依赖应该依赖的对象。从被依赖者的角度说，只暴露应该暴露的方法。</p>
-<ul>
-<li>在类的结构设计上，尽量降低类成员的访问权限</li>
-<li>在类的设计上，优先考虑将一个类设置成不变类</li>
-<li>在对其他类的引用上，将引用其他对象的次数降到最低。</li>
-<li>不暴露类的属性成员，而应该提供相应的访问器（set 和 get 方法）</li>
-<li>谨慎使用序列化（Serializable）功能</li>
-</ul>
-<p>好处：</p>
-<ul>
-<li>降低了类之间的耦合度，提高了模块的相对独立性</li>
-<li>由于亲合度降低，从而提高了类的可复用率和系统的扩展性</li>
-</ul>
-<p>过度使用迪米特法则会使系统产生大量的中介类，从而增加系统的复杂性，使模块之间的通信效率降低。</p>
-<h1 id="合成复用原则"><a href="#合成复用原则" class="headerlink" title="合成复用原则"></a>合成复用原则</h1><p><font color="red"><strong>组合/聚合复用原则。在软件复用时，要尽量先使用组合或者聚合等关联关系来实现，其次才考虑使用继承关系来实现</strong>。合成复用原则同里氏替换原则相辅相成的，两者都是开闭原则的具体实现规范。</font></p>
-<p>通常类的复用分为继承复用和合成复用两种。</p>
-<p>继承复用也叫“白箱”复用，简单易实现。但</p>
-<ul>
-<li>子类与父类的耦合度高</li>
-<li>继承会将父类的实现细节暴露给子类（父类透明）</li>
-<li>从父类继承而来的实现是静态的，在编译时已经定义，所以在运行时不可能发生变化</li>
-</ul>
-<p>组合或聚合复用，将已有对象纳入新对象中，使之成为新对象的一部分，新对象可以调用已有对象。这样</p>
-<ul>
-<li>它维持了类的封装性。因为成分对象的内部细节是新对象看不见的，所以这种复用又称为“黑箱”复用</li>
-<li>新旧类之间的耦合度低。这种复用所需的依赖较少，新对象存取成分对象的唯一方法是通过成分对象的接口</li>
-<li>复用的灵活性高。这种复用可以在运行时动态进行，新对象可以动态地引用与成分对象类型相同的对象</li>
-</ul>
-<p>实现方法：<br>合成复用原则是通过将已有的对象纳入新对象中，作为新对象的成员对象来实现的，新对象可以调用已有对象的功能，从而达到复用。就是<strong>需要某类里边的方法，不用去继承该类，直接以其对象作为本类的成员，再进行调用</strong>。</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="http://c.biancheng.net/design_pattern/" target="_blank" rel="noopener">C语言中文网：Java设计模式</a></p>
-]]></content>
-      <categories>
-        <category>java</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-        <tag>概念</tag>
-        <tag>设计原则</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>阿里云宝塔面板部署java项目</title>
     <url>/2020/10/30/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E9%83%A8%E7%BD%B2java%E9%A1%B9%E7%9B%AE/</url>
     <content><![CDATA[<p>背景故事是这样的。</p>
@@ -942,95 +1058,6 @@
       <tags>
         <tag>java</tag>
         <tag>宝塔面板</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>浅谈图像</title>
-    <url>/2020/06/01/%E6%B5%85%E8%B0%88%E5%9B%BE%E5%83%8F/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>一切要从图像分辨率说起。前不久问过自己一个问题：<strong>小米6只有1920x1080的分辨率为什么能拍出4032x3016px的照片？</strong></p>
-<p>不知当时脑袋想什么，问出这样一个特别蠢的问题。但它居然就这样作为一个导火索，让我不得不去了解一下关于图像的基本知识。</p>
-<p>这里需要说明的是，这个问题本身就是个问题。小米6的分辨率1920x1080是说的屏幕分辨率，而4032x3016px的照片是相机拍出来的图像分辨率，也就是米6后置的1200万像素摄像头拍出来的。一个是屏幕显示分辨率，另一个是拍照图像分辨率，就没得啥关联的。</p>
-<p>然后又因为接触<code>React Native</code>，知道其组件的宽高用的是逻辑像素作为单位。之前买的kindle参数里其中一项是PPI，笔记本外设显示器4K屏……</p>
-<p>于是就简单整理一下图像基础知识及相关概念，权作了解。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0001.jpg" alt="图像啊图像"></p>
-<h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><p>位图和矢量图是计算机图形中的两大概念。</p>
-<h2 id="位图"><a href="#位图" class="headerlink" title="位图"></a>位图</h2><p><strong>位图</strong>（bitmap）也叫点阵图、栅格图像、<strong>像素图</strong>。<strong>构成位图的最小单位是像素</strong>，位图就是依靠像素阵列的排列来实现其显示效果的，缩放位图会导致失真（边缘锯齿）。例如放大后的位图出现“马赛克”。</p>
-<p><strong>位图图像善于重现颜色的细微层次</strong>，能够制作出色彩和亮度变化丰富的图像，可逼真地再现这个世界，文件庞大，<strong>不能随意缩放，打印和输出的精度是有限的。</strong></p>
-<p><strong>位图的文件类型</strong>很多，如.bmp、.pcx、.gif、.jpg、.tif等。同样的图形，存盘成以上几种文件时文件的字节数会有一些差别，尤其是jpg格式，它的大小只有同样的bmp格式的1/20到1/35，这是因为它们的点矩阵经过了复杂的压缩算法的缘故。</p>
-<p><strong>位图图像面积越大，图像文件的色彩越丰富，文件的字节数就越多。</strong></p>
-<h2 id="矢量图"><a href="#矢量图" class="headerlink" title="矢量图"></a>矢量图</h2><p><strong>矢量图</strong>（vector）也叫向量图，是一种<strong>缩放不失真</strong>的图像格式。矢量图是通过多个对象的组合生成的，对其中的每一个对象的纪录方式，都是以数学函数来实现的，也就是说，矢量图实际上并不是像位图那样纪录画面上每一点的信息，而是纪录了元素形状及颜色的算法，当你打开矢量图的时候，软件利用图行对应的函数进行运算，将运算结果[图形的形状和颜色]显示给你看。</p>
-<p>矢量图形能<strong>重现清晰的轮廓</strong>，线条非常光滑、且<strong>具有良好的缩放性</strong>。因为图像中保存的是线条和图块的信息，与分辨率和图形大小无关，只与图像的复杂程度有关，所以图像文件所占的存储空间较小（图像不复杂情况下）。</p>
-<p>与位图相比，在显示和打印方面都快的多；<strong>图形不真实生动，颜色不丰富</strong>。无法像照片一样真实地再现这个世界的景色。（矢量图基本都需要专门软件打开）</p>
-<p><strong>矢量图形格式</strong>也很多，常见的如.SVG。</p>
-<p>矢量图形文件的规律：</p>
-<ul>
-<li>可以无限放大图形中的细节，不用担心会造成失真和色块。</li>
-<li>一般的线条的图形和卡通图形，存成矢量图文件就比存成位图文件要小很多。</li>
-<li>存盘后<strong>文件的大小</strong>与图形中<strong>元素的个数</strong>和每个<strong>元素的复杂程度</strong>成正比。而与图形面积和色彩的丰富程度无关。（元素的复杂程度指的是这个元素的结构复杂度，如五角星就比矩形复杂、一个任意曲线就比一个直线段复杂）。</li>
-<li>通过软件，<strong>矢量图可以轻松地转化为位图，而位图转化为矢量图就需要经过复杂而庞大的数据处理</strong>，而且生成的矢量图的质量绝对不能和原来的图形比拟。</li>
-</ul>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0002.jpg" alt="图像啊图像"></p>
-<h2 id="一些单位"><a href="#一些单位" class="headerlink" title="一些单位"></a>一些单位</h2><p>绝对单位与相对单位。比如设备尺寸5.15 inch就是绝对的物理长度，像素（pixel）就是相对单位，1英寸显示屏可以只有1个像素，也可以有100个像素。<strong>相同面积不同分辨率的显示屏，其像素点大小就不相同。</strong></p>
-<p><strong>px</strong>：<code>pixel</code>，像素，是<strong>组成数字图像的基本单元</strong>。这种基本单元越多，越能呈现出图像的细节，图像就越清晰。像素的大小是没有固定长度的，不同设备上一个单位像素色块的大小是不一样的。</p>
-<p><strong>ppi</strong> ：<code>pixels per inch</code>,等于屏幕对角线像素点／屏幕对角线物理宽度，是每英寸对角线上所拥有的像素（pixel）数目，通常也叫<strong>像素密度</strong>。手机屏幕的PPI当达到一定数值（300ppi）时，人眼就分辨不出颗粒感了。</p>
-<p><strong>dpi</strong>：<code>dots per inch</code>,是每英寸所能打印的点数，通常也叫<strong>打印精度</strong>。如：打印机输出可达600DPI的分辨率，表示打印机可以在每一平方英寸的面积中可以输出600X600＝360000个输出点。大多数情况下，PPI与DPI的数值是相等的。</p>
-<p><strong>dp</strong>：<code>density-independent pixels</code>,一种基于屏幕密度的抽象单位。在每英寸160点的显示器上，1dp = 1px。<a href="https://developer.android.com/guide/practices/screens_support.html" target="_blank" rel="noopener">dp的提出</a>是为了解决控件对不同屏幕的适配问题。</p>
-<p><strong>sp</strong>：<code>scale-independent pixel</code>，与缩放无关的抽象像素，安卓开发用的字体大小单位。一般情况下可认为sp=dp。</p>
-<p><strong>density</strong> ：密度。density ≈ 设备PPI/160PPI。比如我是320PPI设备，density＝320PPI/160PPI=2;density是一个int类型的值。</p>
-<p><strong>运算案例</strong></p>
-<p>小米6设备参数：显示屏尺寸5.15英寸（1 inch=2.54 cm），分辨率1920x1080px</p>
-<p>计算得：PPI=428 ，density≈3，1dp=2.67px≈3px。</p>
-<h2 id="分辨率"><a href="#分辨率" class="headerlink" title="分辨率"></a>分辨率</h2><p>分辨率，又称解析度。分辨率=画面水平方向的像素值x画面垂直方向的像素值，分为 <strong>屏幕分辨率</strong>和<strong>图像分辨率</strong>。</p>
-<p>显示分辨率（屏幕分辨率）是屏幕图像的精密度，是指<strong>显示器所能显示的像素有多少</strong>。由于屏幕上的点、线和面都是由像素组成的，显示器可显示的像素越多，画面就越精细，同样的屏幕区域内能显示的信息也越多。显示分辨率一定的情况下，显示屏越小图像越清晰，反之，显示屏大小固定时，显示分辨率越高图像越清晰。</p>
-<p>屏幕分辨率1920x1080（16:9显示屏），就是说设备屏幕的水平方向上有1920个像素点，垂直方向上有1080个像素点。<strong>同一台硬件设备上的屏幕分辨率、像素块大小是不会变的（倾向于说显示器分辨率）</strong>。PC电脑上之所以可以调整屏幕分辨率，其实是通过算法转换实现的。</p>
-<p><strong>图像分辨率是指每英寸图像内的像素点数</strong>（这种定义方式更精准）。图像分辨率是有单位的，叫 像素每英寸。分辨率越高，像素的点密度越高（图像尺寸一定时），图像越逼真。</p>
-<p>分辨率和清晰度不能对等，虽然<strong>很多情况下高分辨率的确意味着高清晰度</strong>。比如一张1920x1080尺寸的图片，放在1920x1080分辨率的PC屏幕上显示没问题（大小合适），但放在4K屏上就会发现图片变模糊（失真）了（因为4K屏幕大，图像放大失真）。又比如1920x1080和1280x720的图片作为手机壁纸，其实清晰度看起来差不多的。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0012.jpg" alt="图像啊图像"></p>
-<h1 id="图像深度与像素深度"><a href="#图像深度与像素深度" class="headerlink" title="图像深度与像素深度"></a>图像深度与像素深度</h1><p>像素深度和图像深度是两个相互关联但又有所不同的两个概念。</p>
-<h2 id="像素深度"><a href="#像素深度" class="headerlink" title="像素深度"></a>像素深度</h2><p><strong>像素深度</strong>是指<strong>存储每个像素所用的位数</strong>，它也是用来度量图像的分辨率。</p>
-<p><strong>像素深度决定彩色图像的每个像素可能有的颜色数，或者确定灰度图像的每个像素可能有的灰度级数</strong>。例如，一幅彩色图像的每个像素用R，G，B三个分量表示，若每个分量用8位，那么一个像素共用24位表示，就说像素的深度为24，每个像素可以是16 777 216（2的24次方）种颜色中的一种。在这个意义上，往往把像素深度说成是图像深度。表示一个像素的位数越多，它能表达的颜色数目就越多，而它的深度就越深。</p>
-<h2 id="图像深度"><a href="#图像深度" class="headerlink" title="图像深度"></a>图像深度</h2><p><strong>图像深度</strong>是指<strong>像素深度中实际用于存储图像的灰度或色彩所需要的比特位数</strong>。假定图像的像素深度为16bit，但用于表示图像的灰度或色彩的位数只有15位，则图像的图像深度为15。</p>
-<p>在用二进制数表示彩色图像的像素时，除R，G，B分量用固定位数表示外，往往还增加1位或几位作为属性(Attribute)位。例如，RGB 5∶5∶5表示一个像素时，用2个字节共16位表示，其中R，G，B各占5位，剩下一位作为属性位。在这种情况下，像素深度为16位，而图像深度为15位。</p>
-<h2 id="图像通道"><a href="#图像通道" class="headerlink" title="图像通道"></a>图像通道</h2><p>我们都知道颜色的三元素 Red, Green, Blue。 如果是深度为24=3*8，我们刚好就可以用第一个8位存储Red值，第二个存储Green值，第三个存储Blue值, 2的8次方刚好是255,所以我们一般看到的RGB值都是(0-255,0-255,0-255)这样的值。如果用rgb来表示图片的颜色值，我们称这样的图片通道为三。<br>每个像素点都有3个值表示 ，所以就是3通道；也有4通道的图（RGB+alpha），灰度图一般为单通道。</p>
-<h2 id="灰度图像"><a href="#灰度图像" class="headerlink" title="灰度图像"></a>灰度图像</h2><p><strong>灰度</strong>也可以认为是亮度，简单说就是<strong>色彩的深浅程度</strong>。</p>
-<p>灰度图像是二值图像的进化版本，是彩色图像的退化版，也就是灰度图保存的信息没有彩色图像多，但比二值图像多，灰度图只包含一个通道的信息，而彩色图通常包含三个通道的信息。</p>
-<p><strong>灰度数字图像是每个像素只有一个采样颜色的图像</strong>（灰度图没有色彩）。这类图像通常显示为从最暗黑色到最亮的白色的灰度，尽管理论上这个采样可以任何颜色的不同深浅，甚至可以是不同亮度上的不同颜色。灰度图像与黑白图像不同，在计算机图像领域中黑白图像只有黑白两种颜色，灰度图像在黑色与白色之间还有许多级的颜色深度。</p>
-<p><strong>彩色图像可以二值化和灰度化</strong>。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF1021.jpeg" alt="图像啊图像"></p>
-<h1 id="图像格式"><a href="#图像格式" class="headerlink" title="图像格式"></a>图像格式</h1><p>BMP、PNG、GIF、TIF和JPG格式的文件是位图文件，文件的扩展明指明了图像文件的标准。SVG是矢量图文件格式。<font color="red">图片文件格式本质上是一种对图片进行压缩进而减少文件大小的解决方案。</font></p>
-<p>如果将图像原始格式直接存储到文件中将会非常大，比如一个5000x5000 24位图，所占文件大小为5000x5000x3字节=71.5MB, 其大小非常可观。<br>如果用zip或rar之类的通用算法来压缩像素数据，得到的压缩比例通常不会太高，因为这些压缩算法没有针对图像数据结构进行特殊处理。</p>
-<h2 id="jpeg"><a href="#jpeg" class="headerlink" title="jpeg"></a>jpeg</h2><p>全称<code>JointPhotographicExpertsGroup</code>，<br>JEPG格式，也叫做JPG或JPE格式，是最常用的一种文件格式。<strong>实际测试.jpeg后缀文件更改为.jpg后缀依旧可读</strong>。</p>
-<p>JPEG格式的压缩技术十分先进，<strong>能够将图像压缩在很小的储存空间</strong>，不过这种压缩是<strong>有损耗</strong>的，过度压缩会降低图片的质量。JPEG格式压缩的主要是高频信息，对色彩的信息保留较好，因此特别适合应用于互联网，可减少图像的传输和加载时间。</p>
-<p>jpeg没有透明信息。<strong>jpeg比较适合用来存储相机拍出来的照片，这类图像用jpeg压缩后的体积比较小</strong>。其使用的具体算法核心是离散余弦变换、Huffman编码、算术编码等技术。</p>
-<h2 id="png"><a href="#png" class="headerlink" title="png"></a>png</h2><p>全称<code>Portable Network Graphic Format</code>。<br>png 最重要的特点是<strong>支持alpha 通道透明度</strong>，也就是说，<strong>PNG图片支持透明背景</strong>。一般来说彩色图像是24位3通道图像，png格式的图像就是4通道的。</p>
-<p>png的设计目的是试图替代gif和tiff。png是一种支持无损压缩的图像格式（从LZ77派生的无损数据压缩算法），没有可调整的压缩质量设置（有损程度）。虽然PNG提供的压缩量比JPEG少，但PNG图片却比JPEG图片有更小的文档尺寸，因此现在越来越多的网络图像开始采用PNG格式。</p>
-<p><strong>jpeg比较适合存储色彩“杂乱”的拍摄图片，png比较适合存储几何特征强的图形类图片（颜色值少）</strong>。</p>
-<h2 id="gif"><a href="#gif" class="headerlink" title="gif"></a>gif</h2><p>全称<code>Graphics Interchange Format</code>。<br>GIF也是一种压缩的图片格式，分为动态GIF和静态GIF两种。</p>
-<p>GIF格式的最大特点是<strong>支持动态图片</strong>（多帧），并且支持透明背景。网络上绝大部分动图、表情包都是GIF格式的，相比与动画，GIF动态图片占用的存储空间小，加载速度快，因此非常流行。</p>
-<h2 id="psd"><a href="#psd" class="headerlink" title="psd"></a>psd</h2><p>全称<code>Photoshop Document</code>。<br>PSD格式是Photoshop默认的存储格式，<strong>适用于存储源文档和工作文件</strong>，修改起来比较方便。<br>PSD格式的最大特点是可以保留透明度、图层、路径、通道等PS处理信息，但是需要专业的图形处理软件才能打开。PSD格式的缺点是体积庞大，十分占用存储空间。</p>
-<h2 id="tiff"><a href="#tiff" class="headerlink" title="tiff"></a>tiff</h2><p>全称<code>Tagged Image File Format</code><br>，TIFF格式，也叫做或TIF格式，可以支持不同颜色模式、路径、透明度、以及通道，是打印文档中最常用的格式。Photoshop支持在TIFF文件中保存图层以及其他信息，在很多方面类似于PSD格式文件。</p>
-<h2 id="bmp"><a href="#bmp" class="headerlink" title="bmp"></a>bmp</h2><p>全称<code>Bitmap</code>。<br>BMP 格式是Windows操作系统中的标准图像文件格式，能够被多种Windows应用程序所支持。BMP格式包含的图像信息较丰富，<strong>几乎不进行压缩</strong>，但由此导致了它占用的存储空间很大，所以，目前BMP在单机上比较流行。</p>
-<h2 id="webp"><a href="#webp" class="headerlink" title="webp"></a>webp</h2><p>google开发的一种有损、透明图片格式，相当于jpeg和png的合体，google声称其可以把图片大小减少40%。但是当前支持差，压得慢。</p>
-<h2 id="svg"><a href="#svg" class="headerlink" title="svg"></a>svg</h2><p>全称<code>Scalable Vector Graphics</code>，意思为可缩放的矢量图形。它是<strong>基于XML</strong>（Extensible Markup Language），由World Wide Web Consortium（W3C）联盟进行开发的。严格来说应该是一种开放标准的矢量图形语言，可让你设计激动人心的、高分辨率的Web图形页面。用户可以直接用代码来描绘图像，可以用任何文字处理工具打开SVG图像，通过改变部分代码来使图像具有交互功能，并可以随时插入到HTML中通过浏览器来观看。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0003.jpg" alt="图像啊图像"></p>
-<h1 id="图像的附加信息"><a href="#图像的附加信息" class="headerlink" title="图像的附加信息"></a>图像的附加信息</h1><h2 id="Exif信息"><a href="#Exif信息" class="headerlink" title="Exif信息"></a>Exif信息</h2><p>Exif <code>Exchangeable image file format</code>可交换图像文件格式，是<strong>专门为数码相机的照片设定的，可以记录数码照片的属性信息和拍摄数据</strong>。如米6拍摄的照片，照片文件详情中附带有拍摄参数，便是exif信息。Exif可以附加于JPEG、TIFF、RIFF等文件之中，为其增加有关数码相机拍摄信息的内容和索引图或图像处理软件的版本信息。</p>
-<p>所有的JPEG文件以字符串“0xFFD8”开头，并以字符串“0xFFD9”结束。文件头中有一系列“0xFF??”格式的字符串，称为“标识”，用来标记JPEG文件的信息段。“0xFFD8”表示图像信息开始，“0xFFD9”表示图像信息结束，这两个标识后面没有信息，而其它标识紧跟一些信息字符。0xFFE0 – 0xFFEF之间的标识符称为“<strong>应用标记</strong>”，没有被常规JPEG文件利用，<strong>Exif正是利用这些信息串记录拍摄信息如快门速度、光圈值等，甚至可以包括全球定位信息。</strong></p>
-<h2 id="隐私数据思考"><a href="#隐私数据思考" class="headerlink" title="隐私数据思考"></a>隐私数据思考</h2><p><strong>手机所拍的照片，在查看详情时可能看到地理位置信息，即拍摄地的经纬度坐标信息</strong>。通过经纬度坐标，利用百度的拾取坐标系统进行坐标反查，能够精准定位相片的拍摄地址。这里便思考到隐私数据的问题，如果拍摄的相片都附加这些地址信息，那是不是存在隐私泄露的问题。</p>
-<p>于是我尝试将图片原图（包含地址信息）从手机QQ/微信传到电脑QQ/微信，图片另存为，查看图片详情（文件大小未变化），发现图像的拍摄参数及地址信息依旧能看到。进一步，我下载来自朋友圈和QQ动态的实拍图片（自己上传测试用的照片），并查看详细信息，拍摄参数以及地址信息均为空。</p>
-<p>那么照片的exif信息是被脱敏了吗？还是我们的exif信息在特定的传输过程被丢弃（蓝牙传输文件exif信息仍存在）？当我们的原图上传到qq空间或朋友圈后，图片的存储位置在腾讯的数据中心，腾讯里的我们的照片已经不包含地址信息了吗？还是图片进一步有损压缩（提高网络传输效率）直接丢弃附属信息？</p>
-<p>答案尚且确定不了。但知道一点，<strong>相机设置里可以关闭 保存地理位置信息 的选项</strong>。如此，原图没有位置信息，便不存在地址泄露的隐私问题了。</p>
-<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>大致整理一下，才发现枯燥的文字是真的多。收获就是大概知道web开发过程中为什么logo选择.svg或者.icon格式的矢量图，为什么一亿像素相机的相片用HEIF图片格式（米10高质量图片降低文件大小的解决方案），知道jpeg格式图片改动后保存会导致图片越来越小。</p>
-<p>更重要的是知道这样一种观点：<font color="red">无论哪一种图片格式规范，其本质都是为了图像传输的高效或者图像的高质量，两者不可得兼</font>。没得最完美的，适合你需求的就是最好的选择。</p>
-<h1 id="参考文献："><a href="#参考文献：" class="headerlink" title="参考文献："></a>参考文献：</h1><p><a href="https://www.coreldrawchina.com/xinshourumen/weitu-shiliangtu.html" target="_blank" rel="noopener">矢量图与位图的区别</a><br><a href="https://www.zhihu.com/question/21283005" target="_blank" rel="noopener">知乎：既然矢量图放大缩小都不失真，为什么还要使用位图？</a><br><a href="https://www.zhihu.com/question/20028452" target="_blank" rel="noopener">图片格式 jpg、png、gif各有什么优缺点？什么情况下用什么格式的图片呢？</a><br><a href="https://zhuanlan.zhihu.com/p/143649897" target="_blank" rel="noopener">几种常见图片格式的区别</a><br><a href="https://blog.csdn.net/jianzhengzhouzjz/article/details/7427432" target="_blank" rel="noopener">像素深度与图像深度</a><br><a href="https://blog.csdn.net/tz_zs/article/details/79768201" target="_blank" rel="noopener">二值图像、灰度图像、彩色图像</a><br><a href="https://juejin.im/post/5c8e4feb6fb9a070aa5ce200" target="_blank" rel="noopener">PNG图片压缩原理解析</a>  </p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/ilF0013.jpg" alt="图像啊图像"></p>
-]]></content>
-      <categories>
-        <category>常识</category>
-      </categories>
-      <tags>
-        <tag>概念</tag>
-        <tag>图像</tag>
-        <tag>常识</tag>
       </tags>
   </entry>
 </search>
