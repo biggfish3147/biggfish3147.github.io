@@ -28,6 +28,74 @@
       </tags>
   </entry>
   <entry>
+    <title>MVCC与Next-key Locks</title>
+    <url>/2020/11/12/MVCC%E4%B8%8ENext-key-Locks/</url>
+    <content><![CDATA[<p>MYSQL数据库中，事务主要有4种<strong>隔离级别</strong>，分别是<strong>未提交读，提交读，可重复读，可串行化</strong>。</p>
+<p>多版本并发控制（Muti-Version Concurrency Control,MVCC）是MYSQL的InnoDB引擎实现隔离级别的一种具体方式。主要用来解决提交读和可重复读。</p>
+<p>但是单纯的MVCC还不能解决幻读的问题，于是在MVCC基础上加上Next-key Locks，达到可串行化的效果。</p>
+<p>这里只谈简单的理解。</p>
+<h1 id="1-MVCC"><a href="#1-MVCC" class="headerlink" title="1. MVCC"></a>1. MVCC</h1><p>顾名思义，通过<strong>多版本</strong>来实现并发控制。<strong>同一条记录在系统中可以存在多个版本</strong>。</p>
+<p>谈到并发控制，无非就是加锁实现。但加锁过程也会影响性能，这就是一致性与高可用的矛盾。MVCC免去读操作的加锁（非阻塞的读），使开销更低。<strong>写操作必须加锁</strong>。</p>
+<p>MVCC就是想办法少加点锁，通过其他方式保证数据一致性。<strong>MVCC是通过保存数据在某一个时间点快照来实现的。也就是说不管实现时间多长，每个事务看到的数据都是一致的。</strong></p>
+<p>于是不得不提到版本号、快照读与当前读。</p>
+<p>版本号，包括系统版本号与事务版本号。系统版本号是递增的数字，每开始一个新的事务，系统版本号自动增加。<strong>事务版本号就是事务开始时的系统版本号。</strong></p>
+<p>MVCC机制虽然能够让数据可重复读，但读取的数据可能是历史数据。<strong>读取历史数据的方式，称为快照读，而读取数据库最新版本的数据，称为当前读。</strong></p>
+<p>快照读实现了可重复读。自然的也解决了幻读问题（历史数据未变更）。</p>
+<p>对数据修改的操作(update、insert、delete)都是采用当前读的模式。在执行这几个操作时会读取最新的记录，即使是别的事务提交的数据也可以查询到。读取的是最新的数据，需要加锁。<strong>当前读不能解决幻读问题，需要加锁，使用Next-key Lock。</strong></p>
+<h1 id="1-1-隐藏列"><a href="#1-1-隐藏列" class="headerlink" title="1.1 隐藏列"></a>1.1 隐藏列</h1><p>MVCC工作时，在每行记录后边保存两个隐藏列。分别是数据行的创建时间，数据行的删除时间。这里的时间只是一种说法，不代表具体的时间，而是当时的系统版本号。</p>
+<blockquote>
+<p>注：这里表述的删除时间（版本号）不易理解，恰当的说法应该是回滚版本号（回滚指针）。通过该版本号在回滚日志中查询历史数据。</p>
+</blockquote>
+<p><strong>当开始一个新事务时，该事务的版本号肯定会大于当前所有数据行快照的创建版本号。</strong></p>
+<p>隐藏列对客户端来说是不可见的。</p>
+<h1 id="1-2-回滚日志（undo-log）"><a href="#1-2-回滚日志（undo-log）" class="headerlink" title="1.2 回滚日志（undo log）"></a>1.2 回滚日志（undo log）</h1><p><strong>当事务对数据行进行一次更新操作时，会把旧数据行记录在一个叫做undo log的记录中。</strong></p>
+<p>在undo log中除了记录数据行，还会记录下该行数据的对应的创建版本号。并将原来数据行中的回滚指针指向undo log 记录的这行数据。然后再在原来数据表中进行一次更新操作，如果这次更新操作回滚了，那么就可以根据回滚指针去undo log中查找之前的数据进行复原。</p>
+<p>如果后续还有更新操作的话，就会在undo log中和之前的数据行形成一条链表，链表头就是最新的数据，这条链表就叫做<strong>版本链</strong>。</p>
+<p><strong>事务的可见性都是基于undo log来实现的。</strong></p>
+<h1 id="1-3-事务快照（ReadView-可读视图）"><a href="#1-3-事务快照（ReadView-可读视图）" class="headerlink" title="1.3 事务快照（ReadView/可读视图）"></a>1.3 事务快照（ReadView/可读视图）</h1><p>当进行查询操作时，事务会生成一个ReadView，ReadView是一个事务快照，准确来说是当前时间点系统内活跃的事务列表，也就是说<strong>系统内所有未提交的事务，都会记录在这个Readview内</strong>，事务就根据它来判断哪些数据是可见的，哪些是不可见的。</p>
+<p>查询一条数据时，事务会拿到这个ReadView，去到undo log中进行判断。若查询到某一条数据：</p>
+<ul>
+<li>先去查看undo log中的最新数据行，如果数据行的版本号小于ReadView记录的事务版本号最小值，就说明这条数据对当前数据库是可见的，可以直接作为结果集返回</li>
+<li>若数据行版本号大于ReadView记录最大值，说明这条数据是由一个新的事务修改的，对当前事务不可见，那么就顺着版本链继续往下寻找第一条满足条件的</li>
+<li>若数据行版本号在ReadView最小值和最大值之间，那么就需要进行遍历了整个ReadView了，如果数据行版本号等于ReadView的某个值，则说明该行数据仍然处于活跃状态，那么对当前事务不可见</li>
+</ul>
+<h1 id="1-4-提交读与可重复读的实现"><a href="#1-4-提交读与可重复读的实现" class="headerlink" title="1.4 提交读与可重复读的实现"></a>1.4 提交读与可重复读的实现</h1><p><strong>关键在于生成ReadView的时机不同。</strong></p>
+<p><strong>对提交读来说，事务中的每次读操作都会生成一个新的ReadView</strong>，也就是说，如果这期间某个事务提交了，那么它就会从ReadView中移除。这样确保事务每次读操作都能读到相对比较新的数据。</p>
+<p>而<strong>对可重复读来说，事务只有在第一次进行读操作时才会生成一个ReadView</strong>，后续的读操作都会重复使用这个ReadView。也就是说，如果在此期间有其他事务提交了，那么对于可重复读来说也是不可见的，因为对它来说，事务活跃状态在第一次进行读操作时就已经确定下来，后面不会修改了。</p>
+<h1 id="1-5-理解增删改查"><a href="#1-5-理解增删改查" class="headerlink" title="1.5 理解增删改查"></a>1.5 理解增删改查</h1><p><strong>SELECT</strong> </p>
+<p>在SELECT过程中，InnoDB<strong>只查找版本早于当前事务版本的数据行</strong>，这样可以确保事务读取的行要么是在开始事务之前已经存在要么是事务自身插入或者修改过的，在事务开始之后才插入的行，事务不会看到。<br>行的删除版本号要么未定义，要么大于当前事务版本号，这样可以确保事务读取到的行在事务开始之前未被删除，在事务开始之前就已经过期的数据行，该事务也不会看到。</p>
+<p><strong>INSERT</strong></p>
+<p>将当前系统版本号作为数据行快照的创建版本号。</p>
+<p><strong>DELETE</strong>  </p>
+<p>将当前系统版本号作为数据行快照的删除版本号。</p>
+<p><strong>UPDATE</strong></p>
+<p>将当前系统版本号作为更新前的数据行快照的删除版本号，并将当前系统版本号作为更新后的数据行快照的创建版本号。可以理解为先执行 DELETE 后执行 INSERT。</p>
+<h1 id="2-Next-key-Locks"><a href="#2-Next-key-Locks" class="headerlink" title="2. Next-key Locks"></a>2. Next-key Locks</h1><p><strong>Next-key Locks由record locks(记录锁) 和 gap locks(间隙锁)组合而成</strong>，每次锁住的不光是需要使用的数据，还会锁住这些数据附近的数据。</p>
+<p>InnoDB的三种行锁算法：</p>
+<ul>
+<li>Record Lock：单个行记录上的锁。</li>
+<li>Gap Lock：间隙锁，锁定一个范围，但不包括记录本身。GAP锁的目的，是为了防止同一事务的两次当前读，出现幻读的情况。</li>
+<li>Next-Key Lock：1+2，锁定一个范围，并且锁定记录本身。对于行的查询，都是采用该方法，主要目的是解决幻读的问题。</li>
+</ul>
+<h2 id="2-1-Record-Locks"><a href="#2-1-Record-Locks" class="headerlink" title="2.1 Record Locks"></a>2.1 Record Locks</h2><p>锁定一个记录上的索引，而不是记录本身。</p>
+<h2 id="2-2-Gap-Locks"><a href="#2-2-Gap-Locks" class="headerlink" title="2.2 Gap Locks"></a>2.2 Gap Locks</h2><p>锁定索引之间的间隙，但是不包含索引本身。</p>
+<h2 id="2-3-Next-Key-Locks"><a href="#2-3-Next-Key-Locks" class="headerlink" title="2.3 Next-Key Locks"></a>2.3 Next-Key Locks</h2><p>Next-Key Locks 是 MySQL 的 InnoDB 存储引擎的一种锁实现。</p>
+<p>当查询的索引含有唯一属性的时候，Next-Key Lock 会进行优化，将其降级为Record Lock，即仅锁住索引本身，不是范围。</p>
+<p>它是 Record Locks 和 Gap Locks 的结合，不仅锁定一个记录上的索引，也锁定索引之间的间隙。</p>
+<h1 id="3-参考"><a href="#3-参考" class="headerlink" title="3. 参考"></a>3. 参考</h1><p><a href="https://juejin.im/post/6844903842505555981#heading-13" target="_blank" rel="noopener">聊聊MVCC和Next-key Locks</a></p>
+<p><a href="https://blog.csdn.net/SCUTJAY/article/details/104653599" target="_blank" rel="noopener">MVCC如何实现数据库读已提交和可重复读这两种隔离级别？</a></p>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+        <tag>MVCC</tag>
+        <tag>Next-key Lock</tag>
+        <tag>隔离级别</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java浅拷贝和深拷贝</title>
     <url>/2020/10/17/Java%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/</url>
     <content><![CDATA[<p>本文转载自简书（安静的蓝孩子）<a href="https://www.jianshu.com/p/94dbef2de298" target="_blank" rel="noopener">Java浅拷贝和深拷贝</a></p>
@@ -93,6 +161,43 @@
       <tags>
         <tag>java</tag>
         <tag>拷贝</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>POJO与JavaBean的区别</title>
+    <url>/2020/09/19/POJO%E4%B8%8EJavaBean%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<p>本文转载自 <a href="https://www.jianshu.com/p/224489dfdec8" target="_blank" rel="noopener">简书 (匠丶): java对象 POJO和JavaBean的区别</a></p>
+<p>POJO与JavaBean的区别，其实就是两个概念的区别。</p>
+<p>至于对实际编程有没有太大的影响，倒也没啥。</p>
+<p>只是同行说起来时，大概知道是个啥，谁还不知道这两玩意儿都是类呢！</p>
+<h1 id="POJO"><a href="#POJO" class="headerlink" title="POJO"></a>POJO</h1><p>“Plain Ordinary Java Object”，简单普通的java对象。主要用来指代那些没有遵循特定的java对象模型，约定或者框架的对象。</p>
+<p>POJO的内在含义是指那些:<br>有一些private的参数作为对象的属性，然后针对每一个参数定义get和set方法访问的接口。<br><strong>没有从任何类继承、也没有实现任何接口，更没有被其它框架侵入的java对象。</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BasicInfoVo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> String orderId;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> Integer uid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getOrderId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderId</span><span class="params">(String orderId)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.orderId = orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> Integer <span class="title">getUid</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> uid;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUid</span><span class="params">(Integer uid)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.uid = uid;</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="JavaBean"><a href="#JavaBean" class="headerlink" title="JavaBean"></a>JavaBean</h1><p>JavaBean 是<strong>一种JAVA语言写成的可重用组件</strong>。JavaBean符合一定规范编写的Java类，不是一种技术，而是一种规范。大家针对这种规范，总结了很多开发技巧、工具函数。符合这种规范的类，可以被其它的程序员或者框架使用。它的方法命名，构造及行为必须符合特定的约定：</p>
+<ul>
+<li><p><strong>所有属性为private</strong>。</p>
+</li>
+<li><p>这个类必须有一个公共的缺省构造函数。即是<strong>提供无参数的构造器</strong>。</p>
+</li>
+<li><p>这个类的<strong>属性使用getter和setter来访问</strong>，其他方法遵从标准命名规范。</p>
+</li>
+<li><p>这个类应是可序列化的。<strong>实现serializable接口</strong>。</p>
+</li>
+</ul>
+<p>因为这些要求主要是靠约定而不是靠实现接口，所以<strong>许多开发者把JavaBean看作遵从特定命名约定的POJO</strong>。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserInfo</span> <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span></span>&#123;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//实现serializable接口。  </span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">private</span> String name;  </span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> age;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//无参构造器  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">UserInfo</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">      </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.name = name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.age = age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">//javabean当中可以有其它的方法  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">userInfoPrint</span><span class="params">()</span></span>&#123;  </span><br><span class="line">    System.out.println(<span class="string">""</span>);  </span><br><span class="line">&#125;  &#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="两者有什么区别"><a href="#两者有什么区别" class="headerlink" title="两者有什么区别"></a>两者有什么区别</h1><p>POJO其实是比javabean更纯净的简单类或接口。POJO严格地遵守简单对象的概念，而一些JavaBean中往往会封装一些简单逻辑。</p>
+<p>POJO主要用于数据的临时传递，它只能装载数据， 作为数据存储的载体，而不具有业务逻辑处理的能力。</p>
+<p>Javabean虽然数据的获取与POJO一样，但是javabean当中可以有其它的方法。</p>
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>概念</tag>
       </tags>
   </entry>
   <entry>
@@ -172,114 +277,23 @@
         <category>java</category>
       </categories>
       <tags>
+        <tag>概念</tag>
         <tag>Json</tag>
         <tag>数据传输</tag>
-        <tag>概念</tag>
       </tags>
   </entry>
   <entry>
-    <title>MVCC与Next-key Locks</title>
-    <url>/2020/11/12/MVCC%E4%B8%8ENext-key-Locks/</url>
-    <content><![CDATA[<p>MYSQL数据库中，事务主要有4种<strong>隔离级别</strong>，分别是<strong>未提交读，提交读，可重复读，可串行化</strong>。</p>
-<p>多版本并发控制（Muti-Version Concurrency Control,MVCC）是MYSQL的InnoDB引擎实现隔离级别的一种具体方式。主要用来解决提交读和可重复读。</p>
-<p>但是单纯的MVCC还不能解决幻读的问题，于是在MVCC基础上加上Next-key Locks，达到可串行化的效果。</p>
-<p>这里只谈简单的理解。</p>
-<h1 id="1-MVCC"><a href="#1-MVCC" class="headerlink" title="1. MVCC"></a>1. MVCC</h1><p>顾名思义，通过<strong>多版本</strong>来实现并发控制。<strong>同一条记录在系统中可以存在多个版本</strong>。</p>
-<p>谈到并发控制，无非就是加锁实现。但加锁过程也会影响性能，这就是一致性与高可用的矛盾。MVCC免去读操作的加锁（非阻塞的读），使开销更低。<strong>写操作必须加锁</strong>。</p>
-<p>MVCC就是想办法少加点锁，通过其他方式保证数据一致性。<strong>MVCC是通过保存数据在某一个时间点快照来实现的。也就是说不管实现时间多长，每个事务看到的数据都是一致的。</strong></p>
-<p>于是不得不提到版本号、快照读与当前读。</p>
-<p>版本号，包括系统版本号与事务版本号。系统版本号是递增的数字，每开始一个新的事务，系统版本号自动增加。<strong>事务版本号就是事务开始时的系统版本号。</strong></p>
-<p>MVCC机制虽然能够让数据可重复读，但读取的数据可能是历史数据。<strong>读取历史数据的方式，称为快照读，而读取数据库最新版本的数据，称为当前读。</strong></p>
-<p>快照读实现了可重复读。自然的也解决了幻读问题（历史数据未变更）。</p>
-<p>对数据修改的操作(update、insert、delete)都是采用当前读的模式。在执行这几个操作时会读取最新的记录，即使是别的事务提交的数据也可以查询到。读取的是最新的数据，需要加锁。<strong>当前读不能解决幻读问题，需要加锁，使用Next-key Lock。</strong></p>
-<h1 id="1-1-隐藏列"><a href="#1-1-隐藏列" class="headerlink" title="1.1 隐藏列"></a>1.1 隐藏列</h1><p>MVCC工作时，在每行记录后边保存两个隐藏列。分别是数据行的创建时间，数据行的删除时间。这里的时间只是一种说法，不代表具体的时间，而是当时的系统版本号。</p>
-<blockquote>
-<p>注：这里表述的删除时间（版本号）不易理解，恰当的说法应该是回滚版本号（回滚指针）。通过该版本号在回滚日志中查询历史数据。</p>
-</blockquote>
-<p><strong>当开始一个新事务时，该事务的版本号肯定会大于当前所有数据行快照的创建版本号。</strong></p>
-<p>隐藏列对客户端来说是不可见的。</p>
-<h1 id="1-2-回滚日志（undo-log）"><a href="#1-2-回滚日志（undo-log）" class="headerlink" title="1.2 回滚日志（undo log）"></a>1.2 回滚日志（undo log）</h1><p><strong>当事务对数据行进行一次更新操作时，会把旧数据行记录在一个叫做undo log的记录中。</strong></p>
-<p>在undo log中除了记录数据行，还会记录下该行数据的对应的创建版本号。并将原来数据行中的回滚指针指向undo log 记录的这行数据。然后再在原来数据表中进行一次更新操作，如果这次更新操作回滚了，那么就可以根据回滚指针去undo log中查找之前的数据进行复原。</p>
-<p>如果后续还有更新操作的话，就会在undo log中和之前的数据行形成一条链表，链表头就是最新的数据，这条链表就叫做<strong>版本链</strong>。</p>
-<p><strong>事务的可见性都是基于undo log来实现的。</strong></p>
-<h1 id="1-3-事务快照（ReadView-可读视图）"><a href="#1-3-事务快照（ReadView-可读视图）" class="headerlink" title="1.3 事务快照（ReadView/可读视图）"></a>1.3 事务快照（ReadView/可读视图）</h1><p>当进行查询操作时，事务会生成一个ReadView，ReadView是一个事务快照，准确来说是当前时间点系统内活跃的事务列表，也就是说<strong>系统内所有未提交的事务，都会记录在这个Readview内</strong>，事务就根据它来判断哪些数据是可见的，哪些是不可见的。</p>
-<p>查询一条数据时，事务会拿到这个ReadView，去到undo log中进行判断。若查询到某一条数据：</p>
-<ul>
-<li>先去查看undo log中的最新数据行，如果数据行的版本号小于ReadView记录的事务版本号最小值，就说明这条数据对当前数据库是可见的，可以直接作为结果集返回</li>
-<li>若数据行版本号大于ReadView记录最大值，说明这条数据是由一个新的事务修改的，对当前事务不可见，那么就顺着版本链继续往下寻找第一条满足条件的</li>
-<li>若数据行版本号在ReadView最小值和最大值之间，那么就需要进行遍历了整个ReadView了，如果数据行版本号等于ReadView的某个值，则说明该行数据仍然处于活跃状态，那么对当前事务不可见</li>
-</ul>
-<h1 id="1-4-提交读与可重复读的实现"><a href="#1-4-提交读与可重复读的实现" class="headerlink" title="1.4 提交读与可重复读的实现"></a>1.4 提交读与可重复读的实现</h1><p><strong>关键在于生成ReadView的时机不同。</strong></p>
-<p><strong>对提交读来说，事务中的每次读操作都会生成一个新的ReadView</strong>，也就是说，如果这期间某个事务提交了，那么它就会从ReadView中移除。这样确保事务每次读操作都能读到相对比较新的数据。</p>
-<p>而<strong>对可重复读来说，事务只有在第一次进行读操作时才会生成一个ReadView</strong>，后续的读操作都会重复使用这个ReadView。也就是说，如果在此期间有其他事务提交了，那么对于可重复读来说也是不可见的，因为对它来说，事务活跃状态在第一次进行读操作时就已经确定下来，后面不会修改了。</p>
-<h1 id="1-5-理解增删改查"><a href="#1-5-理解增删改查" class="headerlink" title="1.5 理解增删改查"></a>1.5 理解增删改查</h1><p><strong>SELECT</strong> </p>
-<p>在SELECT过程中，InnoDB<strong>只查找版本早于当前事务版本的数据行</strong>，这样可以确保事务读取的行要么是在开始事务之前已经存在要么是事务自身插入或者修改过的，在事务开始之后才插入的行，事务不会看到。<br>行的删除版本号要么未定义，要么大于当前事务版本号，这样可以确保事务读取到的行在事务开始之前未被删除，在事务开始之前就已经过期的数据行，该事务也不会看到。</p>
-<p><strong>INSERT</strong></p>
-<p>将当前系统版本号作为数据行快照的创建版本号。</p>
-<p><strong>DELETE</strong>  </p>
-<p>将当前系统版本号作为数据行快照的删除版本号。</p>
-<p><strong>UPDATE</strong></p>
-<p>将当前系统版本号作为更新前的数据行快照的删除版本号，并将当前系统版本号作为更新后的数据行快照的创建版本号。可以理解为先执行 DELETE 后执行 INSERT。</p>
-<h1 id="2-Next-key-Locks"><a href="#2-Next-key-Locks" class="headerlink" title="2. Next-key Locks"></a>2. Next-key Locks</h1><p><strong>Next-key Locks由record locks(记录锁) 和 gap locks(间隙锁)组合而成</strong>，每次锁住的不光是需要使用的数据，还会锁住这些数据附近的数据。</p>
-<p>InnoDB的三种行锁算法：</p>
-<ul>
-<li>Record Lock：单个行记录上的锁。</li>
-<li>Gap Lock：间隙锁，锁定一个范围，但不包括记录本身。GAP锁的目的，是为了防止同一事务的两次当前读，出现幻读的情况。</li>
-<li>Next-Key Lock：1+2，锁定一个范围，并且锁定记录本身。对于行的查询，都是采用该方法，主要目的是解决幻读的问题。</li>
-</ul>
-<h2 id="2-1-Record-Locks"><a href="#2-1-Record-Locks" class="headerlink" title="2.1 Record Locks"></a>2.1 Record Locks</h2><p>锁定一个记录上的索引，而不是记录本身。</p>
-<h2 id="2-2"><a href="#2-2" class="headerlink" title="2.2"></a>2.2</h2><p>锁定索引之间的间隙，但是不包含索引本身。</p>
-<h2 id="2-3"><a href="#2-3" class="headerlink" title="2.3"></a>2.3</h2><p>Next-Key Locks 是 MySQL 的 InnoDB 存储引擎的一种锁实现。</p>
-<p>当查询的索引含有唯一属性的时候，Next-Key Lock 会进行优化，将其降级为Record Lock，即仅锁住索引本身，不是范围。</p>
-<p>它是 Record Locks 和 Gap Locks 的结合，不仅锁定一个记录上的索引，也锁定索引之间的间隙。</p>
-<h1 id="3-参考"><a href="#3-参考" class="headerlink" title="3. 参考"></a>3. 参考</h1><p><a href="https://juejin.im/post/6844903842505555981#heading-13" target="_blank" rel="noopener">聊聊MVCC和Next-key Locks</a></p>
-<p><a href="https://blog.csdn.net/SCUTJAY/article/details/104653599" target="_blank" rel="noopener">MVCC如何实现数据库读已提交和可重复读这两种隔离级别？</a></p>
+    <title>docker常用指令</title>
+    <url>/2020/09/18/docker%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/</url>
+    <content><![CDATA[<figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 进入容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//（run方式）运行容器时在使用 -d 参数时，容器启动后会进入后台</span></span><br><span class="line"><span class="comment">// -it参数：命令提示符效果（i：交互式 t：伪终端）</span></span><br><span class="line"><span class="comment">// /bin/bash 参数表明进入容器后执行的cmd命令（使用shell指令）</span></span><br><span class="line"></span><br><span class="line">docker exec -it 容器id /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment">//退出当前容器（exec进入，exit退出时不停止容器；attach进入，停止）</span></span><br><span class="line"></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta"># 拉取镜像（从docker hub镜像仓库）</span></span><br><span class="line">docker pull nginx(镜像名称)</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看镜像 </span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta"># 创建镜像（提前写好Dockerfile） </span></span><br><span class="line"><span class="comment">// -t 指定构建的镜像名称（target）</span></span><br><span class="line">docker image build -t diyimage:<span class="number">0.0</span><span class="number">.1</span> .</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除镜像 </span></span><br><span class="line"><span class="comment">// -f参数：force</span></span><br><span class="line">docker image rm 镜像id</span><br><span class="line">docker rmi [-f] 镜像id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 通过镜像生成容器 </span></span><br><span class="line">docker container run -p <span class="number">8000</span>:<span class="number">3000</span> -itd --name 容器名称 image01:<span class="number">0.0</span><span class="number">.1</span> /bin/bash</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">注：</span></span><br><span class="line"><span class="comment">每次run都会新增容器</span></span><br><span class="line"><span class="comment">-p参数：容器的 3000 端口映射到本机的 8000 端口。</span></span><br><span class="line"><span class="comment">-it参数：容器的 Shell 映射到当前的 Shell，然后你在本机窗口输入的命令，就会传入容器。</span></span><br><span class="line"><span class="comment">-d参数：容器生成后，后台运行</span></span><br><span class="line"><span class="comment">--name参数：指定容器的名称（不指定系统随机命名）</span></span><br><span class="line"><span class="comment">image01:0.0.1：image 文件的名字（如果有标签，还需要提供标签，默认是 latest 标签）</span></span><br><span class="line"><span class="comment">/bin/bash：容器启动以后，内部第一个执行的命令。这里是启动 Bash，保证用户可以使用 Shell。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">又注：如果镜像是基于nginx的，则不要写/bin/bash，否则映射出去的端口失效(无法访问)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 停止/启动容器 </span></span><br><span class="line">docker container kill/stop/start [containID]</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除容器 </span></span><br><span class="line">docker container rm 容器id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看容器 </span></span><br><span class="line">docker container ls</span><br><span class="line">docker container ls -all</span><br><span class="line"></span><br><span class="line">docker ps</span><br><span class="line">docker ps -a</span><br><span class="line"></span><br><span class="line"><span class="meta"># 保存镜像（eg：viewer-镜像名） </span></span><br><span class="line"></span><br><span class="line">docker save viewers-images  -o  /home/ldj/viewers-image.tar</span><br><span class="line"></span><br><span class="line"><span class="meta"># 载入本地镜像 </span></span><br><span class="line"></span><br><span class="line">docker load -i viewers-image.tar</span><br></pre></td></tr></table></figure>
+
 ]]></content>
       <categories>
-        <category>MySQL</category>
+        <category>docker</category>
       </categories>
       <tags>
-        <tag>数据库</tag>
-        <tag>MVCC</tag>
-        <tag>Next-key Lock</tag>
-        <tag>隔离级别</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>POJO与JavaBean的区别</title>
-    <url>/2020/09/19/POJO%E4%B8%8EJavaBean%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
-    <content><![CDATA[<p>本文转载自 <a href="https://www.jianshu.com/p/224489dfdec8" target="_blank" rel="noopener">简书 (匠丶): java对象 POJO和JavaBean的区别</a></p>
-<p>POJO与JavaBean的区别，其实就是两个概念的区别。</p>
-<p>至于对实际编程有没有太大的影响，倒也没啥。</p>
-<p>只是同行说起来时，大概知道是个啥，谁还不知道这两玩意儿都是类呢！</p>
-<h1 id="POJO"><a href="#POJO" class="headerlink" title="POJO"></a>POJO</h1><p>“Plain Ordinary Java Object”，简单普通的java对象。主要用来指代那些没有遵循特定的java对象模型，约定或者框架的对象。</p>
-<p>POJO的内在含义是指那些:<br>有一些private的参数作为对象的属性，然后针对每一个参数定义get和set方法访问的接口。<br><strong>没有从任何类继承、也没有实现任何接口，更没有被其它框架侵入的java对象。</strong></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BasicInfoVo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> String orderId;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> Integer uid;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getOrderId</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setOrderId</span><span class="params">(String orderId)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.orderId = orderId;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> Integer <span class="title">getUid</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> uid;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setUid</span><span class="params">(Integer uid)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.uid = uid;</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="JavaBean"><a href="#JavaBean" class="headerlink" title="JavaBean"></a>JavaBean</h1><p>JavaBean 是<strong>一种JAVA语言写成的可重用组件</strong>。JavaBean符合一定规范编写的Java类，不是一种技术，而是一种规范。大家针对这种规范，总结了很多开发技巧、工具函数。符合这种规范的类，可以被其它的程序员或者框架使用。它的方法命名，构造及行为必须符合特定的约定：</p>
-<ul>
-<li><p><strong>所有属性为private</strong>。</p>
-</li>
-<li><p>这个类必须有一个公共的缺省构造函数。即是<strong>提供无参数的构造器</strong>。</p>
-</li>
-<li><p>这个类的<strong>属性使用getter和setter来访问</strong>，其他方法遵从标准命名规范。</p>
-</li>
-<li><p>这个类应是可序列化的。<strong>实现serializable接口</strong>。</p>
-</li>
-</ul>
-<p>因为这些要求主要是靠约定而不是靠实现接口，所以<strong>许多开发者把JavaBean看作遵从特定命名约定的POJO</strong>。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserInfo</span> <span class="keyword">implements</span> <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span></span>&#123;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//实现serializable接口。  </span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">1L</span>;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">private</span> String name;  </span><br><span class="line"><span class="keyword">private</span> <span class="keyword">int</span> age;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">//无参构造器  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">UserInfo</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">      </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.name = name;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getAge</span><span class="params">()</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">this</span>.age = age;  </span><br><span class="line">&#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">//javabean当中可以有其它的方法  </span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">userInfoPrint</span><span class="params">()</span></span>&#123;  </span><br><span class="line">    System.out.println(<span class="string">""</span>);  </span><br><span class="line">&#125;  &#125;</span><br></pre></td></tr></table></figure>
-
-<h1 id="两者有什么区别"><a href="#两者有什么区别" class="headerlink" title="两者有什么区别"></a>两者有什么区别</h1><p>POJO其实是比javabean更纯净的简单类或接口。POJO严格地遵守简单对象的概念，而一些JavaBean中往往会封装一些简单逻辑。</p>
-<p>POJO主要用于数据的临时传递，它只能装载数据， 作为数据存储的载体，而不具有业务逻辑处理的能力。</p>
-<p>Javabean虽然数据的获取与POJO一样，但是javabean当中可以有其它的方法。</p>
-]]></content>
-      <categories>
-        <category>java</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-        <tag>概念</tag>
+        <tag>docker</tag>
+        <tag>命令</tag>
       </tags>
   </entry>
   <entry>
@@ -301,23 +315,9 @@
         <category>docker</category>
       </categories>
       <tags>
+        <tag>docker</tag>
         <tag>教程</tag>
-        <tag>docker</tag>
         <tag>nginx</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>docker常用指令</title>
-    <url>/2020/09/18/docker%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4/</url>
-    <content><![CDATA[<figure class="highlight vala"><table><tr><td class="code"><pre><span class="line"><span class="meta"># 进入容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//（run方式）运行容器时在使用 -d 参数时，容器启动后会进入后台</span></span><br><span class="line"><span class="comment">// -it参数：命令提示符效果（i：交互式 t：伪终端）</span></span><br><span class="line"><span class="comment">// /bin/bash 参数表明进入容器后执行的cmd命令（使用shell指令）</span></span><br><span class="line"></span><br><span class="line">docker exec -it 容器id /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment">//退出当前容器（exec进入，exit退出时不停止容器；attach进入，停止）</span></span><br><span class="line"></span><br><span class="line">exit</span><br><span class="line"></span><br><span class="line"><span class="meta"># 拉取镜像（从docker hub镜像仓库）</span></span><br><span class="line">docker pull nginx(镜像名称)</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看镜像 </span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="meta"># 创建镜像（提前写好Dockerfile） </span></span><br><span class="line"><span class="comment">// -t 指定构建的镜像名称（target）</span></span><br><span class="line">docker image build -t diyimage:<span class="number">0.0</span><span class="number">.1</span> .</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除镜像 </span></span><br><span class="line"><span class="comment">// -f参数：force</span></span><br><span class="line">docker image rm 镜像id</span><br><span class="line">docker rmi [-f] 镜像id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 通过镜像生成容器 </span></span><br><span class="line">docker container run -p <span class="number">8000</span>:<span class="number">3000</span> -itd --name 容器名称 image01:<span class="number">0.0</span><span class="number">.1</span> /bin/bash</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">注：</span></span><br><span class="line"><span class="comment">每次run都会新增容器</span></span><br><span class="line"><span class="comment">-p参数：容器的 3000 端口映射到本机的 8000 端口。</span></span><br><span class="line"><span class="comment">-it参数：容器的 Shell 映射到当前的 Shell，然后你在本机窗口输入的命令，就会传入容器。</span></span><br><span class="line"><span class="comment">-d参数：容器生成后，后台运行</span></span><br><span class="line"><span class="comment">--name参数：指定容器的名称（不指定系统随机命名）</span></span><br><span class="line"><span class="comment">image01:0.0.1：image 文件的名字（如果有标签，还需要提供标签，默认是 latest 标签）</span></span><br><span class="line"><span class="comment">/bin/bash：容器启动以后，内部第一个执行的命令。这里是启动 Bash，保证用户可以使用 Shell。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">又注：如果镜像是基于nginx的，则不要写/bin/bash，否则映射出去的端口失效(无法访问)</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="meta"># 停止/启动容器 </span></span><br><span class="line">docker container kill/stop/start [containID]</span><br><span class="line"></span><br><span class="line"><span class="meta"># 删除容器 </span></span><br><span class="line">docker container rm 容器id</span><br><span class="line"></span><br><span class="line"><span class="meta"># 查看容器 </span></span><br><span class="line">docker container ls</span><br><span class="line">docker container ls -all</span><br><span class="line"></span><br><span class="line">docker ps</span><br><span class="line">docker ps -a</span><br><span class="line"></span><br><span class="line"><span class="meta"># 保存镜像（eg：viewer-镜像名） </span></span><br><span class="line"></span><br><span class="line">docker save viewers-images  -o  /home/ldj/viewers-image.tar</span><br><span class="line"></span><br><span class="line"><span class="meta"># 载入本地镜像 </span></span><br><span class="line"></span><br><span class="line">docker load -i viewers-image.tar</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>docker</category>
-      </categories>
-      <tags>
-        <tag>docker</tag>
-        <tag>命令</tag>
       </tags>
   </entry>
   <entry>
@@ -373,6 +373,71 @@
       </categories>
       <tags>
         <tag>kindle</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>博客伊始</title>
+    <url>/2019/09/20/%E5%8D%9A%E5%AE%A2%E4%BC%8A%E5%A7%8B/</url>
+    <content><![CDATA[<h2 id="博客伊始"><a href="#博客伊始" class="headerlink" title="博客伊始"></a>博客伊始</h2><p align="right"><font color="grey">作者：冬结</font></p>
+
+<blockquote>
+<p>写在前面：<br>偶然看到Hexo模板的博客，观感不错，加上前辈也搭过，就试试以这种相对简单的形式搭建起来玩。一方面简单学习以现有框架搭建专属博客的“技术”，另一方面也能有个容器装一点自己的笔记，尽管可能比较少，可能并不安全，聊胜于无。</p>
+</blockquote>
+<h3 id="兴趣"><a href="#兴趣" class="headerlink" title="兴趣"></a>兴趣</h3><p>我的兴趣，很难讲。佛系（可能）心态的人在平静生活中貌似对所有的事不放心上，所以，电影可以不看、单车可以不骑、乒乓球可以不打、书可以不阅读、随笔可以不写、游戏可以不玩。自我认知是一个漫长的过程，从浪漫理想主义到实用现实主义，说到底也划不清界限。妥协的做法是就此作罢，不去深究，也就能将困惑搁置一旁。况且说辞也是一大把，比如复杂的个体就能说服我自己。一贯的自我否定，也可以说深究一法至少能够审视自我更加全面深刻，更加接近真实。否定之否定，打住！</p>
+<p>接着说兴趣。从某种维度上讲，兴趣带来愉悦、专注与充实感。</p>
+<p>这样说来，好的电影是我的兴趣，带给我专注与思考。看过的电影也不少，影评却没尝试过一篇。电影没有带给我充实感，但我并不认为它在浪费时间。娱乐的底质，依旧能够容纳艺术与生活。尽管总能从这种媒介中看到不真实，生活的经验依然鲜活。现在的我能以相对包容的眼光对待现实的种种“怪象”，大抵与之有所关联。</p>
+<p>骑单车溜达也算得上。单车是真的单车，单人单骑，随便找个目标，也就慢慢悠悠的去。骑行就不能描述我的方式了，老老实实地去骑单车溜达。某次，什么背景的现在全无记忆，只是感到沉闷的低落，简直到不能忍受的地步，然后就溜达着去后海那边。也许逛胡同，也许没有。至于能否缓解我的状态，我也记不得。只是到那种状态，我能想到这种方式去排解，多少也算是一种认同吧。</p>
+<p>至于随笔（恰当称谓？），也能算是我的兴趣。偶尔写写东西，偶尔是真的偶偶尔。我从写文字当中获取的安静、专注、充实感显而易见，而文字大多都是当时的情绪与想法，可能脱胎于日记，但也将一些真实到黑暗的思考隐藏起来，多少能见光。不知道将自我产出的文字视若珍宝算不算病态，但我的确珍视，在我眼里这些文字能真切表示一种状态，这一刻我就是美化的真实的。至于这种方式何以占据重要的位置，大概因为内心戏丰富如我，不善表达情绪，多少是关掉大门开几扇窗。</p>
+<p>其他能说的，读书、乒乓和游戏，目前的程度都还比较浅。曾经都热过一阵的行为，慢慢沉寂下来也沾上了尘土。所谓的我的兴趣，没得一项算是个人特长。骑车只是休闲，电影只是娱乐，随笔也只是偶尔的文艺，但是至少这些，能够成为生活的调剂，是能够令我感到舒适的生活方式。</p>
+<h3 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h3><p>整理些技术向的学习内容，也多少要往这博客里边搁，况且，这本就是搭建这玩意的初衷。尽管不太喜欢用“工作”一词，但还是必须得慢慢习惯的。</p>
+<p>求学时期拥有很好的学习环境，这段时间也就余下几年，两者都不得不承认。实验室的一些开发工作，还有自己看过的、学过的、实践过的一些内容，选择性的往这个博客里边搁。尽量减少一些空洞的文字（多一些图），减少随处可见的教程，多一点自己的总结，就是描述不规范，甚至有错误也无关紧要。他人的是他人的，转化为自己的才是自己的。尽管这些话可有可无，也就这样摆在这里了。</p>
+<p>至于具体的工作内容，也没法细说。只是一段时间过去，觉得稍微闲下来时，慢悠悠写一点总结，多少能够察觉出自己在缓慢的生长，就很开心了。至于成长的快与慢，也不多去琢磨。吃饭慢，跑步慢，性子慢……真要快节奏起来，真就为难我“胖虎”了！</p>
+<h3 id="成长"><a href="#成长" class="headerlink" title="成长"></a>成长</h3><p>现在过多的想法与计划一如既往地空白，只是希望每天有点进步，慢慢生长吧。</p>
+<p>趁现在还有点记忆，罗列下自初中以来每个阶段自我希求的关键词。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">改变 ：白墙上丑陋的浓墨毛笔字，墨迹未干尚不回望，小屋也拆了，斑驳的往事不能再找回。</span><br><span class="line">掌控 ：年少时总希望能够决定自己的命运，可是连早睡早起也没有做到。</span><br><span class="line">自由 ：那四年时光，持续性潇洒，间歇性焦虑。觉睡得很饱，书读得也少。向自己一样平平淡淡。</span><br><span class="line">成长 ：有的人每天跑步，有的人会慢慢散步。蜗牛和火箭，都在自以为的前进。</span><br></pre></td></tr></table></figure>
+
+<h3 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h3><p>今天是2019年9月20日，算是一个开始吧！</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/xingkong.jpeg" alt="星空"></p>
+]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>随笔</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>对象的序列化：Serializable接口</title>
+    <url>/2020/10/12/%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9ASerializable%E6%8E%A5%E5%8F%A3/</url>
+    <content><![CDATA[<p>一般而言，定义实体类时会实现 <code>Serializable</code>接口，同时还要显示指定<code>serialVersionUID</code>的值。</p>
+<p>为什么要有这些操作呢？这里就试图简单理解。</p>
+<h1 id="1-序列化与反序列化"><a href="#1-序列化与反序列化" class="headerlink" title="1. 序列化与反序列化"></a>1. 序列化与反序列化</h1><p><font color="red">序列化</font>：把对象转换为字节序列的过程称为对象的序列化。</p>
+<p><font color="red">反序列化</font>：把字节序列恢复为对象的过程称为对象的反序列化。</p>
+<p>从概念上看，<strong>序列化操作只是针对于对象层面的</strong>，包含对象的成员变量和成员方法。那么被static修饰的成员变量呢？结论是被static修饰的属性不会被序列化。</p>
+<p>但这并不意味着static修饰的变量会缺失。这个变量不管被什么修饰词修饰，始终还算对象里边的成员变量。只是可能存在变量值不一致的情况，因为无法序列化代表对象的该变量的值无法硬性写入字节序列（有点饶，描述serialVersionUID进一步阐述）</p>
+<h1 id="2-Serializable接口"><a href="#2-Serializable接口" class="headerlink" title="2. Serializable接口"></a>2. Serializable接口</h1><p>一个对象序列化的接口，<strong>一个类只有实现了Serializable接口，它的对象才能被序列化</strong>。</p>
+<p>日常接触的String类，其底层也实现了Serializable接口，所以JSON字符串才能在前后端自由传输。</p>
+<p>但观察Serializable接口就会发现，接口内部啥也没有，就是说，它是一个空接口。<font color="red">其实，可以将它理解为一个标识接口。实现这个接口，就是给JVM看的，JVM会帮助当前类实现序列化（或反序列化）的具体操作。</font></p>
+<p>Serializable接口就是<font color="red">Java提供用来进行高效率的异地共享实例对象的机制</font>，实现这个接口即可。</p>
+<h1 id="3-serialversionUID变量"><a href="#3-serialversionUID变量" class="headerlink" title="3. serialversionUID变量"></a>3. serialversionUID变量</h1><p>通常的写法是：</p>
+<figure class="highlight aspectj"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">12356</span>L;</span><br></pre></td></tr></table></figure>
+
+<p>显示声明这个变量并赋予字面量的作用是啥？保证类的一致性。如果类发生变化，依然能够对旧类的对象（已经序列化）执行反序列化操作。</p>
+<p>很多时候我们未显示声明该变量，程序照常运行。<font color="red">实际上，是JVM在序列化时根据属性自动生成一个serialVersionUID，然后与属性一起序列化。在反序列化时，JVM会再根据属性自动生成一个新版serialVersionUID，然后将新serialVersionUID与旧serialVersionUID比较，如果一致，则反序列化成功，否则报错。</font></p>
+<p>类发生变化（旧类与新类），JVM自动生成的serialVersionUID值就不一致，所以就可能出现问题。</p>
+<h1 id="4-serialversionUID变量也被static修饰"><a href="#4-serialversionUID变量也被static修饰" class="headerlink" title="4. serialversionUID变量也被static修饰"></a>4. serialversionUID变量也被static修饰</h1><p>前面提到，被static修饰的属性不会被序列化，但serialversionUID变量也被static修饰确可以被序列化，这不是打脸吗？</p>
+<p>答案是，你用static修饰的那个变量并没有被序列化，只不过是工具变量拿来传值的。JVM 在序列化对象时会自动生成一个 serialVersionUID, 然后将我们显示指定的 serialVersionUID 属性值赋给自动生成的 serialVersionUID。</p>
+<p>至于其他的static修饰的属性，这些属性是跟着类走的。一种合理的解释是，<font color="red">序列化是针对对象而言的, 而 static 属性优先于对象存在, 随着类的加载而加载, 所以不会被序列化。</font></p>
+<h1 id="5-什么时候需要序列化和反序列化"><a href="#5-什么时候需要序列化和反序列化" class="headerlink" title="5. 什么时候需要序列化和反序列化"></a>5. 什么时候需要序列化和反序列化</h1><p>答案是：<font color="red">对内存中的对象进行数据（指对象的状态信息）传输（通信）与数据存储（持久化）。</font>很多时候我们可能并不是将整个对象存储或者传输，而是其中的字段信息，比如说将数据保存在数据库。这个过程每个字段的变量类型都应该是可序列化的，也即实现了Serializable接口。</p>
+<p>我们经常这么用，但不一定想到原来它们都默默实现了Serializable接口。</p>
+<h1 id="6-参考资料"><a href="#6-参考资料" class="headerlink" title="6. 参考资料"></a>6. 参考资料</h1><p><a href="https://blog.csdn.net/litianxiang_kaola/article/details/100097019" target="_blank" rel="noopener">Java序列化和反序列化为什么要实现Serializable接口</a></p>
+]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>Serializable接口</tag>
       </tags>
   </entry>
   <entry>
@@ -454,68 +519,264 @@
       </tags>
   </entry>
   <entry>
-    <title>对象的序列化：Serializable接口</title>
-    <url>/2020/10/12/%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%EF%BC%9ASerializable%E6%8E%A5%E5%8F%A3/</url>
-    <content><![CDATA[<p>一般而言，定义实体类时会实现 <code>Serializable</code>接口，同时还要显示指定<code>serialVersionUID</code>的值。</p>
-<p>为什么要有这些操作呢？这里就试图简单理解。</p>
-<h1 id="1-序列化与反序列化"><a href="#1-序列化与反序列化" class="headerlink" title="1. 序列化与反序列化"></a>1. 序列化与反序列化</h1><p><font color="red">序列化</font>：把对象转换为字节序列的过程称为对象的序列化。</p>
-<p><font color="red">反序列化</font>：把字节序列恢复为对象的过程称为对象的反序列化。</p>
-<p>从概念上看，<strong>序列化操作只是针对于对象层面的</strong>，包含对象的成员变量和成员方法。那么被static修饰的成员变量呢？结论是被static修饰的属性不会被序列化。</p>
-<p>但这并不意味着static修饰的变量会缺失。这个变量不管被什么修饰词修饰，始终还算对象里边的成员变量。只是可能存在变量值不一致的情况，因为无法序列化代表对象的该变量的值无法硬性写入字节序列（有点饶，描述serialVersionUID进一步阐述）</p>
-<h1 id="2-Serializable接口"><a href="#2-Serializable接口" class="headerlink" title="2. Serializable接口"></a>2. Serializable接口</h1><p>一个对象序列化的接口，<strong>一个类只有实现了Serializable接口，它的对象才能被序列化</strong>。</p>
-<p>日常接触的String类，其底层也实现了Serializable接口，所以JSON字符串才能在前后端自由传输。</p>
-<p>但观察Serializable接口就会发现，接口内部啥也没有，就是说，它是一个空接口。<font color="red">其实，可以将它理解为一个标识接口。实现这个接口，就是给JVM看的，JVM会帮助当前类实现序列化（或反序列化）的具体操作。</font></p>
-<p>Serializable接口就是<font color="red">Java提供用来进行高效率的异地共享实例对象的机制</font>，实现这个接口即可。</p>
-<h1 id="3-serialversionUID变量"><a href="#3-serialversionUID变量" class="headerlink" title="3. serialversionUID变量"></a>3. serialversionUID变量</h1><p>通常的写法是：</p>
-<figure class="highlight aspectj"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = <span class="number">12356</span>L;</span><br></pre></td></tr></table></figure>
-
-<p>显示声明这个变量并赋予字面量的作用是啥？保证类的一致性。如果类发生变化，依然能够对旧类的对象（已经序列化）执行反序列化操作。</p>
-<p>很多时候我们未显示声明该变量，程序照常运行。<font color="red">实际上，是JVM在序列化时根据属性自动生成一个serialVersionUID，然后与属性一起序列化。在反序列化时，JVM会再根据属性自动生成一个新版serialVersionUID，然后将新serialVersionUID与旧serialVersionUID比较，如果一致，则反序列化成功，否则报错。</font></p>
-<p>类发生变化（旧类与新类），JVM自动生成的serialVersionUID值就不一致，所以就可能出现问题。</p>
-<h1 id="4-serialversionUID变量也被static修饰"><a href="#4-serialversionUID变量也被static修饰" class="headerlink" title="4. serialversionUID变量也被static修饰"></a>4. serialversionUID变量也被static修饰</h1><p>前面提到，被static修饰的属性不会被序列化，但serialversionUID变量也被static修饰确可以被序列化，这不是打脸吗？</p>
-<p>答案是，你用static修饰的那个变量并没有被序列化，只不过是工具变量拿来传值的。JVM 在序列化对象时会自动生成一个 serialVersionUID, 然后将我们显示指定的 serialVersionUID 属性值赋给自动生成的 serialVersionUID。</p>
-<p>至于其他的static修饰的属性，这些属性是跟着类走的。一种合理的解释是，<font color="red">序列化是针对对象而言的, 而 static 属性优先于对象存在, 随着类的加载而加载, 所以不会被序列化。</font></p>
-<h1 id="5-什么时候需要序列化和反序列化"><a href="#5-什么时候需要序列化和反序列化" class="headerlink" title="5. 什么时候需要序列化和反序列化"></a>5. 什么时候需要序列化和反序列化</h1><p>答案是：<font color="red">对内存中的对象进行数据（指对象的状态信息）传输（通信）与数据存储（持久化）。</font>很多时候我们可能并不是将整个对象存储或者传输，而是其中的字段信息，比如说将数据保存在数据库。这个过程每个字段的变量类型都应该是可序列化的，也即实现了Serializable接口。</p>
-<p>我们经常这么用，但不一定想到原来它们都默默实现了Serializable接口。</p>
-<h1 id="6-参考资料"><a href="#6-参考资料" class="headerlink" title="6. 参考资料"></a>6. 参考资料</h1><p><a href="https://blog.csdn.net/litianxiang_kaola/article/details/100097019" target="_blank" rel="noopener">Java序列化和反序列化为什么要实现Serializable接口</a></p>
+    <title>缓存穿透、缓存击穿和缓存雪崩</title>
+    <url>/2020/12/16/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%E3%80%81%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%E5%92%8C%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9/</url>
+    <content><![CDATA[<p>缓存，基本上都是在内存空间里，所以读缓存比读磁盘更快。</p>
+<p><strong>缓存能减少数据库服务器的压力，并提升用户请求的响应速度</strong>。其实，不管是前端还是后端，<strong>缓存</strong>都是一种必不可少的<strong>优化方式</strong>之一。</p>
+<p>但也可能出现缓存穿透、缓存击穿、缓存雪崩、热点数据失效等问题。</p>
+<h1 id="1-缓存的工作流程"><a href="#1-缓存的工作流程" class="headerlink" title="1. 缓存的工作流程"></a>1. 缓存的工作流程</h1><p>不管缓存的位置在哪，可能在浏览器、代理服务器、服务器本地、分布式缓存系统或者数据库中，作用机理都基本一致。</p>
+<p>假定我们现在讨论服务器本地缓存。</p>
+<ol>
+<li><p>客户端（用户）请求数据</p>
+</li>
+<li><p>服务器先查缓存，如果缓存中有相关的响应数据，直接返回</p>
+</li>
+<li><p>缓存中没有相应数据，则服务器将从数据库获取数据，然后返回给客户端，同时将这份数据存入缓存</p>
+</li>
+</ol>
+<p>服务器根据客户端的请求查找缓存，如何做到相同请求对应相同的缓存数据？</p>
+<p><strong>客户端请求的URL可以映射为一个Key，服务器根据这个Key查找对应的缓存Value。</strong></p>
+<h1 id="2-缓存穿透"><a href="#2-缓存穿透" class="headerlink" title="2. 缓存穿透"></a>2. 缓存穿透</h1><p>客户端<strong>请求数据库中不存在的数据</strong>时发生。</p>
+<p>因为数据库中都不存在该数据，缓存中自然也没有。服务器查遍缓存也没有，然后客户端请求就会去冲击数据库，请求成功的话返回空。</p>
+<p>但并发量一大，所以客户端请求全都冲击数据库，容易导致数据库服务器压力过大甚至宕机。</p>
+<blockquote>
+<p>注：请求 id = -1 的数据。</p>
+</blockquote>
+<p>解决方案：</p>
+<ul>
+<li>接口校验（过滤无效请求）</li>
+<li>缓存空值（key-null），并设置较短的缓存过期时间</li>
+<li>布隆过滤器（BloomFilter）</li>
+</ul>
+<p>布隆过滤器本质上是一种数据结构，巧妙的概率型数据结构。特点是高效地插入和查询，节约内存空间，时间复杂度低。</p>
+<p>布隆过滤器能够告诉你，“某样东西一定不存在或者可能存在”。这里的应用场景，就是“请求的key在缓存中一定不存在或者可能存在”。通过“一定不存在”能过滤掉大量无效请求。</p>
+<p>相比于传统的List、Map、Set等数据结构，布隆过滤器这种bitMap是一个bit数组或者说bit向量，更高效、占用空间更小。</p>
+<p>布隆过滤器的应用关键是如何选择Hash函数个数和布隆过滤器的长度。</p>
+<blockquote>
+<p>注：虽然理论上布隆过滤器应对缓存穿透十分有效，但实际上可能并不常用。它也有缺点，一是准确率有误（本质是因为hash碰撞），二是不能删除元素（如果一个元素被删除，却不能从布隆过滤器中删除）。</p>
+</blockquote>
+<h1 id="3-缓存击穿"><a href="#3-缓存击穿" class="headerlink" title="3. 缓存击穿"></a>3. 缓存击穿</h1><p><strong>大量请求同时查询Key，但这个Key正好失效</strong>，于是并发的请求同时冲击数据库。这就是缓存击穿。</p>
+<blockquote>
+<p>注：热点Key缓存过期。</p>
+</blockquote>
+<p>缓存击穿与缓存穿透不一样。缓存击穿查询的是数据库中有但缓存没有的数据，缓存穿透查询的是数据库中没有且缓存也没有的数据。</p>
+<p>解决方案：</p>
+<ul>
+<li>设置热点数据永不过期</li>
+<li>加互斥锁</li>
+</ul>
+<blockquote>
+<p>注：热点数据的更新通过异步线程实现，保证高可用性；互斥锁能保证数据的一致性，大量的线程阻塞降低吞吐量，失去了性能。</p>
+</blockquote>
+<h1 id="4-缓存雪崩"><a href="#4-缓存雪崩" class="headerlink" title="4. 缓存雪崩"></a>4. 缓存雪崩</h1><p>缓存雪崩是<strong>缓存中大量数据同时过期</strong>，导致大量的请求到达数据库。</p>
+<p>缓存雪崩和缓存击穿不一样。缓存击穿查询的是同一条数据，缓存雪崩是不同的数据都过期了。</p>
+<p>缓存服务器宕机，或者（初始化阶段）数据未加载到缓存中，都可能导致缓存雪崩。</p>
+<p>解决方案：</p>
+<ul>
+<li>缓存数据设置不同的过期时间</li>
+<li>缓存预热（缓存服务器刚启动不久，大量数据未被缓存的背景下）</li>
+</ul>
+<blockquote>
+<p>注：给不同key过期时间加上随机值，使缓存失效的时间点尽量均匀。其实缓存击穿的解决方案完全适用于缓存雪崩。在考虑使用互斥锁时，可以加上主备缓存策略（二级缓存）。</p>
+</blockquote>
+<p><strong>缓存预热</strong>是在系统上线后，先将相关的数据构建到缓存中，这样可以避免用户请求直接到达数据库。预热的数据主要取决于访问量和数据量大小。</p>
+<h1 id="4-热点Key重建"><a href="#4-热点Key重建" class="headerlink" title="4. 热点Key重建"></a>4. 热点Key重建</h1><p>使用“<strong>缓存+过期时间</strong>”的策略能够加速读写，同时能保证数据的定期更新，能满足绝大部分需求。</p>
+<p>如果当前Key是热点Key，并且该Key的重建缓存不能在短时间完成（可能需要复杂计算）。</p>
+<p>那么这个Key的缓存失效就得不偿失了。</p>
+<p>解决方案：</p>
+<ul>
+<li>热点数据永不过期</li>
+<li>互斥锁（数据库服务端）</li>
+<li>后端限流</li>
+<li>二级缓存（A级缓存正常，B级缓存永不过期，A/B级缓存适时同步更新）</li>
+</ul>
+<p>前两种这些方案都建立在Hot Key是已知的背景下。<strong>在不知道Hot Key的前提下，还是考虑后端限流、二级缓存等解决方案</strong>。</p>
+<h1 id="5-缓存降级"><a href="#5-缓存降级" class="headerlink" title="5. 缓存降级"></a>5. 缓存降级</h1><p><strong>缓存降级</strong>是指缓存失效或缓存服务器宕机的情况下，不去访问数据库，<strong>直接返回默认数据或访问服务的内存数据</strong>。值得注意的是，<strong>缓存降级是有损的</strong>。</p>
+<p>所谓的有损，是因为用户享受到的服务不是完整的（页面部分数据丢失）或者获取到的不是最新数据（一致性不能保证）。限流其实就是服务降级的一种，部分用户可能会请求失败。</p>
+<blockquote>
+<p>注：降级和熔断相似但有区别。降级出现在整体负荷超出整体负载承受能力时，延迟或暂停非重要服务，例如日志收集服务。熔断针对于单个服务，当某一服务出现了过载现象，为防止造成整个系统故障，直接关闭该服务（比较暴力）或者保证部分请求成功。</p>
+</blockquote>
+<h1 id="6-小结"><a href="#6-小结" class="headerlink" title="6. 小结"></a>6. 小结</h1><p>数据库服务器很脆弱。</p>
+<p>缓存解决的请求类型都是查询请求，查询就可能带来一致性问题。</p>
+<p>缓存很重要，是数据库服务器的盾牌（削减伤害）。</p>
+<p>解决缓存的问题，似乎加锁是通用方法。但加锁需要付出性能代价。</p>
+<p>限流应该是数据库的贴身保镖，请求密集可能响应慢，但服务还不至于挂掉。</p>
+<p>高并发系统的三大法宝：缓存、降级（熔断）和限流。</p>
 ]]></content>
       <categories>
-        <category>java</category>
+        <category>系统设计</category>
       </categories>
       <tags>
-        <tag>java</tag>
-        <tag>Serializable接口</tag>
+        <tag>缓存</tag>
       </tags>
   </entry>
   <entry>
-    <title>博客伊始</title>
-    <url>/2019/09/20/%E5%8D%9A%E5%AE%A2%E4%BC%8A%E5%A7%8B/</url>
-    <content><![CDATA[<h2 id="博客伊始"><a href="#博客伊始" class="headerlink" title="博客伊始"></a>博客伊始</h2><p align="right"><font color="grey">作者：冬结</font></p>
+    <title>常见乱码问题及分析</title>
+    <url>/2020/07/03/%E5%B8%B8%E8%A7%81%E4%B9%B1%E7%A0%81%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>有一个现成的古老的web项目，技术栈包括<code>JSP</code> <code>JAVA</code> <code>MYSQL</code>，<code>MyEclipse 10.5</code>作为开发工具，开发环境<code>JDK1.7</code> <code>Tomcat7</code> <code>Mysql5.5</code>。</p>
+<p>现在项目能够部署成功，正常访问。</p>
+<p>但是当提交的表单数据中包含中文时，数据库存储的相关数据显示为???。</p>
+<p>因为这个<code>BUG</code>，诞生这篇小结。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/pk0001.png" alt="朋克风"></p>
+<h1 id="常见乱码问题分析和总结"><a href="#常见乱码问题分析和总结" class="headerlink" title="常见乱码问题分析和总结"></a>常见乱码问题分析和总结</h1><p>本节内容选自<a href="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/index.html" target="_blank" rel="noopener">IBM Developer : 常见乱码问题分析和总结 </a></p>
+<h2 id="编码与解码"><a href="#编码与解码" class="headerlink" title="编码与解码"></a>编码与解码</h2><p>计算机不能直接存储字母，数字，图片，符号等，计算机能处理和工作的唯一单位是”比特位（bit）”，一个比特位通常只有 0 和 1，是（yes）和否（no），真（true）或者假（false）等等我们喜欢的称呼。利用比特位序列来代表字母，数字，图片，符号等，我们就需要一个存储规则，不同的比特序列代表不同的字符，这就是所谓的”编码”。反之，将存储在计算机中的比特位序列（或者叫二进制序列）解析显示出来成对应的字母，数字，图片和符号，称为”解码”，如同密码学中的加密和解密，下面将详细解释编码解码过程中涉及到的一些术语：</p>
+<p><strong>字符集合（Character set）</strong>：是各种文字和符号的总称，包括各国家文字、标点符号、图形符号、数字等，简单理解就是一个字库，与计算机以及编码无关。</p>
+<p><strong>字符编码集（Coded character set）</strong>：是一组字符对应的编码（即数字），为字符集合中的每一个字符给予一个数字，如 Unicode 为每一个字符分配一个唯一的码点与之一一对应。</p>
+<p><strong>字符编码（Character Encoding）</strong>：简单理解就是一个映射关系，将字符集对应的码点映射为一个个二进制序列，从而使得计算机可以存储和处理。常见的编码方式有 ASCII 编码、ISO-8859-1(不支持中文)、GBK、GB2312（中国编码，支持中文）、UTF-8 等等,详情见表 1。</p>
+<p><strong>字符集（Charset）</strong>：包括编码字符集合和字符编码，如 ASCII 字符集、ISO-8859-X、GB2312 字符集（简中）、BIG5 字符集（繁中）、GB18030 字符集、Shift-JIS 等，即下文中提到的字符集。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">这里提到的字符集合与字符集是不同的概念，后者包含前者。</span><br><span class="line">一般乱码现象都是因为中文数据导致的，汉字占用双字节，所以支持中文的编码方式（GBK、UTF<span class="number">-8</span>等）也就是可以支持对双字节汉字进行编码。</span><br></pre></td></tr></table></figure>
 
-<blockquote>
-<p>写在前面：<br>偶然看到Hexo模板的博客，观感不错，加上前辈也搭过，就试试以这种相对简单的形式搭建起来玩。一方面简单学习以现有框架搭建专属博客的“技术”，另一方面也能有个容器装一点自己的笔记，尽管可能比较少，可能并不安全，聊胜于无。</p>
-</blockquote>
-<h3 id="兴趣"><a href="#兴趣" class="headerlink" title="兴趣"></a>兴趣</h3><p>我的兴趣，很难讲。佛系（可能）心态的人在平静生活中貌似对所有的事不放心上，所以，电影可以不看、单车可以不骑、乒乓球可以不打、书可以不阅读、随笔可以不写、游戏可以不玩。自我认知是一个漫长的过程，从浪漫理想主义到实用现实主义，说到底也划不清界限。妥协的做法是就此作罢，不去深究，也就能将困惑搁置一旁。况且说辞也是一大把，比如复杂的个体就能说服我自己。一贯的自我否定，也可以说深究一法至少能够审视自我更加全面深刻，更加接近真实。否定之否定，打住！</p>
-<p>接着说兴趣。从某种维度上讲，兴趣带来愉悦、专注与充实感。</p>
-<p>这样说来，好的电影是我的兴趣，带给我专注与思考。看过的电影也不少，影评却没尝试过一篇。电影没有带给我充实感，但我并不认为它在浪费时间。娱乐的底质，依旧能够容纳艺术与生活。尽管总能从这种媒介中看到不真实，生活的经验依然鲜活。现在的我能以相对包容的眼光对待现实的种种“怪象”，大抵与之有所关联。</p>
-<p>骑单车溜达也算得上。单车是真的单车，单人单骑，随便找个目标，也就慢慢悠悠的去。骑行就不能描述我的方式了，老老实实地去骑单车溜达。某次，什么背景的现在全无记忆，只是感到沉闷的低落，简直到不能忍受的地步，然后就溜达着去后海那边。也许逛胡同，也许没有。至于能否缓解我的状态，我也记不得。只是到那种状态，我能想到这种方式去排解，多少也算是一种认同吧。</p>
-<p>至于随笔（恰当称谓？），也能算是我的兴趣。偶尔写写东西，偶尔是真的偶偶尔。我从写文字当中获取的安静、专注、充实感显而易见，而文字大多都是当时的情绪与想法，可能脱胎于日记，但也将一些真实到黑暗的思考隐藏起来，多少能见光。不知道将自我产出的文字视若珍宝算不算病态，但我的确珍视，在我眼里这些文字能真切表示一种状态，这一刻我就是美化的真实的。至于这种方式何以占据重要的位置，大概因为内心戏丰富如我，不善表达情绪，多少是关掉大门开几扇窗。</p>
-<p>其他能说的，读书、乒乓和游戏，目前的程度都还比较浅。曾经都热过一阵的行为，慢慢沉寂下来也沾上了尘土。所谓的我的兴趣，没得一项算是个人特长。骑车只是休闲，电影只是娱乐，随笔也只是偶尔的文艺，但是至少这些，能够成为生活的调剂，是能够令我感到舒适的生活方式。</p>
-<h3 id="工作"><a href="#工作" class="headerlink" title="工作"></a>工作</h3><p>整理些技术向的学习内容，也多少要往这博客里边搁，况且，这本就是搭建这玩意的初衷。尽管不太喜欢用“工作”一词，但还是必须得慢慢习惯的。</p>
-<p>求学时期拥有很好的学习环境，这段时间也就余下几年，两者都不得不承认。实验室的一些开发工作，还有自己看过的、学过的、实践过的一些内容，选择性的往这个博客里边搁。尽量减少一些空洞的文字（多一些图），减少随处可见的教程，多一点自己的总结，就是描述不规范，甚至有错误也无关紧要。他人的是他人的，转化为自己的才是自己的。尽管这些话可有可无，也就这样摆在这里了。</p>
-<p>至于具体的工作内容，也没法细说。只是一段时间过去，觉得稍微闲下来时，慢悠悠写一点总结，多少能够察觉出自己在缓慢的生长，就很开心了。至于成长的快与慢，也不多去琢磨。吃饭慢，跑步慢，性子慢……真要快节奏起来，真就为难我“胖虎”了！</p>
-<h3 id="成长"><a href="#成长" class="headerlink" title="成长"></a>成长</h3><p>现在过多的想法与计划一如既往地空白，只是希望每天有点进步，慢慢生长吧。</p>
-<p>趁现在还有点记忆，罗列下自初中以来每个阶段自我希求的关键词。</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">改变 ：白墙上丑陋的浓墨毛笔字，墨迹未干尚不回望，小屋也拆了，斑驳的往事不能再找回。</span><br><span class="line">掌控 ：年少时总希望能够决定自己的命运，可是连早睡早起也没有做到。</span><br><span class="line">自由 ：那四年时光，持续性潇洒，间歇性焦虑。觉睡得很饱，书读得也少。向自己一样平平淡淡。</span><br><span class="line">成长 ：有的人每天跑步，有的人会慢慢散步。蜗牛和火箭，都在自以为的前进。</span><br></pre></td></tr></table></figure>
+<p><strong>字符解码（Character Decoding）</strong>: 根据一定规则，将二进制序列映射成对应的正确字符串，即二进制序列–&gt;字符串，个人将其理解为”翻译”。</p>
+<p><strong>Code Point</strong>：称作码点或码位，是组成编码空间（或代码页）的数值。例如，ASCII 码包含 128 个码点，范围是 0 到 7F（16 进制）；ISO-8859-1 包含 256 个码点，范围是 0 到 FF；而 Unicode 包含 1,114,112 个码点，范围是 0 到 10FFFF。Unicode 码空间划分为 17 个 Unicode 字符平面（基本多文种平面，16 个辅助平面），每个平面有 65,536（= 216）个码点。因此 Unicode 码空间总计是 17 x 65,536 = 1,114,112。</p>
+<p><strong>Code Page</strong>：代码页或者内码表，是 IBM 早期称呼计算机的 BIOS 所支持的字符集编码（也称作 OEM 代码页）。Windows 系统在没有使用 UTF-16 之前，为了解决由于不同国家和地区采用的字符集不一致，很可能出现无法正常显示所有字符的问题，使用了代码页（Codepage）转换表的技术来过渡性的部分解决这一问题，即定义了一系列支持不同国家和地区所制定的字符集，被称为 Windows 代码页或 ANSI 代码页，然而代码页一般与其所对应的字符集之间并非完全相同，有时候会对字符集有所扩展，可以理解为一张字符-字节序列映射表，通过查表实现编码解码功能。操作系统中不同 Locale 设置默认使用不同的代码页。</p>
+<p><strong>Locale</strong>：是指特定于某个国家或地区的一组设定，包括代码页，以及数字、货币、时间和日期的格式等。在 Windows 内部，有两个 Locale 设置：系统 Locale 和用户 Locale。系统 Locale 决定代码页，用户 Locale 决定数字、货币、时间和日期的格式。</p>
+<h2 id="乱码产生原因"><a href="#乱码产生原因" class="headerlink" title="乱码产生原因"></a>乱码产生原因</h2><p>乱码产生的根源一般情况下可以归结为三方面即：编码引起的乱码、解码引起的乱码以及缺少某种字体库引起的乱码（这种情况需要用户安装对应的字体库），其中大部分乱码问题是由不合适的解码方式造成的，如图 3 所示的鱼骨图。</p>
+<p>图 3. 乱码产生原因</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image003.jpg" alt="乱码产生原因"></p>
+<h3 id="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"><a href="#从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法" class="headerlink" title="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"></a>从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法</h3><p>图 5. 编码方式引起的乱码剖析</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image005.jpg" alt="图 5. 编码方式引起的乱码剖析"></p>
+<p>图 6. 不正确的解码方式引起的乱码</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image006.png" alt="图 6. 不正确的解码方式引起的乱码"></p>
+<figure class="highlight 1c"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">乱码有很多形式。</span><br><span class="line"><span class="string">"??"</span>通常是由于编码引起的乱码，出现?说明原始字符的信息已经丢失，这种情况下形成的乱码是不可逆的，也就是说无论用什么解码方式都不能正确显示字符。</span><br><span class="line"><span class="string">"ÄãºÃ£¬ÖÐ¹ú"</span>一般由解码方式不对引起的，乱码可逆，即可以通过乱码恢复获取原始的字符信息。</span><br></pre></td></tr></table></figure>
 
-<h3 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h3><p>今天是2019年9月20日，算是一个开始吧！</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/xingkong.jpeg" alt="星空"></p>
+<h3 id="从编程角度分析出现乱码的场景和解决办法"><a href="#从编程角度分析出现乱码的场景和解决办法" class="headerlink" title="从编程角度分析出现乱码的场景和解决办法"></a>从编程角度分析出现乱码的场景和解决办法</h3><p>从编程角度来看，出现乱码的场景主要是有文本处理的时候，比如文件的新建和读取、复制和粘贴，导入和导出，打开和保存，数据存储和检索，显示，打印，分词处理，字符转换，规范化，搜索，整理和发送数据等，文本数据的示例包括平面文件，流文件，数据区域，目录名称，资源名称，用户标识等。图 9 是出现乱码的一个常见场景分类。</p>
+<p>图 9. 出现乱码的场景</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image009.jpg" alt="出现乱码的场景"></p>
+<p><strong>Web 程序中出现的乱码情况</strong></p>
+<p>在 web 应用程序中，存在用户输入以及输出显示的地方都有可能存在编码解码，图 12 简要概括了 HTTP web 请求响应环节。</p>
+<p>图 12. Web 请求响应环节中的编码解码</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image012.jpg" alt="请求响应环节中的编码解码"></p>
+<p><strong>数据库操作过程中的乱码</strong></p>
+<p>在实际应用中，和数据库操作相关的乱码可能出现在数据的导入和导出操作中，在整个过程中涉及到的字符集有服务器端数据库字符集、客户端操作系统字符集、客户端环境变量 nls_lang(lang_territory.charset)，这三个参数的工作流程如图 15 所示。如果这三个参数设置一样，整个数据库操作中就不会出现乱码问题，但是实际应用中客户端的情况复杂多样，很难保持三者一致，涉及到双字节字符就需要服务器端进行转码操作，而转码的桥梁就是 Unicode 字符集，这就要求数据库本身支持 UTF-8 编码方式。为了编码数据库操作过程中的乱码问题，在创建数据库的时候使用 UTF-8 编码方式，如果仅在某些列中使用多语言数据，则可以使用 SQL NCHAR 数据类型（NCHAR，NVARCHAR2 和 NCLOB）以 UTF-16 或 UTF-8 编码形式存储 Unicode 数据，避免存储空间的浪费。</p>
+<p>图 15. Oracle 数据库字符集</p>
+<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image015.jpg" alt="Oracle 数据库字符集"></p>
+<h1 id="修改Windows的默认编码"><a href="#修改Windows的默认编码" class="headerlink" title="修改Windows的默认编码"></a>修改Windows的默认编码</h1><p>在Windows设置-时间与语言-语言-管理语言设置-更改系统区域设置中进行修改。</p>
+<p>联想到一个现象：通过执行startup.bat文件开启tomcat服务器时，打印的启动日志出现乱码。</p>
+<p>通过查询cmd的编码格式，并修改为utf-8编码格式，理论上能够解决上述乱码问题。实际上，执行chcp 65001，只是将当前cmd窗口的编码设置为utf-8。执行startup.bat时，会另外启动一个cmd进程，所以打印服务器启动日志的那个cmd窗口还是会有乱码。（除非从操作系统层面更改编码格式）</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//查看当前cmd的编码格式</span></span><br><span class="line"><span class="comment">//character code page</span></span><br><span class="line">chcp</span><br><span class="line"></span><br><span class="line"><span class="comment">//换成utf-8代码页</span></span><br><span class="line">chcp <span class="number">65001</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//换成默认的gbk</span></span><br><span class="line">chcp <span class="number">936</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>现在回过头来想背景中的问题。??的出现有可能是字符的编码方式不对，导致通过任何解码方式都读不出正确的字符。那么在哪个环节出现了这个问题呢？通过测试，表单数据提交到服务端，服务端获取数据并打印，显示正常。说明在浏览器到web服务端的编码解码方式是OK的。那么再来，就是java程序代码中将正常的字符数据存入数据库时发生了问题，导致数据库中数据显示为??。于是考虑中文存入数据库的编码方式出了问题。事实也应该就是这样的。</p>
+<p>【问题解决】java连接数据库的代码中，DBURL设置为<code>jdbc:mysql://localhost:3306/XXX?useUnicode=true&amp;characterEncoding=UTF-8</code>。重点就是后边的characterEncoding参数。</p>
+<p>字符数据在二进制与可识读形式之间来回切换跳转，编码解码的步骤都是循环重复的。博大精深的中国汉字，到底在代码的世界里也很独特。</p>
+<p>尽管问题解决，原因大概分析了，但真实的情形又是怎样的呢？谁又真正的可知？如果能够化身数据流，以数据本身的角度来看浏览器到数据库的往返之路，这该是很奇妙的想象与体验吧。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/hacker.png" alt="hacker"></p>
 ]]></content>
       <categories>
-        <category>随笔</category>
+        <category>常识</category>
       </categories>
       <tags>
-        <tag>随笔</tag>
+        <tag>乱码</tag>
+        <tag>编码</tag>
+        <tag>解码</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>数据库的锁</title>
+    <url>/2020/11/12/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E9%94%81/</url>
+    <content><![CDATA[<h1 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h1><p>锁是网络数据库中的一个非常重要的概念，当多个用户同时对数据库并发操作时，会带来数据不一致的问题，所以，锁主要用于多用户环境下保证数据库完整性和一致性。</p>
+<p>在数据库中加锁时，除了<strong>可以对不同的资源加锁，还可以使用不同程度的加锁方式</strong>，即锁有多种模式。</p>
+<h1 id="2-乐观锁与悲观锁"><a href="#2-乐观锁与悲观锁" class="headerlink" title="2. 乐观锁与悲观锁"></a>2. 乐观锁与悲观锁</h1><p>从程序员的角度看，分为乐观锁和悲观锁。</p>
+<p><strong>悲观锁</strong>（Pessimistic Lock），顾名思义，就是很悲观，每次去拿数据的时候都认为别人会修改，所以，每次在拿数据的时候都会上锁，这样别人想拿这个数据就会block（阻塞），直到它拿到锁。传统的关系型数据库里边就用到了很多这种锁机制，比如行锁、表锁、读锁和写锁等，都是在做操作之前先上锁。</p>
+<p><strong>乐观锁</strong>（Optimistic Lock），顾名思义，就是很乐观，每次去拿数据的时候都认为别人不会修改，所以，不会上锁，但是在更新的时候会判断一下在此期间别人有没有去更新这个数据，可以使用<strong>版本号、时间戳</strong>等机制。乐观锁适用于多读的应用类型，这样可以提高吞吐量，如果数据库提供类似于write_condition机制，其实都是提供的乐观锁。</p>
+<blockquote>
+<p>链接：<a href="https://www.nowcoder.com/questionTerminal/97c7972a55f6459a900a664ee687536f" target="_blank" rel="noopener">https://www.nowcoder.com/questionTerminal/97c7972a55f6459a900a664ee687536f</a>    来源：牛客网</p>
+</blockquote>
+<h1 id="3-具体的锁"><a href="#3-具体的锁" class="headerlink" title="3. 具体的锁"></a>3. 具体的锁</h1><p>表级锁：共享、排他、意向锁</p>
+<p>行级锁：共享、排他、更新锁</p>
+<h2 id="3-1-共享锁"><a href="#3-1-共享锁" class="headerlink" title="3.1 共享锁"></a>3.1 共享锁</h2><p><strong>共享锁也称为S（Share Lock）锁，用于所有的只读数据操作。</strong></p>
+<p>共享锁是非独占的，允许多个并发事务读取其锁定的资源。</p>
+<p>它具有以下性质：<strong>多个事务可封锁一个共享页；任何事务都不能修改该页；通常是该页被读取完毕，S锁立即被释放。</strong></p>
+<p>在SQL Server中，默认情况下，数据被读取后，立即释放共享锁。例如，执行查询语句“SELECT * FROM my_table”时，首先锁定第一页，读取之后，释放对第一页的锁定，然后锁定第二页。这样，就允许在读操作过程中，修改未被锁定的第一页。</p>
+<p>但是，事务隔离级别连接选项设置和SELECT语句中的锁定设置都可以改变SQL Server的这种默认设置。<br>例如，语句“SELECT * FROM my_table HOLDLOCK”就要求在整个查询过程中，保持对表的锁定，直到查询完成才释放锁定。</p>
+<h2 id="3-2-排他锁"><a href="#3-2-排他锁" class="headerlink" title="3.2 排他锁"></a>3.2 排他锁</h2><p><strong>排他锁（Exclusive Lock，也叫X锁）也叫写锁（X）。表示对数据进行写操作。如果一个事务对对象加了排他锁，其他事务就不能再给它加任何锁了。</strong></p>
+<p>排他锁具有以下几点性质：仅允许一个事务封锁此页；其他任何事务必须等到X锁被释放才能对该页进行访问；X锁一直到事务结束才能被释放。</p>
+<p>产生排他锁的SQL语句如下所示：select * from ad_plan for update;</p>
+<h2 id="3-3-更新锁"><a href="#3-3-更新锁" class="headerlink" title="3.3 更新锁"></a>3.3 更新锁</h2><p><strong>更新锁（也叫U锁）在修改操作的初始化阶段用来锁定可能要被修改的资源，这样可以避免使用共享锁造成的死锁现象。</strong></p>
+<p>因为，当使用共享锁时，修改数据的操作分为两步，首先获得一个共享锁，读取数据，然后将共享锁升级为排他锁，然后再执行修改操作。这样，如果有两个或多个事务同时对一个事务申请了共享锁，在修改数据的时候，这些事务都要将共享锁升级为排他锁。这时，这些事务都不会释放共享锁而是一直等待对方释放，这样就造成了死锁。</p>
+<p>如果一个数据在修改前直接申请更新锁，在数据修改的时候再升级为排他锁，就可以避免死锁。</p>
+<p><strong>更新锁</strong>具有以下性质：<strong>用来预定要对此页施加X锁，它允许其他事务读，但不允许再施加U锁或X锁；当被读取的页将要被更新时，则升级为X锁；U锁一直到事务结束时才能被释放。</strong></p>
+<h2 id="3-4-意向锁"><a href="#3-4-意向锁" class="headerlink" title="3.4 意向锁"></a>3.4 意向锁</h2><p><strong>申请意向锁的动作是数据库完成的，就是说，事务A申请一行的行锁的时候，数据库会自动先开始申请表的意向锁，不需要我们程序员使用代码来申请。</strong></p>
+<p>意向锁说明SQL Server有在资源的低层获得共享锁或独占锁的意向。</p>
+<p>例如，表级的共享意向锁说明事务意图将独占锁释放到表中的页或者行。</p>
+<p>意向锁又可以分为共享意向锁、 独占意向锁和共享式独占意向锁。</p>
+<p>共享意向锁说明事务意图在共享意向锁所锁定的低层资源上放置共享锁来读取数据。</p>
+<p>独占意向锁说明事务意图在共享意向锁所锁定 的低层资源上放置独占锁来修改数据。</p>
+<p>共享式独占锁说明事务允许其他事务使用共享锁来读取顶层资源，并意图在该资源低层上放置独占锁。 </p>
+<blockquote>
+<p>参考来源：<a href="https://blog.csdn.net/C_J33/article/details/79487941" target="_blank" rel="noopener">数据库的锁机制及原理</a></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>数据库</tag>
+        <tag>锁</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Hexo与GitHub Pages搭建独立博客</title>
+    <url>/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>博客其实在很久之前按照教程已经搭建完成，现在才回头来写教程步骤。有时候会想是否多此一举，毕竟网上现成的优秀的教程比比皆是。所以权且不说这是搭建基于Hexo的博客教程，只是一个简单的记录。</p>
+<p>写一点东西，像擦肩而过的风。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/7.jpg" alt="起飞"></p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2><p><code>GitHub Pages</code> 是一项<strong>静态站点托管服务</strong>，它直接从<code>GitHub</code> 上的仓库获取<code>HTML</code>、<code>CSS</code>和<code>JavaScript</code>文件，（可选）通过构建过程运行文件，然后发布网站。</p>
+<p>有三种类型的 <code>GitHub Pages</code> 站点：项目、用户和组织。 项目站点连接到 <code>GitHub</code> 上托管的特定项目，用户和组织站点连接到特定的 <code>GitHub</code> 帐户。只能为每个 <code>GitHub</code>账户创建一个用户或组织站点。项目站点（无论是组织还是用户帐户拥有）没有限制。除非使用自定义域，否则用户和组织站点位于<code>http(s)://&lt;username&gt;.github.io</code> 或 <code>http(s)://&lt;organization&gt;.github.io</code>。</p>
+<p>基于<code>GitHub Pages</code>搭建个人独立博客，即属于用户或组织站点。</p>
+<p><code>GitHub Pages</code> 站点的发布来源是存储站点源文件的分支或文件夹。 所有站点都有默认的发布来源，项目站点还有其他可用的发布来源。用户和组织站点的默认发布来源是<code>master</code>分支。如果用户和组织站点的仓库是<code>master</code> 分支，您的站点将从该分支自动发布。无法为用户或组织站点选择不同的发布来源。</p>
+<p><code>GitHub Pages</code> 站点受到以下使用限制的约束：</p>
+<ul>
+<li><code>GitHub Pages</code> 源仓库建议的限制为1GB。</li>
+<li>发布的 <code>GitHub Pages</code> 站点不得超过 1 GB。</li>
+<li><code>GitHub Pages</code> 站点的软带宽限制为每月 100GB。</li>
+<li><code>GitHub Pages</code> 站点的软限制为每小时 10 次构建。</li>
+</ul>
+<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p><code>Hexo</code>是基于<code>Node.js</code>的快速、简洁且高效的博客框架。<code>Hexo</code> 使用 <code>Markdown</code>（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
+<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul>
+<li>安装<code>Node.js</code></li>
+<li>安装<code>Git</code></li>
+<li>安装<code>Hexo</code><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//进入自己的博客文件夹(如/biggfish/blog)</span></span><br><span class="line">npm install hexo-cli -g </span><br><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><ul>
+<li><p>初始化配置</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 在Hexo安装目录下新建hexo文件夹，如 /biggfish/blog/hexo</span></span><br><span class="line">hexo inint</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>本地生成与部署</p>
+<figure class="highlight verilog"><table><tr><td class="code"><pre><span class="line"><span class="comment">//在hexo文件目录下执行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件</span></span><br><span class="line">hexo <span class="keyword">generate</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地部署</span></span><br><span class="line">hexo server </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地测试</span></span><br><span class="line">http:<span class="comment">//localhost:4000/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置<code>Hexo</code>与远程<code>GitHub</code>仓库关联</p>
+<figure class="highlight dts"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建`GitHub Pages`的站点发布来源，即username.github.io仓库</span></span><br><span class="line"><span class="comment">//配置远程连接的SSH密钥与公钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//将本地Hexo文件（静态网页）更新到GitHub 的username.github.io仓库</span></span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 复制Github仓库的ssh地址</span><br><span class="line"><span class="number">2.</span> 选择hexo文件夹下_config.yml文件，修改deploy相关信息</span><br><span class="line"><span class="symbol">  deploy:</span></span><br><span class="line"><span class="symbol">    type:</span> git</span><br><span class="line"><span class="symbol">    repository:</span> 刚复制的仓库ssh地址</span><br><span class="line"><span class="symbol">    branch:</span> master</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>本地博客推送到远程仓库，<code>GitHub Pages</code>自动发布</p>
+<figure class="highlight stata"><table><tr><td class="code"><pre><span class="line"><span class="comment">//g-&gt;generate  d-&gt;deploy</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件，然后部署</span></span><br><span class="line">hexo <span class="keyword">g</span></span><br><span class="line">hexo <span class="built_in">d</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者联合执行</span></span><br><span class="line">hexo <span class="keyword">g</span> -<span class="built_in">d</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>访问博客 <a href="https://biggfish3147.github.io" target="_blank" rel="noopener">我的博客</a></p>
+</li>
+</ul>
+<h1 id="发表文章"><a href="#发表文章" class="headerlink" title="发表文章"></a>发表文章</h1><p>注意用<code>markdown</code>语法编写文章。</p>
+<ul>
+<li><p><code>Front-matter</code>配置</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">博客伊始</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2019</span><span class="bullet">-09</span><span class="bullet">-20</span> <span class="number">23</span><span class="string">:29:47</span></span><br><span class="line"><span class="attr">comments:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">tags:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">君不见，黄河之水天上来，奔流到海不复回</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 文章正文</span></span><br><span class="line"></span><br><span class="line"><span class="string">注:</span> <span class="string">Front-matter配置支持的变量，其值因主题不同而存在差异</span></span><br><span class="line"><span class="string">/**</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">layout:</span> <span class="string">页面布局（配合主题文档使用）</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章名称</span></span><br><span class="line"><span class="attr">date:</span> <span class="string">文章日期</span></span><br><span class="line"><span class="attr">comments:</span> <span class="string">文章是否开启评论</span></span><br><span class="line"><span class="attr">photos:</span> <span class="string">文章封面图（仅部分主题支持）</span></span><br><span class="line"><span class="attr">tags:</span> </span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签一</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签二</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">文章分类</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">文章描述，即要在首页显示的摘要（仅部分主题支持）</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">*/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>推送文章</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//.md文章保存在/biggfish/blog/hexo/source/_posts中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者新建文章 默认放置在hexo/source/_posts中</span></span><br><span class="line">hexo <span class="keyword">new</span> <span class="string">"test"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//Next主题新建页面</span></span><br><span class="line">hexo <span class="keyword">new</span> page <span class="string">"分类"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//照样在hexo文件夹下执行</span></span><br><span class="line"></span><br><span class="line">hexo d -g</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://help.github.com/cn/github/working-with-github-pages/about-github-pages" target="_blank" rel="noopener">GitHub Pages官方说明文档</a></li>
+<li><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">Hexo官方文档</a></li>
+<li><a href="https://blog.csdn.net/qq_36759224/article/details/82121420#font_colorFF000_font_12" target="_blank" rel="noopener">使用 GitHub Pages和Hexo搭建自己的独立博客</a></li>
+</ul>
+]]></content>
+      <categories>
+        <category>教程</category>
+      </categories>
+      <tags>
+        <tag>Hexo</tag>
+        <tag>GitHub Pages</tag>
       </tags>
   </entry>
   <entry>
@@ -605,175 +866,6 @@
         <tag>概念</tag>
         <tag>图像</tag>
         <tag>常识</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>数据库的锁</title>
-    <url>/2020/11/12/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E9%94%81/</url>
-    <content><![CDATA[<h1 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h1><p>锁是网络数据库中的一个非常重要的概念，当多个用户同时对数据库并发操作时，会带来数据不一致的问题，所以，锁主要用于多用户环境下保证数据库完整性和一致性。</p>
-<p>在数据库中加锁时，除了<strong>可以对不同的资源加锁，还可以使用不同程度的加锁方式</strong>，即锁有多种模式。</p>
-<h1 id="2-乐观锁与悲观锁"><a href="#2-乐观锁与悲观锁" class="headerlink" title="2. 乐观锁与悲观锁"></a>2. 乐观锁与悲观锁</h1><p>从程序员的角度看，分为乐观锁和悲观锁。</p>
-<p><strong>悲观锁</strong>（Pessimistic Lock），顾名思义，就是很悲观，每次去拿数据的时候都认为别人会修改，所以，每次在拿数据的时候都会上锁，这样别人想拿这个数据就会block（阻塞），直到它拿到锁。传统的关系型数据库里边就用到了很多这种锁机制，比如行锁、表锁、读锁和写锁等，都是在做操作之前先上锁。</p>
-<p><strong>乐观锁</strong>（Optimistic Lock），顾名思义，就是很乐观，每次去拿数据的时候都认为别人不会修改，所以，不会上锁，但是在更新的时候会判断一下在此期间别人有没有去更新这个数据，可以使用<strong>版本号、时间戳</strong>等机制。乐观锁适用于多读的应用类型，这样可以提高吞吐量，如果数据库提供类似于write_condition机制，其实都是提供的乐观锁。</p>
-<blockquote>
-<p>链接：<a href="https://www.nowcoder.com/questionTerminal/97c7972a55f6459a900a664ee687536f" target="_blank" rel="noopener">https://www.nowcoder.com/questionTerminal/97c7972a55f6459a900a664ee687536f</a>    来源：牛客网</p>
-</blockquote>
-<h1 id="3-具体的锁"><a href="#3-具体的锁" class="headerlink" title="3. 具体的锁"></a>3. 具体的锁</h1><p>表级锁：共享、排他、意向锁</p>
-<p>行级锁：共享、排他、更新锁</p>
-<h2 id="3-1-共享锁"><a href="#3-1-共享锁" class="headerlink" title="3.1 共享锁"></a>3.1 共享锁</h2><p><strong>共享锁也称为S（Share Lock）锁，用于所有的只读数据操作。</strong></p>
-<p>共享锁是非独占的，允许多个并发事务读取其锁定的资源。</p>
-<p>它具有以下性质：<strong>多个事务可封锁一个共享页；任何事务都不能修改该页；通常是该页被读取完毕，S锁立即被释放。</strong></p>
-<p>在SQL Server中，默认情况下，数据被读取后，立即释放共享锁。例如，执行查询语句“SELECT * FROM my_table”时，首先锁定第一页，读取之后，释放对第一页的锁定，然后锁定第二页。这样，就允许在读操作过程中，修改未被锁定的第一页。</p>
-<p>但是，事务隔离级别连接选项设置和SELECT语句中的锁定设置都可以改变SQL Server的这种默认设置。<br>例如，语句“SELECT * FROM my_table HOLDLOCK”就要求在整个查询过程中，保持对表的锁定，直到查询完成才释放锁定。</p>
-<h2 id="3-2-排他锁"><a href="#3-2-排他锁" class="headerlink" title="3.2 排他锁"></a>3.2 排他锁</h2><p><strong>排他锁（Exclusive Lock，也叫X锁）也叫写锁（X）。表示对数据进行写操作。如果一个事务对对象加了排他锁，其他事务就不能再给它加任何锁了。</strong></p>
-<p>排他锁具有以下几点性质：仅允许一个事务封锁此页；其他任何事务必须等到X锁被释放才能对该页进行访问；X锁一直到事务结束才能被释放。</p>
-<p>产生排他锁的SQL语句如下所示：select * from ad_plan for update;</p>
-<h2 id="3-3-更新锁"><a href="#3-3-更新锁" class="headerlink" title="3.3 更新锁"></a>3.3 更新锁</h2><p><strong>更新锁（也叫U锁）在修改操作的初始化阶段用来锁定可能要被修改的资源，这样可以避免使用共享锁造成的死锁现象。</strong></p>
-<p>因为，当使用共享锁时，修改数据的操作分为两步，首先获得一个共享锁，读取数据，然后将共享锁升级为排他锁，然后再执行修改操作。这样，如果有两个或多个事务同时对一个事务申请了共享锁，在修改数据的时候，这些事务都要将共享锁升级为排他锁。这时，这些事务都不会释放共享锁而是一直等待对方释放，这样就造成了死锁。</p>
-<p>如果一个数据在修改前直接申请更新锁，在数据修改的时候再升级为排他锁，就可以避免死锁。</p>
-<p><strong>更新锁</strong>具有以下性质：<strong>用来预定要对此页施加X锁，它允许其他事务读，但不允许再施加U锁或X锁；当被读取的页将要被更新时，则升级为X锁；U锁一直到事务结束时才能被释放。</strong></p>
-<h2 id="3-4-意向锁"><a href="#3-4-意向锁" class="headerlink" title="3.4 意向锁"></a>3.4 意向锁</h2><p><strong>申请意向锁的动作是数据库完成的，就是说，事务A申请一行的行锁的时候，数据库会自动先开始申请表的意向锁，不需要我们程序员使用代码来申请。</strong></p>
-<p>意向锁说明SQL Server有在资源的低层获得共享锁或独占锁的意向。</p>
-<p>例如，表级的共享意向锁说明事务意图将独占锁释放到表中的页或者行。</p>
-<p>意向锁又可以分为共享意向锁、 独占意向锁和共享式独占意向锁。</p>
-<p>共享意向锁说明事务意图在共享意向锁所锁定的低层资源上放置共享锁来读取数据。</p>
-<p>独占意向锁说明事务意图在共享意向锁所锁定 的低层资源上放置独占锁来修改数据。</p>
-<p>共享式独占锁说明事务允许其他事务使用共享锁来读取顶层资源，并意图在该资源低层上放置独占锁。 </p>
-<blockquote>
-<p>参考来源：<a href="https://blog.csdn.net/C_J33/article/details/79487941" target="_blank" rel="noopener">数据库的锁机制及原理</a></p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>MySQL</category>
-      </categories>
-      <tags>
-        <tag>数据库</tag>
-        <tag>锁</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>常见乱码问题及分析</title>
-    <url>/2020/07/03/%E5%B8%B8%E8%A7%81%E4%B9%B1%E7%A0%81%E9%97%AE%E9%A2%98%E5%8F%8A%E5%88%86%E6%9E%90/</url>
-    <content><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>有一个现成的古老的web项目，技术栈包括<code>JSP</code> <code>JAVA</code> <code>MYSQL</code>，<code>MyEclipse 10.5</code>作为开发工具，开发环境<code>JDK1.7</code> <code>Tomcat7</code> <code>Mysql5.5</code>。</p>
-<p>现在项目能够部署成功，正常访问。</p>
-<p>但是当提交的表单数据中包含中文时，数据库存储的相关数据显示为???。</p>
-<p>因为这个<code>BUG</code>，诞生这篇小结。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/pk0001.png" alt="朋克风"></p>
-<h1 id="常见乱码问题分析和总结"><a href="#常见乱码问题分析和总结" class="headerlink" title="常见乱码问题分析和总结"></a>常见乱码问题分析和总结</h1><p>本节内容选自<a href="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/index.html" target="_blank" rel="noopener">IBM Developer : 常见乱码问题分析和总结 </a></p>
-<h2 id="编码与解码"><a href="#编码与解码" class="headerlink" title="编码与解码"></a>编码与解码</h2><p>计算机不能直接存储字母，数字，图片，符号等，计算机能处理和工作的唯一单位是”比特位（bit）”，一个比特位通常只有 0 和 1，是（yes）和否（no），真（true）或者假（false）等等我们喜欢的称呼。利用比特位序列来代表字母，数字，图片，符号等，我们就需要一个存储规则，不同的比特序列代表不同的字符，这就是所谓的”编码”。反之，将存储在计算机中的比特位序列（或者叫二进制序列）解析显示出来成对应的字母，数字，图片和符号，称为”解码”，如同密码学中的加密和解密，下面将详细解释编码解码过程中涉及到的一些术语：</p>
-<p><strong>字符集合（Character set）</strong>：是各种文字和符号的总称，包括各国家文字、标点符号、图形符号、数字等，简单理解就是一个字库，与计算机以及编码无关。</p>
-<p><strong>字符编码集（Coded character set）</strong>：是一组字符对应的编码（即数字），为字符集合中的每一个字符给予一个数字，如 Unicode 为每一个字符分配一个唯一的码点与之一一对应。</p>
-<p><strong>字符编码（Character Encoding）</strong>：简单理解就是一个映射关系，将字符集对应的码点映射为一个个二进制序列，从而使得计算机可以存储和处理。常见的编码方式有 ASCII 编码、ISO-8859-1(不支持中文)、GBK、GB2312（中国编码，支持中文）、UTF-8 等等,详情见表 1。</p>
-<p><strong>字符集（Charset）</strong>：包括编码字符集合和字符编码，如 ASCII 字符集、ISO-8859-X、GB2312 字符集（简中）、BIG5 字符集（繁中）、GB18030 字符集、Shift-JIS 等，即下文中提到的字符集。</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">这里提到的字符集合与字符集是不同的概念，后者包含前者。</span><br><span class="line">一般乱码现象都是因为中文数据导致的，汉字占用双字节，所以支持中文的编码方式（GBK、UTF<span class="number">-8</span>等）也就是可以支持对双字节汉字进行编码。</span><br></pre></td></tr></table></figure>
-
-<p><strong>字符解码（Character Decoding）</strong>: 根据一定规则，将二进制序列映射成对应的正确字符串，即二进制序列–&gt;字符串，个人将其理解为”翻译”。</p>
-<p><strong>Code Point</strong>：称作码点或码位，是组成编码空间（或代码页）的数值。例如，ASCII 码包含 128 个码点，范围是 0 到 7F（16 进制）；ISO-8859-1 包含 256 个码点，范围是 0 到 FF；而 Unicode 包含 1,114,112 个码点，范围是 0 到 10FFFF。Unicode 码空间划分为 17 个 Unicode 字符平面（基本多文种平面，16 个辅助平面），每个平面有 65,536（= 216）个码点。因此 Unicode 码空间总计是 17 x 65,536 = 1,114,112。</p>
-<p><strong>Code Page</strong>：代码页或者内码表，是 IBM 早期称呼计算机的 BIOS 所支持的字符集编码（也称作 OEM 代码页）。Windows 系统在没有使用 UTF-16 之前，为了解决由于不同国家和地区采用的字符集不一致，很可能出现无法正常显示所有字符的问题，使用了代码页（Codepage）转换表的技术来过渡性的部分解决这一问题，即定义了一系列支持不同国家和地区所制定的字符集，被称为 Windows 代码页或 ANSI 代码页，然而代码页一般与其所对应的字符集之间并非完全相同，有时候会对字符集有所扩展，可以理解为一张字符-字节序列映射表，通过查表实现编码解码功能。操作系统中不同 Locale 设置默认使用不同的代码页。</p>
-<p><strong>Locale</strong>：是指特定于某个国家或地区的一组设定，包括代码页，以及数字、货币、时间和日期的格式等。在 Windows 内部，有两个 Locale 设置：系统 Locale 和用户 Locale。系统 Locale 决定代码页，用户 Locale 决定数字、货币、时间和日期的格式。</p>
-<h2 id="乱码产生原因"><a href="#乱码产生原因" class="headerlink" title="乱码产生原因"></a>乱码产生原因</h2><p>乱码产生的根源一般情况下可以归结为三方面即：编码引起的乱码、解码引起的乱码以及缺少某种字体库引起的乱码（这种情况需要用户安装对应的字体库），其中大部分乱码问题是由不合适的解码方式造成的，如图 3 所示的鱼骨图。</p>
-<p>图 3. 乱码产生原因</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image003.jpg" alt="乱码产生原因"></p>
-<h3 id="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"><a href="#从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法" class="headerlink" title="从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法"></a>从普通用户角度分别阐述这几种原因导致的乱码表象和解决办法</h3><p>图 5. 编码方式引起的乱码剖析</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image005.jpg" alt="图 5. 编码方式引起的乱码剖析"></p>
-<p>图 6. 不正确的解码方式引起的乱码</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image006.png" alt="图 6. 不正确的解码方式引起的乱码"></p>
-<figure class="highlight 1c"><table><tr><td class="code"><pre><span class="line">笔者注：</span><br><span class="line">乱码有很多形式。</span><br><span class="line"><span class="string">"??"</span>通常是由于编码引起的乱码，出现?说明原始字符的信息已经丢失，这种情况下形成的乱码是不可逆的，也就是说无论用什么解码方式都不能正确显示字符。</span><br><span class="line"><span class="string">"ÄãºÃ£¬ÖÐ¹ú"</span>一般由解码方式不对引起的，乱码可逆，即可以通过乱码恢复获取原始的字符信息。</span><br></pre></td></tr></table></figure>
-
-<h3 id="从编程角度分析出现乱码的场景和解决办法"><a href="#从编程角度分析出现乱码的场景和解决办法" class="headerlink" title="从编程角度分析出现乱码的场景和解决办法"></a>从编程角度分析出现乱码的场景和解决办法</h3><p>从编程角度来看，出现乱码的场景主要是有文本处理的时候，比如文件的新建和读取、复制和粘贴，导入和导出，打开和保存，数据存储和检索，显示，打印，分词处理，字符转换，规范化，搜索，整理和发送数据等，文本数据的示例包括平面文件，流文件，数据区域，目录名称，资源名称，用户标识等。图 9 是出现乱码的一个常见场景分类。</p>
-<p>图 9. 出现乱码的场景</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image009.jpg" alt="出现乱码的场景"></p>
-<p><strong>Web 程序中出现的乱码情况</strong></p>
-<p>在 web 应用程序中，存在用户输入以及输出显示的地方都有可能存在编码解码，图 12 简要概括了 HTTP web 请求响应环节。</p>
-<p>图 12. Web 请求响应环节中的编码解码</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image012.jpg" alt="请求响应环节中的编码解码"></p>
-<p><strong>数据库操作过程中的乱码</strong></p>
-<p>在实际应用中，和数据库操作相关的乱码可能出现在数据的导入和导出操作中，在整个过程中涉及到的字符集有服务器端数据库字符集、客户端操作系统字符集、客户端环境变量 nls_lang(lang_territory.charset)，这三个参数的工作流程如图 15 所示。如果这三个参数设置一样，整个数据库操作中就不会出现乱码问题，但是实际应用中客户端的情况复杂多样，很难保持三者一致，涉及到双字节字符就需要服务器端进行转码操作，而转码的桥梁就是 Unicode 字符集，这就要求数据库本身支持 UTF-8 编码方式。为了编码数据库操作过程中的乱码问题，在创建数据库的时候使用 UTF-8 编码方式，如果仅在某些列中使用多语言数据，则可以使用 SQL NCHAR 数据类型（NCHAR，NVARCHAR2 和 NCLOB）以 UTF-16 或 UTF-8 编码形式存储 Unicode 数据，避免存储空间的浪费。</p>
-<p>图 15. Oracle 数据库字符集</p>
-<p><img src="https://www.ibm.com/developerworks/cn/java/analysis-and-summary-of-common-random-code-problems/image015.jpg" alt="Oracle 数据库字符集"></p>
-<h1 id="修改Windows的默认编码"><a href="#修改Windows的默认编码" class="headerlink" title="修改Windows的默认编码"></a>修改Windows的默认编码</h1><p>在Windows设置-时间与语言-语言-管理语言设置-更改系统区域设置中进行修改。</p>
-<p>联想到一个现象：通过执行startup.bat文件开启tomcat服务器时，打印的启动日志出现乱码。</p>
-<p>通过查询cmd的编码格式，并修改为utf-8编码格式，理论上能够解决上述乱码问题。实际上，执行chcp 65001，只是将当前cmd窗口的编码设置为utf-8。执行startup.bat时，会另外启动一个cmd进程，所以打印服务器启动日志的那个cmd窗口还是会有乱码。（除非从操作系统层面更改编码格式）</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//查看当前cmd的编码格式</span></span><br><span class="line"><span class="comment">//character code page</span></span><br><span class="line">chcp</span><br><span class="line"></span><br><span class="line"><span class="comment">//换成utf-8代码页</span></span><br><span class="line">chcp <span class="number">65001</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//换成默认的gbk</span></span><br><span class="line">chcp <span class="number">936</span></span><br></pre></td></tr></table></figure>
-
-<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>现在回过头来想背景中的问题。??的出现有可能是字符的编码方式不对，导致通过任何解码方式都读不出正确的字符。那么在哪个环节出现了这个问题呢？通过测试，表单数据提交到服务端，服务端获取数据并打印，显示正常。说明在浏览器到web服务端的编码解码方式是OK的。那么再来，就是java程序代码中将正常的字符数据存入数据库时发生了问题，导致数据库中数据显示为??。于是考虑中文存入数据库的编码方式出了问题。事实也应该就是这样的。</p>
-<p>【问题解决】java连接数据库的代码中，DBURL设置为<code>jdbc:mysql://localhost:3306/XXX?useUnicode=true&amp;characterEncoding=UTF-8</code>。重点就是后边的characterEncoding参数。</p>
-<p>字符数据在二进制与可识读形式之间来回切换跳转，编码解码的步骤都是循环重复的。博大精深的中国汉字，到底在代码的世界里也很独特。</p>
-<p>尽管问题解决，原因大概分析了，但真实的情形又是怎样的呢？谁又真正的可知？如果能够化身数据流，以数据本身的角度来看浏览器到数据库的往返之路，这该是很奇妙的想象与体验吧。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/hacker.png" alt="hacker"></p>
-]]></content>
-      <categories>
-        <category>常识</category>
-      </categories>
-      <tags>
-        <tag>乱码</tag>
-        <tag>编码</tag>
-        <tag>解码</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Hexo与GitHub Pages搭建独立博客</title>
-    <url>/2020/04/29/%E6%90%AD%E5%BB%BA%E7%8B%AC%E7%AB%8B%E5%8D%9A%E5%AE%A2/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>博客其实在很久之前按照教程已经搭建完成，现在才回头来写教程步骤。有时候会想是否多此一举，毕竟网上现成的优秀的教程比比皆是。所以权且不说这是搭建基于Hexo的博客教程，只是一个简单的记录。</p>
-<p>写一点东西，像擦肩而过的风。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/biggfish3147/pics/blog/7.jpg" alt="起飞"></p>
-<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><h2 id="GitHub-Pages"><a href="#GitHub-Pages" class="headerlink" title="GitHub Pages"></a>GitHub Pages</h2><p><code>GitHub Pages</code> 是一项<strong>静态站点托管服务</strong>，它直接从<code>GitHub</code> 上的仓库获取<code>HTML</code>、<code>CSS</code>和<code>JavaScript</code>文件，（可选）通过构建过程运行文件，然后发布网站。</p>
-<p>有三种类型的 <code>GitHub Pages</code> 站点：项目、用户和组织。 项目站点连接到 <code>GitHub</code> 上托管的特定项目，用户和组织站点连接到特定的 <code>GitHub</code> 帐户。只能为每个 <code>GitHub</code>账户创建一个用户或组织站点。项目站点（无论是组织还是用户帐户拥有）没有限制。除非使用自定义域，否则用户和组织站点位于<code>http(s)://&lt;username&gt;.github.io</code> 或 <code>http(s)://&lt;organization&gt;.github.io</code>。</p>
-<p>基于<code>GitHub Pages</code>搭建个人独立博客，即属于用户或组织站点。</p>
-<p><code>GitHub Pages</code> 站点的发布来源是存储站点源文件的分支或文件夹。 所有站点都有默认的发布来源，项目站点还有其他可用的发布来源。用户和组织站点的默认发布来源是<code>master</code>分支。如果用户和组织站点的仓库是<code>master</code> 分支，您的站点将从该分支自动发布。无法为用户或组织站点选择不同的发布来源。</p>
-<p><code>GitHub Pages</code> 站点受到以下使用限制的约束：</p>
-<ul>
-<li><code>GitHub Pages</code> 源仓库建议的限制为1GB。</li>
-<li>发布的 <code>GitHub Pages</code> 站点不得超过 1 GB。</li>
-<li><code>GitHub Pages</code> 站点的软带宽限制为每月 100GB。</li>
-<li><code>GitHub Pages</code> 站点的软限制为每小时 10 次构建。</li>
-</ul>
-<h2 id="Hexo"><a href="#Hexo" class="headerlink" title="Hexo"></a>Hexo</h2><p><code>Hexo</code>是基于<code>Node.js</code>的快速、简洁且高效的博客框架。<code>Hexo</code> 使用 <code>Markdown</code>（或其他渲染引擎）解析文章，在几秒内，即可利用靓丽的主题生成静态网页。</p>
-<h1 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h1><ul>
-<li>安装<code>Node.js</code></li>
-<li>安装<code>Git</code></li>
-<li>安装<code>Hexo</code><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//进入自己的博客文件夹(如/biggfish/blog)</span></span><br><span class="line">npm install hexo-cli -g </span><br><span class="line">npm install hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><ul>
-<li><p>初始化配置</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 在Hexo安装目录下新建hexo文件夹，如 /biggfish/blog/hexo</span></span><br><span class="line">hexo inint</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>本地生成与部署</p>
-<figure class="highlight verilog"><table><tr><td class="code"><pre><span class="line"><span class="comment">//在hexo文件目录下执行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件</span></span><br><span class="line">hexo <span class="keyword">generate</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地部署</span></span><br><span class="line">hexo server </span><br><span class="line"></span><br><span class="line"><span class="comment">//本地测试</span></span><br><span class="line">http:<span class="comment">//localhost:4000/</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>配置<code>Hexo</code>与远程<code>GitHub</code>仓库关联</p>
-<figure class="highlight dts"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建`GitHub Pages`的站点发布来源，即username.github.io仓库</span></span><br><span class="line"><span class="comment">//配置远程连接的SSH密钥与公钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//将本地Hexo文件（静态网页）更新到GitHub 的username.github.io仓库</span></span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 复制Github仓库的ssh地址</span><br><span class="line"><span class="number">2.</span> 选择hexo文件夹下_config.yml文件，修改deploy相关信息</span><br><span class="line"><span class="symbol">  deploy:</span></span><br><span class="line"><span class="symbol">    type:</span> git</span><br><span class="line"><span class="symbol">    repository:</span> 刚复制的仓库ssh地址</span><br><span class="line"><span class="symbol">    branch:</span> master</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>本地博客推送到远程仓库，<code>GitHub Pages</code>自动发布</p>
-<figure class="highlight stata"><table><tr><td class="code"><pre><span class="line"><span class="comment">//g-&gt;generate  d-&gt;deploy</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//生成静态文件，然后部署</span></span><br><span class="line">hexo <span class="keyword">g</span></span><br><span class="line">hexo <span class="built_in">d</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者联合执行</span></span><br><span class="line">hexo <span class="keyword">g</span> -<span class="built_in">d</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>访问博客 <a href="https://biggfish3147.github.io" target="_blank" rel="noopener">我的博客</a></p>
-</li>
-</ul>
-<h1 id="发表文章"><a href="#发表文章" class="headerlink" title="发表文章"></a>发表文章</h1><p>注意用<code>markdown</code>语法编写文章。</p>
-<ul>
-<li><p><code>Front-matter</code>配置</p>
-<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">博客伊始</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2019</span><span class="bullet">-09</span><span class="bullet">-20</span> <span class="number">23</span><span class="string">:29:47</span></span><br><span class="line"><span class="attr">comments:</span> <span class="literal">false</span></span><br><span class="line"><span class="attr">tags:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">随笔</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">君不见，黄河之水天上来，奔流到海不复回</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## 文章正文</span></span><br><span class="line"></span><br><span class="line"><span class="string">注:</span> <span class="string">Front-matter配置支持的变量，其值因主题不同而存在差异</span></span><br><span class="line"><span class="string">/**</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">layout:</span> <span class="string">页面布局（配合主题文档使用）</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">文章名称</span></span><br><span class="line"><span class="attr">date:</span> <span class="string">文章日期</span></span><br><span class="line"><span class="attr">comments:</span> <span class="string">文章是否开启评论</span></span><br><span class="line"><span class="attr">photos:</span> <span class="string">文章封面图（仅部分主题支持）</span></span><br><span class="line"><span class="attr">tags:</span> </span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签一</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">文章标签二</span></span><br><span class="line"><span class="attr">categories:</span> <span class="string">文章分类</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">文章描述，即要在首页显示的摘要（仅部分主题支持）</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="string">*/</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>推送文章</p>
-<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">//.md文章保存在/biggfish/blog/hexo/source/_posts中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者新建文章 默认放置在hexo/source/_posts中</span></span><br><span class="line">hexo <span class="keyword">new</span> <span class="string">"test"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//Next主题新建页面</span></span><br><span class="line">hexo <span class="keyword">new</span> page <span class="string">"分类"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//照样在hexo文件夹下执行</span></span><br><span class="line"></span><br><span class="line">hexo d -g</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
-<li><a href="https://help.github.com/cn/github/working-with-github-pages/about-github-pages" target="_blank" rel="noopener">GitHub Pages官方说明文档</a></li>
-<li><a href="https://hexo.io/zh-cn/docs/" target="_blank" rel="noopener">Hexo官方文档</a></li>
-<li><a href="https://blog.csdn.net/qq_36759224/article/details/82121420#font_colorFF000_font_12" target="_blank" rel="noopener">使用 GitHub Pages和Hexo搭建自己的独立博客</a></li>
-</ul>
-]]></content>
-      <categories>
-        <category>教程</category>
-      </categories>
-      <tags>
-        <tag>Hexo</tag>
-        <tag>GitHub Pages</tag>
       </tags>
   </entry>
   <entry>
@@ -895,6 +987,53 @@
       </tags>
   </entry>
   <entry>
+    <title>阿里云宝塔面板部署java项目</title>
+    <url>/2020/10/30/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E9%83%A8%E7%BD%B2java%E9%A1%B9%E7%9B%AE/</url>
+    <content><![CDATA[<p>背景故事是这样的。</p>
+<p>一个老项目，“上级”指示需要再次启用。</p>
+<p>阿里云实例一周前过期的，如果续费的话，后端代码不用改，前端的请求ip也不用改。原有的java环境就能支持老项目跑起来。</p>
+<p>不要问为什么代码里边不用域名表示主机（映射关系）。如果用域名的话，只需要改一下域名与ip的映射记录就行。这个法儿我是现在才想到的。</p>
+<p>然后就是需要重新租用一个云服务器，配置java运行环境，再把项目扔上去跑（用的是war包）。</p>
+<p>9.5块钱/月的阿里云学生机，选择的是轻量应用服务器，宝塔面板应用镜像。</p>
+<p>宝塔面板一键配置环境真的是“傻瓜”操作，真香。</p>
+<h1 id="1-镜像的理解"><a href="#1-镜像的理解" class="headerlink" title="1. 镜像的理解"></a>1. 镜像的理解</h1><p>任何镜像都是基于系统镜像制作的。</p>
+<p>宝塔面板应用镜像就是在系统镜像的基础上，配置好宝塔面板，然后生成的镜像。</p>
+<p>镜像流行的原因，其中一个原因就是简化配置。特别是运行环境的配置。</p>
+<p>纯净的操作系统镜像，还需要我们自己部署java web运行环境，比如下载tomcat、jdk、mysql等。如果是java运行环境镜像，其内已经装好了相关软件，我们只要知道如何使用即可。</p>
+<p>宝塔面板，顾名思义，就是一个面板控制工具。通过Web页面，即可控制远端服务器的服务开闭、端口开放、项目部署等。</p>
+<h1 id="2-云服务器宝塔面板"><a href="#2-云服务器宝塔面板" class="headerlink" title="2. 云服务器宝塔面板"></a>2. 云服务器宝塔面板</h1><p>一般而言，选购云服务器时需要配置基本参数，其中一项就是<strong>镜像</strong>。</p>
+<p>可以选择纯净的系统镜像，也可以去镜像市场选择免费的定制化镜像使用。</p>
+<p>如果选择宝塔控制面板，即镜像内已经安装并配置好了宝塔面板，那么由该镜像最后生成的实例，就可以直接使用宝塔面板了。</p>
+<p>相当于，别人配好环境，我拿到后开箱即用。</p>
+<h1 id="3-云服务器控制台"><a href="#3-云服务器控制台" class="headerlink" title="3. 云服务器控制台"></a>3. 云服务器控制台</h1><p>宝塔面板是一个控制中心，云服务器（或者轻量应用服务器）也是一个控制中心。云服务器作为上游控制中心，除了对服务器实例的必要运维监控外，还决定着服务器对外开放的端口。</p>
+<p>当然，如果云服务器安装有宝塔面板的话，需要开放TCP 8888端口供外部连接。而且，要进入宝塔面板，需要的账户与密码，也可以在云服务器的控制台进行设置。</p>
+<h1 id="4-宝塔控制面板"><a href="#4-宝塔控制面板" class="headerlink" title="4. 宝塔控制面板"></a>4. 宝塔控制面板</h1><p>如果选择宝塔面板，那么大多数与服务器的交互都变得简洁直观（可视化）。</p>
+<p>云服务器控制台的作用大多数时候就是放行端口（服务器防火墙）。</p>
+<blockquote>
+<p>宝塔控制面板也能对端口放行。但是如果云服务器不放行，在宝塔面板设置放行其实是无效的。大概就是上下游两道闸门的关系。</p>
+</blockquote>
+<p>在宝塔面板，你可以以安装软件的形式（软件商店）来配置环境。这区别于远程登录云服务器，并在终端输入shell命令。面板的操作对新人更加友好，但也相对没有技术含量，不能学到服务器内部的知识。</p>
+<h1 id="5-部署java-web项目"><a href="#5-部署java-web项目" class="headerlink" title="5. 部署java web项目"></a>5. 部署java web项目</h1><p>基本上都是与宝塔控制面板进行交互。</p>
+<ul>
+<li>配置环境</li>
+<li>导入war包</li>
+<li>放行端口</li>
+<li>启动tomcat</li>
+</ul>
+<p>虽然java环境需要jdk，但是在宝塔面板上配置tomcat时，会自动下载jdk。</p>
+<p>导入的war包直接放入到tomcat文件的webapps目录下即可，tomcat会自动解压。</p>
+<h1 id="6-参考"><a href="#6-参考" class="headerlink" title="6. 参考"></a>6. 参考</h1><p><a href="https://my.oschina.net/u/4340796/blog/4315488" target="_blank" rel="noopener">阿里云宝塔面板配置及部署Java项目</a></p>
+<p><a href="https://developer.aliyun.com/article/761633" target="_blank" rel="noopener">阿里云轻量应用服务器应用镜像和系统镜像选择详细介绍</a></p>
+]]></content>
+      <categories>
+        <category>教程</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+        <tag>宝塔面板</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>漫谈JSP</title>
     <url>/2020/05/09/%E6%BC%AB%E8%B0%88JSP/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>以前倒是知道<code>JSP</code>概念，但只能算是大概中的大概。今天因缘际会，又大致去查了些资料，然后就知道了个大概。比起<code>JSP</code>本身的语法规则，我对其由盛及衰的发展历史，倒表现出更大的兴趣。</p>
@@ -1011,53 +1150,6 @@
       <tags>
         <tag>概念</tag>
         <tag>JSP</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>阿里云宝塔面板部署java项目</title>
-    <url>/2020/10/30/%E9%98%BF%E9%87%8C%E4%BA%91%E5%AE%9D%E5%A1%94%E9%9D%A2%E6%9D%BF%E9%83%A8%E7%BD%B2java%E9%A1%B9%E7%9B%AE/</url>
-    <content><![CDATA[<p>背景故事是这样的。</p>
-<p>一个老项目，“上级”指示需要再次启用。</p>
-<p>阿里云实例一周前过期的，如果续费的话，后端代码不用改，前端的请求ip也不用改。原有的java环境就能支持老项目跑起来。</p>
-<p>不要问为什么代码里边不用域名表示主机（映射关系）。如果用域名的话，只需要改一下域名与ip的映射记录就行。这个法儿我是现在才想到的。</p>
-<p>然后就是需要重新租用一个云服务器，配置java运行环境，再把项目扔上去跑（用的是war包）。</p>
-<p>9.5块钱/月的阿里云学生机，选择的是轻量应用服务器，宝塔面板应用镜像。</p>
-<p>宝塔面板一键配置环境真的是“傻瓜”操作，真香。</p>
-<h1 id="1-镜像的理解"><a href="#1-镜像的理解" class="headerlink" title="1. 镜像的理解"></a>1. 镜像的理解</h1><p>任何镜像都是基于系统镜像制作的。</p>
-<p>宝塔面板应用镜像就是在系统镜像的基础上，配置好宝塔面板，然后生成的镜像。</p>
-<p>镜像流行的原因，其中一个原因就是简化配置。特别是运行环境的配置。</p>
-<p>纯净的操作系统镜像，还需要我们自己部署java web运行环境，比如下载tomcat、jdk、mysql等。如果是java运行环境镜像，其内已经装好了相关软件，我们只要知道如何使用即可。</p>
-<p>宝塔面板，顾名思义，就是一个面板控制工具。通过Web页面，即可控制远端服务器的服务开闭、端口开放、项目部署等。</p>
-<h1 id="2-云服务器宝塔面板"><a href="#2-云服务器宝塔面板" class="headerlink" title="2. 云服务器宝塔面板"></a>2. 云服务器宝塔面板</h1><p>一般而言，选购云服务器时需要配置基本参数，其中一项就是<strong>镜像</strong>。</p>
-<p>可以选择纯净的系统镜像，也可以去镜像市场选择免费的定制化镜像使用。</p>
-<p>如果选择宝塔控制面板，即镜像内已经安装并配置好了宝塔面板，那么由该镜像最后生成的实例，就可以直接使用宝塔面板了。</p>
-<p>相当于，别人配好环境，我拿到后开箱即用。</p>
-<h1 id="3-云服务器控制台"><a href="#3-云服务器控制台" class="headerlink" title="3. 云服务器控制台"></a>3. 云服务器控制台</h1><p>宝塔面板是一个控制中心，云服务器（或者轻量应用服务器）也是一个控制中心。云服务器作为上游控制中心，除了对服务器实例的必要运维监控外，还决定着服务器对外开放的端口。</p>
-<p>当然，如果云服务器安装有宝塔面板的话，需要开放TCP 8888端口供外部连接。而且，要进入宝塔面板，需要的账户与密码，也可以在云服务器的控制台进行设置。</p>
-<h1 id="4-宝塔控制面板"><a href="#4-宝塔控制面板" class="headerlink" title="4. 宝塔控制面板"></a>4. 宝塔控制面板</h1><p>如果选择宝塔面板，那么大多数与服务器的交互都变得简洁直观（可视化）。</p>
-<p>云服务器控制台的作用大多数时候就是放行端口（服务器防火墙）。</p>
-<blockquote>
-<p>宝塔控制面板也能对端口放行。但是如果云服务器不放行，在宝塔面板设置放行其实是无效的。大概就是上下游两道闸门的关系。</p>
-</blockquote>
-<p>在宝塔面板，你可以以安装软件的形式（软件商店）来配置环境。这区别于远程登录云服务器，并在终端输入shell命令。面板的操作对新人更加友好，但也相对没有技术含量，不能学到服务器内部的知识。</p>
-<h1 id="5-部署java-web项目"><a href="#5-部署java-web项目" class="headerlink" title="5. 部署java web项目"></a>5. 部署java web项目</h1><p>基本上都是与宝塔控制面板进行交互。</p>
-<ul>
-<li>配置环境</li>
-<li>导入war包</li>
-<li>放行端口</li>
-<li>启动tomcat</li>
-</ul>
-<p>虽然java环境需要jdk，但是在宝塔面板上配置tomcat时，会自动下载jdk。</p>
-<p>导入的war包直接放入到tomcat文件的webapps目录下即可，tomcat会自动解压。</p>
-<h1 id="6-参考"><a href="#6-参考" class="headerlink" title="6. 参考"></a>6. 参考</h1><p><a href="https://my.oschina.net/u/4340796/blog/4315488" target="_blank" rel="noopener">阿里云宝塔面板配置及部署Java项目</a></p>
-<p><a href="https://developer.aliyun.com/article/761633" target="_blank" rel="noopener">阿里云轻量应用服务器应用镜像和系统镜像选择详细介绍</a></p>
-]]></content>
-      <categories>
-        <category>教程</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-        <tag>宝塔面板</tag>
       </tags>
   </entry>
 </search>

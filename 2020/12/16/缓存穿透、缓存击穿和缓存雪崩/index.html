@@ -75,7 +75,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="缓存,">
 
 
 
@@ -88,16 +88,18 @@
 
 
 
-<meta name="description" content="给时光以生命，给岁月以文明">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Biggfish">
-<meta property="og:url" content="http://yoursite.com/tags/设计原则/index.html">
+<meta name="description" content="常见的缓存异常都在这里了！">
+<meta name="keywords" content="缓存">
+<meta property="og:type" content="article">
+<meta property="og:title" content="缓存穿透、缓存击穿和缓存雪崩">
+<meta property="og:url" content="http://yoursite.com/2020/12/16/缓存穿透、缓存击穿和缓存雪崩/index.html">
 <meta property="og:site_name" content="Biggfish">
-<meta property="og:description" content="给时光以生命，给岁月以文明">
+<meta property="og:description" content="常见的缓存异常都在这里了！">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-12-16T09:03:34.447Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Biggfish">
-<meta name="twitter:description" content="给时光以生命，给岁月以文明">
+<meta name="twitter:title" content="缓存穿透、缓存击穿和缓存雪崩">
+<meta name="twitter:description" content="常见的缓存异常都在这里了！">
 
 
 
@@ -127,13 +129,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/tags/设计原则/">
+  <link rel="canonical" href="http://yoursite.com/2020/12/16/缓存穿透、缓存击穿和缓存雪崩/">
 
 
 
 
 
-  <title>标签: 设计原则 | Biggfish</title>
+  <title>缓存穿透、缓存击穿和缓存雪崩 | Biggfish</title>
   
 
 
@@ -162,7 +164,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -308,52 +310,330 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>设计原则<small>标签</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/12/16/缓存穿透、缓存击穿和缓存雪崩/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Dongjie">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/cyber_avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Biggfish">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2020/09/19/面向对象设计原则/" itemprop="url">
-              
-                <span itemprop="name">面向对象设计原则</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">缓存穿透、缓存击穿和缓存雪崩</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2020-09-19T22:45:37+08:00" content="2020-09-19">
-          09-19
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-12-16T16:22:08+08:00">
+                2020-12-16
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/系统设计/" itemprop="url" rel="index">
+                    <span itemprop="name">系统设计</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/12/16/缓存穿透、缓存击穿和缓存雪崩/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/12/16/缓存穿透、缓存击穿和缓存雪崩/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-eye"></i> 浏览
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.8k 字
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  5 分钟
+                </span>
+              
+            </div>
+          
+
+          
+              <div class="post-description">
+                  常见的缓存异常都在这里了！
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>缓存，基本上都是在内存空间里，所以读缓存比读磁盘更快。</p>
+<p><strong>缓存能减少数据库服务器的压力，并提升用户请求的响应速度</strong>。其实，不管是前端还是后端，<strong>缓存</strong>都是一种必不可少的<strong>优化方式</strong>之一。</p>
+<p>但也可能出现缓存穿透、缓存击穿、缓存雪崩、热点数据失效等问题。</p>
+<h1 id="1-缓存的工作流程"><a href="#1-缓存的工作流程" class="headerlink" title="1. 缓存的工作流程"></a>1. 缓存的工作流程</h1><p>不管缓存的位置在哪，可能在浏览器、代理服务器、服务器本地、分布式缓存系统或者数据库中，作用机理都基本一致。</p>
+<p>假定我们现在讨论服务器本地缓存。</p>
+<ol>
+<li><p>客户端（用户）请求数据</p>
+</li>
+<li><p>服务器先查缓存，如果缓存中有相关的响应数据，直接返回</p>
+</li>
+<li><p>缓存中没有相应数据，则服务器将从数据库获取数据，然后返回给客户端，同时将这份数据存入缓存</p>
+</li>
+</ol>
+<p>服务器根据客户端的请求查找缓存，如何做到相同请求对应相同的缓存数据？</p>
+<p><strong>客户端请求的URL可以映射为一个Key，服务器根据这个Key查找对应的缓存Value。</strong></p>
+<h1 id="2-缓存穿透"><a href="#2-缓存穿透" class="headerlink" title="2. 缓存穿透"></a>2. 缓存穿透</h1><p>客户端<strong>请求数据库中不存在的数据</strong>时发生。</p>
+<p>因为数据库中都不存在该数据，缓存中自然也没有。服务器查遍缓存也没有，然后客户端请求就会去冲击数据库，请求成功的话返回空。</p>
+<p>但并发量一大，所以客户端请求全都冲击数据库，容易导致数据库服务器压力过大甚至宕机。</p>
+<blockquote>
+<p>注：请求 id = -1 的数据。</p>
+</blockquote>
+<p>解决方案：</p>
+<ul>
+<li>接口校验（过滤无效请求）</li>
+<li>缓存空值（key-null），并设置较短的缓存过期时间</li>
+<li>布隆过滤器（BloomFilter）</li>
+</ul>
+<p>布隆过滤器本质上是一种数据结构，巧妙的概率型数据结构。特点是高效地插入和查询，节约内存空间，时间复杂度低。</p>
+<p>布隆过滤器能够告诉你，“某样东西一定不存在或者可能存在”。这里的应用场景，就是“请求的key在缓存中一定不存在或者可能存在”。通过“一定不存在”能过滤掉大量无效请求。</p>
+<p>相比于传统的List、Map、Set等数据结构，布隆过滤器这种bitMap是一个bit数组或者说bit向量，更高效、占用空间更小。</p>
+<p>布隆过滤器的应用关键是如何选择Hash函数个数和布隆过滤器的长度。</p>
+<blockquote>
+<p>注：虽然理论上布隆过滤器应对缓存穿透十分有效，但实际上可能并不常用。它也有缺点，一是准确率有误（本质是因为hash碰撞），二是不能删除元素（如果一个元素被删除，却不能从布隆过滤器中删除）。</p>
+</blockquote>
+<h1 id="3-缓存击穿"><a href="#3-缓存击穿" class="headerlink" title="3. 缓存击穿"></a>3. 缓存击穿</h1><p><strong>大量请求同时查询Key，但这个Key正好失效</strong>，于是并发的请求同时冲击数据库。这就是缓存击穿。</p>
+<blockquote>
+<p>注：热点Key缓存过期。</p>
+</blockquote>
+<p>缓存击穿与缓存穿透不一样。缓存击穿查询的是数据库中有但缓存没有的数据，缓存穿透查询的是数据库中没有且缓存也没有的数据。</p>
+<p>解决方案：</p>
+<ul>
+<li>设置热点数据永不过期</li>
+<li>加互斥锁</li>
+</ul>
+<blockquote>
+<p>注：热点数据的更新通过异步线程实现，保证高可用性；互斥锁能保证数据的一致性，大量的线程阻塞降低吞吐量，失去了性能。</p>
+</blockquote>
+<h1 id="4-缓存雪崩"><a href="#4-缓存雪崩" class="headerlink" title="4. 缓存雪崩"></a>4. 缓存雪崩</h1><p>缓存雪崩是<strong>缓存中大量数据同时过期</strong>，导致大量的请求到达数据库。</p>
+<p>缓存雪崩和缓存击穿不一样。缓存击穿查询的是同一条数据，缓存雪崩是不同的数据都过期了。</p>
+<p>缓存服务器宕机，或者（初始化阶段）数据未加载到缓存中，都可能导致缓存雪崩。</p>
+<p>解决方案：</p>
+<ul>
+<li>缓存数据设置不同的过期时间</li>
+<li>缓存预热（缓存服务器刚启动不久，大量数据未被缓存的背景下）</li>
+</ul>
+<blockquote>
+<p>注：给不同key过期时间加上随机值，使缓存失效的时间点尽量均匀。其实缓存击穿的解决方案完全适用于缓存雪崩。在考虑使用互斥锁时，可以加上主备缓存策略（二级缓存）。</p>
+</blockquote>
+<p><strong>缓存预热</strong>是在系统上线后，先将相关的数据构建到缓存中，这样可以避免用户请求直接到达数据库。预热的数据主要取决于访问量和数据量大小。</p>
+<h1 id="4-热点Key重建"><a href="#4-热点Key重建" class="headerlink" title="4. 热点Key重建"></a>4. 热点Key重建</h1><p>使用“<strong>缓存+过期时间</strong>”的策略能够加速读写，同时能保证数据的定期更新，能满足绝大部分需求。</p>
+<p>如果当前Key是热点Key，并且该Key的重建缓存不能在短时间完成（可能需要复杂计算）。</p>
+<p>那么这个Key的缓存失效就得不偿失了。</p>
+<p>解决方案：</p>
+<ul>
+<li>热点数据永不过期</li>
+<li>互斥锁（数据库服务端）</li>
+<li>后端限流</li>
+<li>二级缓存（A级缓存正常，B级缓存永不过期，A/B级缓存适时同步更新）</li>
+</ul>
+<p>前两种这些方案都建立在Hot Key是已知的背景下。<strong>在不知道Hot Key的前提下，还是考虑后端限流、二级缓存等解决方案</strong>。</p>
+<h1 id="5-缓存降级"><a href="#5-缓存降级" class="headerlink" title="5. 缓存降级"></a>5. 缓存降级</h1><p><strong>缓存降级</strong>是指缓存失效或缓存服务器宕机的情况下，不去访问数据库，<strong>直接返回默认数据或访问服务的内存数据</strong>。值得注意的是，<strong>缓存降级是有损的</strong>。</p>
+<p>所谓的有损，是因为用户享受到的服务不是完整的（页面部分数据丢失）或者获取到的不是最新数据（一致性不能保证）。限流其实就是服务降级的一种，部分用户可能会请求失败。</p>
+<blockquote>
+<p>注：降级和熔断相似但有区别。降级出现在整体负荷超出整体负载承受能力时，延迟或暂停非重要服务，例如日志收集服务。熔断针对于单个服务，当某一服务出现了过载现象，为防止造成整个系统故障，直接关闭该服务（比较暴力）或者保证部分请求成功。</p>
+</blockquote>
+<h1 id="6-小结"><a href="#6-小结" class="headerlink" title="6. 小结"></a>6. 小结</h1><p>数据库服务器很脆弱。</p>
+<p>缓存解决的请求类型都是查询请求，查询就可能带来一致性问题。</p>
+<p>缓存很重要，是数据库服务器的盾牌（削减伤害）。</p>
+<p>解决缓存的问题，似乎加锁是通用方法。但加锁需要付出性能代价。</p>
+<p>限流应该是数据库的贴身保镖，请求密集可能响应慢，但服务还不至于挂掉。</p>
+<p>高并发系统的三大法宝：缓存、降级（熔断）和限流。</p>
 
       
     </div>
+    
+    
+    
 
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.png" alt="Dongjie 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="Dongjie 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/缓存/" rel="tag"><i class="fa fa-tag"></i> 缓存</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/11/24/Array与List的转换/" rel="next" title="Array与List的转换">
+                <i class="fa fa-chevron-left"></i> Array与List的转换
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -361,6 +641,13 @@
 
 
           
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
 
         </div>
         
@@ -381,8 +668,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -461,6 +757,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-缓存的工作流程"><span class="nav-text">1. 缓存的工作流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-缓存穿透"><span class="nav-text">2. 缓存穿透</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-缓存击穿"><span class="nav-text">3. 缓存击穿</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-缓存雪崩"><span class="nav-text">4. 缓存雪崩</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-热点Key重建"><span class="nav-text">4. 热点Key重建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-缓存降级"><span class="nav-text">5. 缓存降级</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-小结"><span class="nav-text">6. 小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -625,6 +937,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 

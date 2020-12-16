@@ -96,7 +96,7 @@
 <meta property="og:site_name" content="Biggfish">
 <meta property="og:description" content="MySQL实现提交读与可重复读隔离级别的一种方式">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-11-12T02:54:39.318Z">
+<meta property="og:updated_time" content="2020-11-25T13:37:42.859Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MVCC与Next-key Locks">
 <meta name="twitter:description" content="MySQL实现提交读与可重复读隔离级别的一种方式">
@@ -513,8 +513,8 @@
 <li>Next-Key Lock：1+2，锁定一个范围，并且锁定记录本身。对于行的查询，都是采用该方法，主要目的是解决幻读的问题。</li>
 </ul>
 <h2 id="2-1-Record-Locks"><a href="#2-1-Record-Locks" class="headerlink" title="2.1 Record Locks"></a>2.1 Record Locks</h2><p>锁定一个记录上的索引，而不是记录本身。</p>
-<h2 id="2-2"><a href="#2-2" class="headerlink" title="2.2"></a>2.2</h2><p>锁定索引之间的间隙，但是不包含索引本身。</p>
-<h2 id="2-3"><a href="#2-3" class="headerlink" title="2.3"></a>2.3</h2><p>Next-Key Locks 是 MySQL 的 InnoDB 存储引擎的一种锁实现。</p>
+<h2 id="2-2-Gap-Locks"><a href="#2-2-Gap-Locks" class="headerlink" title="2.2 Gap Locks"></a>2.2 Gap Locks</h2><p>锁定索引之间的间隙，但是不包含索引本身。</p>
+<h2 id="2-3-Next-Key-Locks"><a href="#2-3-Next-Key-Locks" class="headerlink" title="2.3 Next-Key Locks"></a>2.3 Next-Key Locks</h2><p>Next-Key Locks 是 MySQL 的 InnoDB 存储引擎的一种锁实现。</p>
 <p>当查询的索引含有唯一属性的时候，Next-Key Lock 会进行优化，将其降级为Record Lock，即仅锁住索引本身，不是范围。</p>
 <p>它是 Record Locks 和 Gap Locks 的结合，不仅锁定一个记录上的索引，也锁定索引之间的间隙。</p>
 <h1 id="3-参考"><a href="#3-参考" class="headerlink" title="3. 参考"></a>3. 参考</h1><p><a href="https://juejin.im/post/6844903842505555981#heading-13" target="_blank" rel="noopener">聊聊MVCC和Next-key Locks</a></p>
@@ -678,7 +678,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">20</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -689,7 +689,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-count">9</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -700,7 +700,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-count">32</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -750,7 +750,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-MVCC"><span class="nav-text">1. MVCC</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-1-隐藏列"><span class="nav-text">1.1 隐藏列</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-2-回滚日志（undo-log）"><span class="nav-text">1.2 回滚日志（undo log）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-3-事务快照（ReadView-可读视图）"><span class="nav-text">1.3 事务快照（ReadView/可读视图）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-4-提交读与可重复读的实现"><span class="nav-text">1.4 提交读与可重复读的实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-5-理解增删改查"><span class="nav-text">1.5 理解增删改查</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-Next-key-Locks"><span class="nav-text">2. Next-key Locks</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Record-Locks"><span class="nav-text">2.1 Record Locks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2"><span class="nav-text">2.2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3"><span class="nav-text">2.3</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-参考"><span class="nav-text">3. 参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-MVCC"><span class="nav-text">1. MVCC</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-1-隐藏列"><span class="nav-text">1.1 隐藏列</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-2-回滚日志（undo-log）"><span class="nav-text">1.2 回滚日志（undo log）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-3-事务快照（ReadView-可读视图）"><span class="nav-text">1.3 事务快照（ReadView/可读视图）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-4-提交读与可重复读的实现"><span class="nav-text">1.4 提交读与可重复读的实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-5-理解增删改查"><span class="nav-text">1.5 理解增删改查</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-Next-key-Locks"><span class="nav-text">2. Next-key Locks</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Record-Locks"><span class="nav-text">2.1 Record Locks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-Gap-Locks"><span class="nav-text">2.2 Gap Locks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-Next-Key-Locks"><span class="nav-text">2.3 Next-Key Locks</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-参考"><span class="nav-text">3. 参考</span></a></li></ol></div>
             
 
           </div>
@@ -785,7 +785,7 @@
     
       <span class="post-meta-item-text"></span>
     
-    <span title="Site words total count">全站共 28.8k 字</span>
+    <span title="Site words total count">全站共 30.5k 字</span>
   
 </div>
 
